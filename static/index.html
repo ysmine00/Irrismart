@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>IrriSmart MVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --green:#2D6A4F;--green-mid:#40916C;--green-light:#74C69D;--green-pale:#D8F3DC;--green-bg:#EFF6F0;
+  --amber:#E9A719;--amber-light:#FEF3C7;--red:#E05252;--red-light:#FEE2E2;
+  --blue:#3B82F6;--blue-light:#DBEAFE;
+  --text:#1A2E1A;--text-mid:#4A5E4A;--text-muted:#8A9E8A;
+  --card:#FFFFFF;--bg:#EFF6F0;--border:#E2EDE4;
+  --radius:16px;--radius-sm:10px;--shadow:0 2px 12px rgba(45,106,79,.08);
+}
+html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);font-size:15px}
+body{max-width:430px;margin:0 auto;overflow-x:hidden}
+
+@media(min-width:900px){
+  body{max-width:100%;font-size:16px;margin:0;display:flex;min-height:100vh}
+  .left-panel{width:300px;min-width:300px;background:var(--card);border-right:1.5px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;position:sticky;top:0;left:0;box-shadow:4px 0 24px rgba(45,106,79,.06)}
+  .right-panel{flex:1;padding:36px 48px;overflow-y:auto;height:100vh;background:var(--bg)}
+  .header{border-radius:0;margin-bottom:0;box-shadow:none;border-bottom:1.5px solid var(--border);padding:24px 20px 18px}
+  .farm-card{margin:16px;border-radius:var(--radius);box-shadow:none;border:1.5px solid var(--border)}
+  .nav{padding:8px 16px 16px;display:flex;flex-direction:column;gap:6px}
+  .nav-btn{justify-content:flex-start;padding:13px 16px;border-radius:var(--radius-sm);box-shadow:none}
+  .section{padding:0;height:auto;display:none}
+  .section.active{display:block}
+  .section-title{font-size:28px}
+  .meta-grid{grid-template-columns:1fr 1fr 1fr 1fr}
+  .stat-grid{grid-template-columns:1fr 1fr 1fr 1fr}
+  .health-sub-grid{grid-template-columns:repeat(4,1fr)}
+  .sim-results{grid-template-columns:1fr 1fr}
+  .report-stat-grid{grid-template-columns:1fr 1fr 1fr 1fr}
+  .decision-action{font-size:40px}
+  .decision-card{border-radius:var(--radius)}
+  .card{border-radius:var(--radius)}
+  .bottom-pad{display:none}
+}
+
+/* ── Header ── */
+.header{background:var(--card);padding:18px 16px 14px;border-radius:0 0 20px 20px;box-shadow:var(--shadow);margin-bottom:12px}
+.header-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.logo-icon{width:44px;height:44px;background:var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{width:22px;height:22px;fill:white}
+.logo-text h1{font-size:20px;font-weight:700;color:var(--text);line-height:1}
+.logo-text p{font-size:12px;color:var(--text-muted);margin-top:2px}
+.lang-row{display:flex;align-items:center;gap:8px}
+.lang-label{font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.lang-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--text-mid);font-family:inherit;transition:.15s}
+.lang-btn.active{background:var(--green);border-color:var(--green);color:white}
+
+/* ── Farm card ── */
+.farm-card{background:var(--card);margin:0 12px 12px;border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.farm-label{font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.farm-name{font-size:17px;font-weight:700;margin-bottom:10px}
+.farm-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tag{padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:500;color:var(--text-mid)}
+.tag.green{border-color:var(--green-light);color:var(--green)}
+.parcelles-scroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.parcelles-scroll::-webkit-scrollbar{display:none}
+.parcelle-btn{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--text-mid);font-family:inherit;white-space:nowrap;transition:.15s}
+.parcelle-btn span{font-size:11px;font-weight:400;opacity:.7;margin-left:4px}
+.parcelle-btn.active{background:var(--green);border-color:var(--green);color:white}
+.parcelle-btn.active span{opacity:.8}
+
+/* ── Nav tabs ── */
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
+.nav-btn{padding:12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-size:14px;font-weight:600;cursor:pointer;background:var(--card);color:var(--text-mid);font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s;box-shadow:var(--shadow)}
+.nav-btn.active{background:var(--green);border-color:var(--green);color:white}
+.nav-btn svg{width:16px;height:16px}
+
+/* ── Section ── */
+.section{padding:0 12px;display:none}
+.section.active{display:block}
+.section-title{font-size:22px;font-weight:700;margin-bottom:4px}
+.section-sub{font-size:14px;color:var(--text-muted);margin-bottom:14px}
+
+/* ── Meta cards (confiance, fiabilité, etc.) ── */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.meta-card{background:var(--card);border-radius:var(--radius-sm);padding:12px 14px;box-shadow:var(--shadow)}
+.meta-card .label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+.meta-card .value{font-size:17px;font-weight:700;display:flex;align-items:center;gap:5px}
+.meta-card .value svg{width:15px;height:15px;color:var(--green-mid)}
+
+/* ── Decision card (big green) ── */
+.decision-card{background:var(--green);border-radius:var(--radius);padding:18px;margin-bottom:14px;color:white}
+.decision-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.decision-eyebrow{font-size:10px;font-weight:600;letter-spacing:1px;opacity:.8;text-transform:uppercase}
+.decision-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600}
+.decision-action{font-size:32px;font-weight:700;margin-bottom:6px}
+.decision-reason{font-size:14px;opacity:.9;margin-bottom:14px;line-height:1.4}
+.decision-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.decision-stat .dl{font-size:11px;opacity:.75}
+.decision-stat .dv{font-size:20px;font-weight:700}
+.factors-label{font-size:11px;opacity:.7;margin-bottom:8px;font-weight:500}
+.factors{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.factor-chip{background:rgba(255,255,255,.15);border-radius:20px;padding:5px 12px;font-size:12px;display:flex;align-items:center;gap:4px}
+.factor-chip.moisture{border:1px solid rgba(255,180,0,.5);color:#FFD166}
+.factor-chip.rain{border:1px solid rgba(100,200,255,.4);color:#93C5FD}
+.factor-chip.heat{border:1px solid rgba(255,150,100,.4);color:#FCA5A5}
+.decision-footer{border-top:1px solid rgba(255,255,255,.2);padding-top:10px;display:flex;flex-direction:column;gap:5px}
+.decision-footer .df-row{font-size:12px;opacity:.8;display:flex;align-items:center;gap:6px}
+
+/* ── Stat row (humidity etc.) ── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.stat-card{background:var(--card);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)}
+.stat-card.temp{background:#FFFBEB}
+.stat-card.rain{background:#EFF6FF}
+.stat-card .sc-label{font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.stat-card .sc-value{font-size:22px;font-weight:700}
+
+/* ── Forecast cards ── */
+.card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:10px}
+.card-title{font-size:17px;font-weight:700;margin-bottom:2px}
+.card-sub{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+.forecast-day{background:#F8FAF8;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
+.forecast-day-header{font-size:14px;font-weight:700;margin-bottom:8px}
+.forecast-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:13px}
+.forecast-row .fr-label{color:var(--text-mid);display:flex;align-items:center;gap:5px}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.green{background:var(--green-pale);color:var(--green)}
+.badge.amber{background:var(--amber-light);color:#B45309}
+.badge.red{background:var(--red-light);color:var(--red)}
+
+/* ── Soil health ── */
+.health-score{font-size:40px;font-weight:700;margin:4px 0}
+.health-score sup{font-size:16px;font-weight:400;color:var(--text-muted)}
+.health-bar-wrap{background:#E8F0EA;border-radius:99px;height:8px;margin:8px 0 10px}
+.health-bar{background:var(--green);border-radius:99px;height:8px;transition:width .6s ease}
+.health-bullet{font-size:13px;color:var(--text-mid);margin-bottom:10px;padding-left:14px;position:relative}
+.health-bullet::before{content:'•';position:absolute;left:0;color:var(--green)}
+.health-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.health-sub-card{background:#F8FAF8;border-radius:var(--radius-sm);padding:10px 12px}
+.health-sub-card .hsc-label{font-size:10px;color:var(--text-muted);margin-bottom:4px;line-height:1.2}
+.health-sub-card .hsc-value{font-size:18px;font-weight:700;color:var(--green)}
+
+/* ── Simulation ── */
+.sim-tabs{display:flex;gap:0;border-radius:var(--radius-sm);overflow:hidden;border:1.5px solid var(--border);margin-bottom:12px}
+.sim-tab{flex:1;padding:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--text-mid);transition:.15s}
+.sim-tab.active{background:var(--green-pale);color:var(--green)}
+.sim-results{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.sim-result-card{background:#F8FAF8;border-radius:var(--radius-sm);padding:12px}
+.sim-result-card .sr-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+.sim-result-card .sr-value{font-size:20px;font-weight:700}
+.sim-result-card .sr-delta{font-size:12px;font-weight:600;color:var(--green-mid)}
+.sim-desc{font-size:13px;color:var(--text-mid);margin-bottom:6px;line-height:1.4}
+.sim-current{font-size:12px;color:var(--text-muted)}
+
+/* ── Flux ── */
+.flux-item{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
+.flux-date{font-size:11px;color:var(--text-muted);margin-bottom:2px}
+.flux-action{font-size:16px;font-weight:700;margin-bottom:2px}
+.flux-sub{font-size:12px;color:var(--text-muted)}
+.flux-right{text-align:right}
+.flux-impact-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--amber-light);color:#B45309;margin-bottom:4px}
+.flux-impact-badge.positive{background:var(--green-pale);color:var(--green)}
+.flux-deltas{font-size:12px;color:var(--text-muted)}
+.flux-row{display:flex;justify-content:space-between;align-items:flex-start}
+
+/* ── Charts (sensors tab) ── */
+.chart-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.chart-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.chart-title{font-size:16px;font-weight:700}
+.trend-badge{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.trend-up{background:#ECFDF5;color:var(--green)}
+.trend-down{background:var(--red-light);color:var(--red)}
+.chart-sub{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+.chart-wrap{position:relative;height:150px}
+.signal-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.signal-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.signal-sub{font-size:12px;color:var(--text-muted);margin-bottom:10px}
+.signal-text{font-size:13px;color:var(--text-mid);margin-bottom:8px;line-height:1.4}
+.signal-action-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--amber-light);color:#B45309;margin-bottom:8px}
+.signal-reason{font-size:13px;color:var(--text-mid);margin-bottom:12px}
+.btn-outline{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;background:none;font-family:inherit;color:var(--text-mid);margin-left:auto}
+
+/* ── Alerts tab ── */
+.alert-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border-left:4px solid var(--blue)}
+.alert-card.warning{border-left-color:var(--amber)}
+.alert-card.critical{border-left-color:var(--red)}
+.alert-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.alert-type-badge{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--blue-light);color:var(--blue);display:flex;align-items:center;gap:4px}
+.alert-type-badge.warning{background:var(--amber-light);color:#B45309}
+.alert-date{font-size:12px;color:var(--text-muted)}
+.alert-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.alert-msg{font-size:13px;color:var(--text-mid);margin-bottom:10px;line-height:1.4}
+.alert-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.alert-tag{padding:3px 10px;border-radius:20px;border:1.5px solid var(--border);font-size:11px;color:var(--text-mid)}
+.alert-impact-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.alert-impact{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--amber-light);color:#B45309}
+.alert-impact.low{background:var(--green-pale);color:var(--green)}
+.alert-divider{border:none;border-top:1px solid var(--border);margin:10px 0}
+.alert-rec-action{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--amber-light);color:#B45309;margin-bottom:6px}
+.alert-rec-reason{font-size:13px;color:var(--text-mid);margin-bottom:10px}
+
+/* ── Reports tab ── */
+.report-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;overflow-x:auto}
+.report-stat-card{background:var(--card);border-radius:var(--radius-sm);padding:12px 14px;box-shadow:var(--shadow);min-width:0}
+.report-stat-card .rs-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+.report-stat-card .rs-value{font-size:18px;font-weight:700}
+.narrative-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.narrative-section{background:#F8FAF8;border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
+.narrative-label{font-size:11px;font-weight:600;color:var(--green-mid);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.narrative-text{font-size:13px;color:var(--text-mid);line-height:1.4}
+.dist-bar{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.dist-bar .db-label{flex:1;color:var(--text-mid)}
+.dist-bar .db-val{font-weight:600;min-width:24px;text-align:right}
+.dist-bar-fill{height:6px;border-radius:99px;background:var(--green-light);flex:2}
+.hist-table{width:100%;border-collapse:collapse;font-size:13px}
+.hist-table th{text-align:left;padding:6px 8px;font-size:11px;color:var(--text-muted);font-weight:600;border-bottom:2px solid var(--border)}
+.hist-table td{padding:8px 8px;border-bottom:1px solid var(--border);color:var(--text-mid)}
+.hist-table tr:last-child td{border-bottom:none}
+
+/* ── Loading ── */
+.loading{text-align:center;padding:40px 20px;color:var(--text-muted)}
+.spinner{width:32px;height:32px;border:3px solid var(--green-pale);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Bottom padding ── */
+.bottom-pad{height:32px}
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" style="display:none"/><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 008 20C19 20 22 3 22 3c-1 2-8 2-8 2s7-1 7 4c0 0-7-5-13-1 0 0 7 0 9 4 0 0-5-3-10 0 0 0 4 0 4 4 0 0-4-1-7 3l-.15.53C3.5 16.5 5 11 17 8z"/></svg>
+    </div>
+    <div class="logo-text">
+      <h1>IrriSmart</h1>
+      <p id="header-sub">Conseil d'irrigation intelligent</p>
+    </div>
+  </div>
+  <div class="lang-row">
+    <span class="lang-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Langue
+    </span>
+    <button class="lang-btn active" id="lang-btn-fr" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" id="lang-btn-ar" onclick="setLang('ar')">AR</button>
+  </div>
+</div>
+
+<!-- FARM CARD -->
+<div class="farm-card">
+  <div class="farm-label" id="farm-label">Exploitation</div>
+  <div class="farm-name" id="farm-name">Ferme Atlas • Beni Mellal, Maroc</div>
+  <div class="farm-tags">
+    <span class="tag">Saison: Printemps</span>
+    <span class="tag green" id="culture-tag">Culture: Olivier</span>
+  </div>
+  <div class="parcelles-scroll" id="parcellesScroll"></div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn active" onclick="showTab('dashboard')" id="btn-dashboard">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 5h2v-2h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+    Dashboard
+  </button>
+  <button class="nav-btn" onclick="showTab('capteurs')" id="btn-capteurs">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2m16 0h2M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>
+    Capteurs
+  </button>
+  <button class="nav-btn" onclick="showTab('alertes')" id="btn-alertes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    Alertes
+  </button>
+  <button class="nav-btn" onclick="showTab('rapports')" id="btn-rapports">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    Rapports
+  </button>
+</div>
+
+</div><!-- end nav -->
+</div><!-- end left-panel -->
+
+<div class="right-panel">
+<!-- DASHBOARD TAB -->
+<div class="section active" id="tab-dashboard">
+  <div style="padding:0 12px 8px">
+    <div class="section-title" id="title-dashboard">Décision du jour</div>
+    <div class="section-sub" id="sub-dashboard">Irriguer aujourd'hui, ou attendre ?</div>
+  </div>
+  <div style="padding:0 12px" id="dashboard-content">
+    <div class="loading"><div class="spinner"></div>Chargement…</div>
+  </div>
+</div>
+
+<!-- CAPTEURS TAB -->
+<div class="section" id="tab-capteurs">
+  <div style="padding:0 12px 8px">
+    <div class="section-title" id="title-capteurs">Détails capteurs</div>
+    <div class="section-sub" id="sub-capteurs">Tendance sur les 14 derniers jours</div>
+  </div>
+  <div style="padding:0 12px" id="capteurs-content">
+    <div class="loading"><div class="spinner"></div>Chargement…</div>
+  </div>
+</div>
+
+<!-- ALERTES TAB -->
+<div class="section" id="tab-alertes">
+  <div style="padding:0 12px 8px">
+    <div class="section-title" id="title-alertes">Alertes</div>
+    <div class="section-sub" id="sub-alertes">Liste priorisée des signaux terrain</div>
+  </div>
+  <div style="padding:0 12px" id="alertes-content">
+    <div class="loading"><div class="spinner"></div>Chargement…</div>
+  </div>
+</div>
+
+<!-- RAPPORTS TAB -->
+<div class="section" id="tab-rapports">
+  <div style="padding:0 12px 8px">
+    <div class="section-title" id="title-rapports">Rapports légers</div>
+    <div class="section-sub" id="sub-rapports">Synthèse rapide pour suivi hebdomadaire</div>
+  </div>
+  <div style="padding:0 12px" id="rapports-content">
+    <div class="loading"><div class="spinner"></div>Chargement…</div>
+  </div>
+</div>
+
+<div class="bottom-pad"></div>
+</div><!-- end right-panel -->
+
+<script>
+const API = "";  // same origin
+let currentSensor = null;
+let sensors = [];
+let chartInstances = {};
+let currentSimTab = "irrigate";
+let lang = "fr";
+
+const T = {
+  fr: {
+    "IRRIGATE":"Irriguer","WAIT":"Attendre","MONITOR":"Surveiller","NO_ACTION":"Aucune action",
+    "dashboard":"Dashboard","capteurs":"Capteurs","alertes":"Alertes","rapports":"Rapports",
+    "decision_title":"Décision du jour","decision_sub":"Irriguer aujourd'hui, ou attendre ?",
+    "confiance":"Confiance données","fiabilite":"Fiabilité capteurs",
+    "coherence":"Cohérence tendances","fraicheur":"Fraîcheur",
+    "decison_eyebrow":"DÉCISION DU JOUR","duree":"Durée","confiance2":"Confiance",
+    "facteurs":"Facteurs influençant la décision",
+    "humidity":"Humidité du sol","temp":"Température air","rain":"Pluie 24h","battery":"Batterie",
+    "forecast_title":"Prévision 5 jours","besoin":"Besoin","pluie":"Pluie","stress":"Stress thermique",
+    "health_title":"Santé du sol","sim_title":"Simulation rapide","sim_sub":"Impact estimé d'ici 24h",
+    "sim_irr":"Si j'irrigue aujourd'hui","sim_wait":"Si j'attends 24h",
+    "hum_est":"Humidité estimée","health_est":"Santé estimée",
+    "capteurs_title":"Détails capteurs","capteurs_sub":"Tendance sur les 14 derniers jours",
+    "alertes_title":"Alertes","alertes_sub":"Liste priorisée des signaux terrain",
+    "rapports_title":"Rapports légers","rapports_sub":"Synthèse rapide pour suivi hebdomadaire",
+    "Faible":"Faible","Moyen":"Moyen","Élevé":"Élevé","Healthy":"Healthy",
+  },
+  ar: {
+    "IRRIGATE":"ري","WAIT":"انتظر","MONITOR":"مراقبة","NO_ACTION":"لا إجراء",
+    "dashboard":"لوحة التحكم","capteurs":"المستشعرات","alertes":"التنبيهات","rapports":"التقارير",
+    "decision_title":"توصية اليوم","decision_sub":"هل يجب الري اليوم؟ وكم المدة؟",
+    "confiance":"ثقة البيانات","fiabilite":"موثوقية المستشعرات",
+    "coherence":"اتساق الاتجاهات","fraicheur":"حداثة البيانات",
+    "decison_eyebrow":"توصية اليوم","duree":"المدة","confiance2":"درجة الثقة",
+    "facteurs":"العوامل المؤثرة في القرار",
+    "humidity":"رطوبة التربة","temp":"درجة حرارة الهواء","rain":"أمطار 24 ساعة","battery":"البطارية",
+    "forecast_title":"توقعات 5 أيام","besoin":"الحاجة","pluie":"المطر","stress":"إجهاد الحرارة",
+    "health_title":"صحة التربة","sim_title":"محاكاة سريعة","sim_sub":"تأثير متوقع خلال 24 ساعة",
+    "sim_irr":"إذا قمت بالري اليوم","sim_wait":"إذا انتظرت 24 ساعة",
+    "hum_est":"الرطوبة المتوقعة","health_est":"الصحة المتوقعة",
+    "capteurs_title":"تفاصيل المستشعرات","capteurs_sub":"الاتجاه خلال آخر 14 يوم",
+    "alertes_title":"التنبيهات","alertes_sub":"قائمة مرتبة حسب الأولوية",
+    "rapports_title":"تقارير خفيفة","rapports_sub":"ملخص سريع للمتابعة الأسبوعية",
+    "Faible":"منخفض","Moyen":"متوسط","Élevé":"مرتفع","Healthy":"جيدة",
+  }
+};
+
+function t(key){ return (T[lang] && T[lang][key]) || key; }
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  const res = await fetch(`${API}/api/sensors`);
+  const j   = await res.json();
+  sensors   = j.data || [];
+  if (!sensors.length) return;
+  currentSensor = sensors[0];
+  renderParcelles();
+  loadTab("dashboard");
+}
+
+function renderParcelles() {
+  const el = document.getElementById("parcellesScroll");
+  el.innerHTML = sensors.map((s,i) =>
+    `<button class="parcelle-btn ${i===0?'active':''}" onclick="selectParcelle('${s.id}',this)">
+      ${s.name} <span>${s.area_ha} ha</span>
+    </button>`).join("");
+}
+
+function selectParcelle(id, btn) {
+  currentSensor = sensors.find(s => s.id === id);
+  document.querySelectorAll(".parcelle-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  // Update culture tag
+  document.getElementById("culture-tag").textContent = "Culture: " + cropLabel(currentSensor.crop_type);
+  const active = document.querySelector(".section.active");
+  if (active) loadTab(active.id.replace("tab-",""));
+}
+
+// ── Tab navigation ────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById(`tab-${name}`).classList.add("active");
+  document.getElementById(`btn-${name}`).classList.add("active");
+  loadTab(name);
+}
+
+function loadTab(name) {
+  if (name === "dashboard")  loadDashboard();
+  if (name === "capteurs")   loadCapteurs();
+  if (name === "alertes")    loadAlertes();
+  if (name === "rapports")   loadRapports();
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  if (!currentSensor) return;
+  const el = document.getElementById("dashboard-content");
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>Chargement…</div>`;
+  const [recRes, snRes] = await Promise.all([
+    fetch(`${API}/api/recommendation?sensor_id=${currentSensor.id}`),
+    fetch(`${API}/api/sensors/${currentSensor.id}`)
+  ]);
+  const rec = (await recRes.json()).data;
+  const sn  = (await snRes.json()).data;
+  if (!rec) { el.innerHTML = "<p style='padding:20px;color:#888'>Aucune donnée</p>"; return; }
+
+  const isAr = lang === 'ar';
+  const lr = sn.latest_reading || {};
+  const nowStr = isAr
+    ? new Date().toLocaleDateString("ar-MA",{day:"numeric",month:"short",year:"numeric"}) + " " + new Date().toLocaleTimeString("ar-MA",{hour:"2-digit",minute:"2-digit"})
+    : new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"}) + " à " + new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+
+  const sensorReliability = isAr ? (rec.sensor_reliability === "Fiable" ? "موثوق" : "تحت المراقبة") : rec.sensor_reliability;
+  const trendCoherence = isAr ? (rec.trend_coherence === "Stable" ? "مستقر" : rec.trend_coherence) : rec.trend_coherence;
+
+  el.innerHTML = `
+    <!-- Meta -->
+    <div class="meta-grid">
+      <div class="meta-card"><div class="label">${isAr?'ثقة البيانات':'Confiance données'}</div><div class="value">${rec.data_confidence}%</div></div>
+      <div class="meta-card"><div class="label">${isAr?'موثوقية المستشعرات':'Fiabilité capteurs'}</div><div class="value"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>${sensorReliability}</div></div>
+      <div class="meta-card"><div class="label">${isAr?'اتساق الاتجاهات':'Cohérence tendances'}</div><div class="value"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>${trendCoherence}</div></div>
+      <div class="meta-card"><div class="label">${isAr?'حداثة البيانات':'Fraîcheur'}</div><div class="value"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${rec.freshness_min} ${isAr?'د':'min'}</div></div>
+    </div>
+
+    <!-- Decision -->
+    <div class="decision-card">
+      <div class="decision-header">
+        <span class="decision-eyebrow">${lang==='ar'?'توصية اليوم':'DÉCISION DU JOUR'}</span>
+        <span class="decision-badge">${t(rec.action)}</span>
+      </div>
+      <div class="decision-action">${t(rec.action)}</div>
+      <div class="decision-reason">${lang==='ar' ? translateReason(rec.reason) : rec.reason}</div>
+      <div class="decision-stats">
+        <div class="decision-stat"><div class="dl">${lang==='ar'?'المدة':'Durée'}</div><div class="dv">${rec.duration_minutes} ${lang==='ar'?'دقيقة':'min'}</div></div>
+        <div class="decision-stat"><div class="dl">${lang==='ar'?'درجة الثقة':'Confiance'}</div><div class="dv">${Math.round(rec.confidence)}%</div></div>
+      </div>
+      <div class="factors-label">${lang==='ar'?'العوامل المؤثرة في القرار':'Facteurs influençant la décision'}</div>
+      <div class="factors">
+        ${rec.factors.map(f=>`<span class="factor-chip ${f.type}">
+          ${f.type==="moisture"?'<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 9 5 13 5 17a7 7 0 0 0 14 0c0-4-3-8-7-15z"/></svg>':''}
+          ${f.type==="rain"?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25M8 19v1M8 23v1M12 21v1M12 17v1M16 19v1M16 23v1"/></svg>':''}
+          ${f.type==="heat"?'<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 23a9 9 0 0 0 9-9c0-4.9-9-13-9-13S3 9.1 3 14a9 9 0 0 0 9 9z"/></svg>':''}
+          ${f.label}</span>`).join("")}
+      </div>
+      <div class="decision-footer">
+        <div class="df-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${lang==='ar'?'آخر تحديث':'Dernière mise à jour'}: ${nowStr}</div>
+        <div class="df-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>${lang==='ar'?'المراجعة القادمة: 8 ساعة':'Prochaine vérification: 8 h'}</div>
+      </div>
+    </div>
+
+    <!-- Current stats -->
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-label">${lang==='ar'?'رطوبة التربة':'Humidité du sol'} <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 9 5 13 5 17a7 7 0 0 0 14 0c0-4-3-8-7-15z"/></svg></div><div class="sc-value">${lr.soil_moisture || 0}%</div></div>
+      <div class="stat-card temp"><div class="sc-label">${lang==='ar'?'درجة حرارة الهواء':'Température air'} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div><div class="sc-value">${lr.air_temperature || 0}°C</div></div>
+      <div class="stat-card rain"><div class="sc-label">${lang==='ar'?'أمطار 24 ساعة':'Pluie 24h'} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25M8 19v1M12 17v1M16 19v1"/></svg></div><div class="sc-value">${lr.rain_mm || 0} mm</div></div>
+      <div class="stat-card"><div class="sc-label">${lang==='ar'?'البطارية':'Batterie'} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></div><div class="sc-value">${Math.round(sn.battery_level || 0)}%</div></div>
+    </div>
+
+    <!-- 5-day forecast -->
+    <div class="card">
+      <div class="card-title">${lang==='ar'?'توقعات 5 أيام':'Prévision 5 jours'}</div>
+      <div class="card-sub">${lang==='ar'?'المحصول':'Culture'}: ${cropLabel(currentSensor.crop_type)} • ${lang==='ar'?'نوع التربة':'Sol'}: ${currentSensor.soil_type || "Limoneux"}</div>
+      ${rec.forecast_cards.map(fc => `
+        <div class="forecast-day">
+          <div class="forecast-day-header">${formatForecastDate(fc.date)}</div>
+          <div class="forecast-row"><span class="fr-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/></svg> ${lang==='ar'?'الحاجة':'Besoin'}</span><span class="badge ${levelBadge(fc.besoin)}">${t(fc.besoin)}</span></div>
+          <div class="forecast-row"><span class="fr-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/></svg> ${lang==='ar'?'المطر':'Pluie'}</span><span>${Math.round(fc.pluie_pct)}%</span></div>
+          <div class="forecast-row"><span class="fr-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 23a9 9 0 0 0 9-9c0-4.9-9-13-9-13S3 9.1 3 14a9 9 0 0 0 9 9z"/></svg> ${lang==='ar'?'إجهاد الحرارة':'Stress thermique'}</span><span class="badge ${levelBadge(fc.stress_thermique)}">${t(fc.stress_thermique)}</span></div>
+        </div>`).join("")}
+    </div>
+
+    <!-- Soil health -->
+    ${renderSoilHealth(rec)}
+
+    <!-- Simulation -->
+    ${renderSimulation(rec)}
+
+    <!-- Flux -->
+  `;
+}
+
+function translateReason(reason) {
+  if (!reason) return reason;
+  return reason
+    .replace("Humidité actuelle suffisante pour aujourd'hui.", "مستوى الرطوبة الحالي كافٍ لليوم.")
+    .replace("Humidité insuffisante.", "الرطوبة غير كافية.")
+    .replace(/Humidité insuffisante \((.+?)% < (.+?)%\)\. Irriguer (.+?) minutes\./, "الرطوبة غير كافية ($1% < $2%). يُنصح بالري $3 دقيقة.")
+    .replace(/Pluie prévue \((.+?)mm dans 24h\).*/, "مطر متوقع ($1 ملم خلال 24 ساعة) — انتظر قبل الري.")
+    .replace(/Température élevée prévue \((.+?)°C\).*/, "درجة حرارة مرتفعة متوقعة ($1°C). راقب الوضع غداً.")
+    .replace("Conditions normales", "ظروف عادية")
+    .replace("Sol suffisamment humide", "التربة رطبة بما يكفي");
+}
+
+function renderSoilHealth(rec) {
+  const sub = rec.health_sub || {};
+  const isAr = lang === 'ar';
+  return `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="card-title">${isAr?'صحة التربة':'Santé du sol'}</div>
+      <span class="badge green">${isAr?'جيدة':'Healthy'}</span>
+    </div>
+    <div class="health-score">${rec.soil_health}<sup>/100</sup></div>
+    <div class="health-bar-wrap"><div class="health-bar" style="width:${rec.soil_health}%"></div></div>
+    <div class="health-bullet">${isAr?'الظروف العامة مستقرة خلال الأسبوع.':'Conditions globalement stables cette semaine.'}</div>
+    <div class="health-sub-grid">
+      ${Object.entries({
+        [isAr?'استقرار الرطوبة':'Stabilité humidité']: sub.stabilite_humidite,
+        [isAr?'توازن الري':'Équilibre irrigation']: sub.equilibre_irrigation,
+        [isAr?'إجهاد الحرارة':'Stress thermique']: sub.stress_thermique,
+        [isAr?'اتساق القرارات':'Cohérence décisions']: sub.coherence_decisions
+      }).map(([k,v])=>`<div class="health-sub-card"><div class="hsc-label">${k}</div><div class="hsc-value">${v||0}</div></div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function renderSimulation(rec) {
+  if (!rec.sim_irrigate) return "";
+  const si = rec.sim_irrigate, sw = rec.sim_wait;
+  const isAr = lang === 'ar';
+  return `<div class="card">
+    <div class="card-title">${isAr?'محاكاة سريعة':'Simulation rapide'}</div>
+    <div class="card-sub">${isAr?'تأثير متوقع خلال 24 ساعة':'Impact estimé d\'ici 24h'}</div>
+    <div class="sim-tabs">
+      <button class="sim-tab active" id="sim-tab-irr" onclick="switchSim('irrigate')">${isAr?'إذا قمت بالري اليوم':'Si j\'irrigue aujourd\'hui'}</button>
+      <button class="sim-tab" id="sim-tab-wait" onclick="switchSim('wait')">${isAr?'إذا انتظرت 24 ساعة':'Si j\'attends 24h'}</button>
+    </div>
+    <div id="sim-body">
+      ${simBody(si, rec.moisture_pct, rec.soil_health)}
+    </div>
+  </div>`;
+}
+
+function simBody(s, curMoisture, curHealth) {
+  return `<div class="sim-results">
+    <div class="sim-result-card"><div class="sr-label">Humidité estimée</div><div class="sr-value">${s.estimated_moisture}%</div><div class="sr-delta">Impact humidité: ${s.moisture_impact >= 0 ? '+' : ''}${s.moisture_impact}%</div></div>
+    <div class="sim-result-card"><div class="sr-label">Santé estimée</div><div class="sr-value">${s.estimated_health}</div><div class="sr-delta">Impact santé: ${s.health_impact >= 0 ? '+' : ''}${s.health_impact}</div></div>
+  </div>
+  <div class="sim-desc">${s.description}</div>
+  <div class="sim-current">Niveau actuel: ${curMoisture}% / ${curHealth}</div>`;
+}
+
+function switchSim(which) {
+  currentSimTab = which;
+  document.getElementById("sim-tab-irr").classList.toggle("active", which==="irrigate");
+  document.getElementById("sim-tab-wait").classList.toggle("active", which==="wait");
+}
+
+// ── Capteurs tab ──────────────────────────────────────────────────────────────
+async function loadCapteurs() {
+  if (!currentSensor) return;
+  const el = document.getElementById("capteurs-content");
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>Chargement…</div>`;
+  const [histRes, recRes] = await Promise.all([
+    fetch(`${API}/api/sensors/${currentSensor.id}/history?limit=14`),
+    fetch(`${API}/api/recommendation?sensor_id=${currentSensor.id}`)
+  ]);
+  const hist = (await histRes.json()).data || [];
+  const rec  = (await recRes.json()).data;
+
+  // Destroy old charts
+  Object.values(chartInstances).forEach(c => c.destroy());
+  chartInstances = {};
+
+  const labels   = hist.map(r => new Date(r.timestamp).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"}));
+  const moisture = hist.map(r => r.soil_moisture);
+  const temp     = hist.map(r => r.air_temperature);
+  const rain     = hist.map(r => r.rain_mm || 0);
+  const battery  = hist.map(r => r.battery_voltage || 0);
+
+  const trendMoist   = moisture.length >= 2 ? round1(moisture[moisture.length-1]-moisture[0]) : 0;
+  const trendTemp    = temp.length >= 2 ? round1(temp[temp.length-1]-temp[0]) : 0;
+  const trendRain    = rain.length >= 2 ? round1(rain[rain.length-1]-rain[0]) : 0;
+  const trendBat     = battery.length >= 2 ? round1(battery[battery.length-1]-battery[0]) : 0;
+
+  el.innerHTML = `
+    <!-- Meta -->
+    <div class="meta-grid">
+      <div class="meta-card"><div class="label">${lang==='ar'?'ثقة البيانات':'Confiance données'}</div><div class="value">${rec ? rec.data_confidence : 76}%</div></div>
+      <div class="meta-card"><div class="label">${lang==='ar'?'موثوقية المستشعرات':'Fiabilité capteurs'}</div><div class="value">${rec ? (lang==='ar' ? (rec.sensor_reliability==='Fiable'?'موثوق':'تحت المراقبة') : rec.sensor_reliability) : 'À surveiller'}</div></div>
+      <div class="meta-card"><div class="label">${lang==='ar'?'اتساق الاتجاهات':'Cohérence tendances'}</div><div class="value">${rec ? (lang==='ar'?'مستقر':rec.trend_coherence) : 'Stable'}</div></div>
+      <div class="meta-card"><div class="label">${lang==='ar'?'حداثة البيانات':'Fraîcheur'}</div><div class="value">${rec ? rec.freshness_min : '--'} ${lang==='ar'?'د':'min'}</div></div>
+    </div>
+
+    <!-- Moisture chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Humidité du sol (%)</div></div>
+        <span class="trend-badge ${trendMoist<=0?'trend-down':'trend-up'}">${trendMoist<=0?'↘ En baisse':'↗ En hausse'} ${trendMoist>0?'+':''}${trendMoist}%</span>
+      </div>
+      <div class="chart-sub">Humidité dans la plage attendue • Normal</div>
+      <div class="chart-wrap"><canvas id="chart-moisture"></canvas></div>
+    </div>
+
+    <!-- Temp chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Température (°C)</div></div>
+        <span class="trend-badge ${trendTemp>=0?'trend-up':'trend-down'}">${trendTemp>=0?'↗ En hausse':'↘ En baisse'} ${trendTemp>0?'+':''}${trendTemp}°C</span>
+      </div>
+      <div class="chart-sub">Température dans la zone attendue • Normal</div>
+      <div class="chart-wrap"><canvas id="chart-temp"></canvas></div>
+    </div>
+
+    <!-- Rain chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Pluie (mm)</div></div>
+        <span class="trend-badge ${trendRain<=0?'trend-down':'trend-up'}">${trendRain<=0?'↘ En baisse':'↗ En hausse'} ${trendRain>0?'+':''}${trendRain}mm</span>
+      </div>
+      <div class="chart-sub">Pluie dans la normale • Normal</div>
+      <div class="chart-wrap"><canvas id="chart-rain"></canvas></div>
+    </div>
+
+    <!-- Battery chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">Batterie (%)</div></div>
+        <span class="trend-badge ${trendBat<=0?'trend-down':'trend-up'}">${trendBat<=0?'↘ En baisse':'↗ En hausse'} ${trendBat>0?'+':''}${trendBat}%</span>
+      </div>
+      <div class="chart-sub">Niveau batterie correct • Normal</div>
+      <div class="chart-wrap"><canvas id="chart-battery"></canvas></div>
+    </div>
+
+    <!-- Signal → decision link -->
+    ${rec ? `<div class="signal-card">
+      <div class="signal-title">Lien vers décision</div>
+      <div class="signal-sub">Ces signaux alimentent la décision</div>
+      <div class="signal-text">Baisse continue d'humidité détectée.</div>
+      <span class="signal-action-badge">${t(rec.action)}</span>
+      <div class="signal-reason">${rec.reason}</div>
+      <button class="btn-outline" onclick="showTab('dashboard')">Voir la décision →</button>
+    </div>` : ""}
+  `;
+
+  // Draw charts
+  const cDefaults = { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{title:i=>`${labels[i[0].dataIndex]}`}}},
+    scales:{ x:{grid:{display:false}, ticks:{font:{size:10},color:"#8A9E8A"}},
+             y:{grid:{color:"#E8F0EA",drawBorder:false}, ticks:{font:{size:10},color:"#8A9E8A"}}}};
+
+  chartInstances.moisture = new Chart(document.getElementById("chart-moisture"), {
+    type:"line", data:{ labels, datasets:[{
+      data: moisture, borderColor:"#40916C", backgroundColor:"rgba(116,198,157,.15)",
+      fill:true, tension:.4, pointRadius:0, borderWidth:2}]},
+    options: cDefaults});
+
+  chartInstances.temp = new Chart(document.getElementById("chart-temp"), {
+    type:"line", data:{ labels, datasets:[{
+      data: temp, borderColor:"#E9A719", backgroundColor:"transparent",
+      fill:false, tension:.3, pointRadius:3, pointBackgroundColor:"#E9A719", borderWidth:2}]},
+    options: cDefaults});
+
+  chartInstances.rain = new Chart(document.getElementById("chart-rain"), {
+    type:"bar", data:{ labels, datasets:[{
+      data: rain, backgroundColor:"#3B82F6", borderRadius:4}]},
+    options: cDefaults});
+
+  chartInstances.battery = new Chart(document.getElementById("chart-battery"), {
+    type:"line", data:{ labels, datasets:[{
+      data: battery, borderColor:"#6B7280", backgroundColor:"transparent",
+      fill:false, tension:.2, pointRadius:3, pointBackgroundColor:"#6B7280", borderWidth:2}]},
+    options: cDefaults});
+}
+
+// ── Alertes tab ───────────────────────────────────────────────────────────────
+async function loadAlertes() {
+  const el = document.getElementById("alertes-content");
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>${lang==='ar'?'جاري التحميل…':'Chargement…'}</div>`;
+  const res = await fetch(`${API}/api/alerts`);
+  const alerts = (await res.json()).data || [];
+  const recRes = await fetch(`${API}/api/recommendation?sensor_id=${currentSensor.id}`);
+  const rec    = (await recRes.json()).data;
+  const isAr = lang === 'ar';
+
+  let html = `<div class="meta-grid">
+    <div class="meta-card"><div class="label">${isAr?'ثقة البيانات':'Confiance données'}</div><div class="value">${rec ? rec.data_confidence : 76}%</div></div>
+    <div class="meta-card"><div class="label">${isAr?'موثوقية المستشعرات':'Fiabilité capteurs'}</div><div class="value">${rec ? (isAr?(rec.sensor_reliability==='Fiable'?'موثوق':'تحت المراقبة'):rec.sensor_reliability) : 'À surveiller'}</div></div>
+  </div>`;
+
+  if (!alerts.length) {
+    html += `<div class="card" style="text-align:center;padding:32px;color:var(--text-muted)">✅ ${isAr?'لا توجد تنبيهات نشطة':'Aucune alerte active'}</div>`;
+  } else {
+    alerts.forEach(a => {
+      const sn = sensors.find(s => s.id === a.sensor_id);
+      const locale = isAr ? "ar-MA" : "fr-FR";
+      const dateStr = new Date(a.created_at).toLocaleDateString(locale,{day:"numeric",month:"short",year:"numeric"})
+                    + (isAr?" ":" à ") + new Date(a.created_at).toLocaleTimeString(locale,{hour:"2-digit",minute:"2-digit"});
+      html += `<div class="alert-card ${a.severity||'info'}">
+        <div class="alert-top">
+          <span class="alert-type-badge ${a.severity||'info'}">ℹ ${isAr?'معلومة':'Info'}</span>
+          <span class="alert-date">${dateStr}</span>
+        </div>
+        <div class="alert-title">${alertTitle(a.type)}</div>
+        <div class="alert-msg">${isAr ? translateMsg(a.message) : a.message}</div>
+        <div class="alert-tags">
+          ${sn ? `<span class="alert-tag">${sn.name}</span>` : ""}
+          <span class="alert-tag">${isAr?'المستشعر: رطوبة التربة':'Capteur: Humidité sol'}</span>
+          ${sn ? `<span class="alert-tag">${isAr?'المصدر':'Source'}: ${sn.name}</span>` : ""}
+        </div>
+        <div class="alert-impact-tags">
+          <span class="alert-impact">${isAr?'تأثير القرار':'Impact décision'}: ${isAr?translateLevel(a.decision_impact):a.decision_impact}</span>
+          <span class="alert-impact">${isAr?'تأثير صحة التربة':'Impact santé sol'}: ${isAr?translateLevel(a.soil_health_impact):a.soil_health_impact}</span>
+          <span class="alert-impact low">${isAr?'مخاطر الإنتاج':'Risque rendement'}: ${isAr?translateLevel(a.yield_risk):a.yield_risk}</span>
+        </div>
+        <hr class="alert-divider"/>
+        ${rec ? `<span class="alert-rec-action">${t(rec.action)}</span>
+        <div class="alert-rec-reason">${isAr?translateReason(rec.reason):rec.reason}</div>` : ""}
+        <button class="btn-outline" onclick="showTab('dashboard')">${isAr?'عرض القرار ←':'Voir la décision →'}</button>
+      </div>`;
+    });
+  }
+  el.innerHTML = html;
+}
+
+// ── Rapports tab ──────────────────────────────────────────────────────────────
+async function loadRapports() {
+  if (!currentSensor) return;
+  const el = document.getElementById("rapports-content");
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>${lang==='ar'?'جاري التحميل…':'Chargement…'}</div>`;
+  const res = await fetch(`${API}/api/reports/weekly?sensor_id=${currentSensor.id}`);
+  const r = (await res.json()).data;
+  const isAr = lang === 'ar';
+  if (!r) { el.innerHTML = `<p style='padding:20px;color:#888'>${isAr?'لا توجد بيانات':'Aucune donnée'}</p>`; return; }
+
+  const total = (r.irrigate_count||0) + (r.wait_count||0);
+  const irrPct = total ? Math.round(100*r.irrigate_count/total) : 0;
+  const waitPct = 100 - irrPct;
+
+  el.innerHTML = `
+    <div class="report-stat-grid">
+      <div class="report-stat-card"><div class="rs-label">${isAr?'مستوى ثقة النظام':'Niveau de confiance système'}</div><div class="rs-value">${r.data_confidence}%</div></div>
+      <div class="report-stat-card"><div class="rs-label">${isAr?'موثوقية المستشعرات':'Fiabilité capteurs'}</div><div class="rs-value">${isAr?(r.sensor_reliability==='Fiable'?'موثوق':'تحت المراقبة'):r.sensor_reliability}</div></div>
+    </div>
+    <div class="report-stat-grid">
+      <div class="report-stat-card"><div class="rs-label">${isAr?'متوسط الرطوبة (7 أيام)':'Humidité moyenne (7j)'}</div><div class="rs-value">${r.avg_moisture_7d}%</div></div>
+      <div class="report-stat-card"><div class="rs-label">${isAr?'متوسط الحرارة (7 أيام)':'Température moyenne (7j)'}</div><div class="rs-value">${r.avg_temp_7d}°C</div></div>
+    </div>
+    <div class="report-stat-grid">
+      <div class="report-stat-card"><div class="rs-label">${isAr?'إجمالي الأمطار (7 أيام)':'Pluie totale (7j)'}</div><div class="rs-value">${r.rain_total_7d} mm</div></div>
+      <div class="report-stat-card"><div class="rs-label">${isAr?'التنبيهات النشطة':'Alertes actives'}</div><div class="rs-value">${r.active_alerts}</div></div>
+    </div>
+
+    <div class="narrative-card">
+      <div class="card-title" style="margin-bottom:12px">${isAr?'سرد الأسبوع':'Narratif de la semaine'}</div>
+      <div class="card-sub" style="margin-bottom:12px">${isAr?'سجل مختصر للقرارات وتأثيرها':'Historique court des décisions et effets'}</div>
+      <div class="narrative-section"><div class="narrative-label">${isAr?'الظروف المرصودة':'Conditions observées'}</div><div class="narrative-text">${isAr?'الظروف العامة مستقرة عبر المستشعرات.':r.narrative.conditions}</div></div>
+      <div class="narrative-section"><div class="narrative-label">${isAr?'القرارات المتخذة':'Décisions prises'}</div><div class="narrative-text">${isAr?'القرارات كانت حذرة مع انتظار المطر.':r.narrative.decisions}</div></div>
+      <div class="narrative-section"><div class="narrative-label">${isAr?'الأثر المتوقع':'Impact estimé'}</div><div class="narrative-text">${isAr?'الأثر متوسط ويتطلب متابعة.':r.narrative.impact}</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:4px">${isAr?'توزيع القرارات':'Répartition décisions'}</div>
+      <div class="card-sub" style="margin-bottom:10px">${isAr?'القرارات الإيجابية':'Décisions positives'}</div>
+      <div style="font-size:28px;font-weight:700;color:var(--green);margin-bottom:12px">${r.positive_decision_pct}%</div>
+      <div class="dist-bar"><span class="db-label">${isAr?'قم بالري':'Irriguer'}</span><div class="dist-bar-fill" style="width:${irrPct}%;max-width:120px"></div><span class="db-val">${r.irrigate_count}</span></div>
+      <div class="dist-bar"><span class="db-label">${isAr?'انتظر':'Attendre'}</span><div class="dist-bar-fill" style="width:${waitPct}%;max-width:120px;background:var(--border)"></div><span class="db-val">${r.wait_count}</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:4px">${isAr?'تدفق القرار ← الأثر':'Flux décision → impact'}</div>
+      <div class="card-sub" style="margin-bottom:12px">${isAr?'سجل مختصر للقرارات وتأثيرها':'Historique court des décisions et effets'}</div>
+      ${r.flux.map(f=>`<div class="flux-item">
+        <div class="flux-row">
+          <div><div class="flux-date">${f.date}</div><div class="flux-action">${t(f.action)}</div><div class="flux-sub">${isAr?translateReason(f.sub):f.sub}</div></div>
+          <div class="flux-right">
+            <div class="flux-impact-badge ${f.impact_label.includes('positif')?'positive':''}">${isAr?translateImpact(f.impact_label):f.impact_label}</div>
+            <div class="flux-deltas">${f.delta_moisture>0?'+':''}${f.delta_moisture}%  ${f.delta_health>0?'+':''}${f.delta_health}</div>
+          </div>
+        </div>
+      </div>`).join("")}
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px">${isAr?'السجل الأخير':'Historique récent'}</div>
+      <table class="hist-table">
+        <thead><tr><th>${isAr?'التاريخ':'Date'}</th><th>${isAr?'% التربة':'Sol %'}</th><th>°C</th><th>mm</th><th>${isAr?'% البطارية':'Batterie %'}</th></tr></thead>
+        <tbody>
+          ${r.history_table.map(row=>`<tr>
+            <td>${row.date}</td><td>${row.soil_pct}</td><td>${row.temp_c}</td>
+            <td>${row.rain_mm}</td><td>${row.battery_pct}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function cropLabel(type){ return {olive:"Olivier",citrus:"Agrumes",wheat:"Blé",alfalfa:"Luzerne",beet:"Betterave"}[type]||type; }
+function levelBadge(l){ return {Faible:"green",Moyen:"amber",Élevé:"red"}[l]||"green"; }
+function round1(n){ return Math.round(n*10)/10; }
+function translateLevel(l){ return {Faible:"منخفض",Moyen:"متوسط",Élevé:"مرتفع"}[l]||l; }
+function translateImpact(l){ return l.includes("positif")?"أثر إيجابي":l.includes("neutre")?"أثر محايد":"أثر سلبي"; }
+function translateMsg(msg){
+  if (!msg) return msg;
+  return msg
+    .replace("Les tendances capteurs changent, surveiller la cohérence des mesures.", "تم رصد تغيير في الاتجاهات. يلزم متابعة الاتساق.")
+    .replace("Humidité critique détectée.", "تم رصد رطوبة حرجة.")
+    .replace(/URGENT: (.+?) - humidite critique \((.+?)%\).*/, "عاجل: $1 - رطوبة حرجة ($2%).");
+}
+function alertTitle(type){
+  const fr = {TREND_CHANGE:"Changement de tendance",LOW_MOISTURE:"Humidité critique",HIGH_TEMP:"Température élevée",FROST_WARNING:"Risque de gel",LOW_BATTERY:"Batterie faible",SENSOR_OFFLINE:"Capteur hors ligne",RAIN_EXPECTED:"Pluie attendue"};
+  const ar = {TREND_CHANGE:"تغير في الاتجاه",LOW_MOISTURE:"رطوبة حرجة",HIGH_TEMP:"درجة حرارة مرتفعة",FROST_WARNING:"خطر الصقيع",LOW_BATTERY:"البطارية ضعيفة",SENSOR_OFFLINE:"المستشعر غير متصل",RAIN_EXPECTED:"مطر متوقع"};
+  return (lang==='ar' ? ar[type] : fr[type]) || type;
+}
+function formatForecastDate(d){
+  if (!d) return "";
+  const dt = new Date(d+"T00:00:00");
+  const locale = lang==='ar' ? "ar-MA" : "fr-FR";
+  return dt.toLocaleDateString(locale,{weekday:"short",day:"2-digit",month:"2-digit"});
+}
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("lang-btn-" + l).classList.add("active");
+  document.documentElement.lang = l;
+  const isAr = l === "ar";
+  document.body.style.direction = isAr ? "rtl" : "ltr";
+
+  // Header
+  document.getElementById("header-sub").textContent = isAr ? "نظام ري ذكي" : "Conseil d'irrigation intelligent";
+  document.getElementById("farm-label").textContent = isAr ? "المزرعة" : "Exploitation";
+  document.getElementById("farm-name").textContent = isAr ? "فيرم أطلس • بني ملال، المغرب" : "Ferme Atlas • Beni Mellal, Maroc";
+  document.getElementById("culture-tag").textContent = (isAr ? "المحصول: " : "Culture: ") + cropLabel(currentSensor ? currentSensor.crop_type : "olive");
+
+  // Nav buttons text only (leave SVG intact)
+  [["btn-dashboard","dashboard"],["btn-capteurs","capteurs"],["btn-alertes","alertes"],["btn-rapports","rapports"]].forEach(([id,key])=>{
+    const btn = document.getElementById(id);
+    if (btn) btn.lastChild.textContent = " " + t(key);
+  });
+
+  // Section titles
+  const titles = {
+    dashboard: isAr?"توصية اليوم":"Décision du jour",
+    capteurs:  isAr?"تفاصيل المستشعرات":"Détails capteurs",
+    alertes:   isAr?"التنبيهات":"Alertes",
+    rapports:  isAr?"تقارير خفيفة":"Rapports légers",
+  };
+  const subs = {
+    dashboard: isAr?"هل يجب الري اليوم؟ وكم المدة؟":"Irriguer aujourd'hui, ou attendre ?",
+    capteurs:  isAr?"الاتجاه خلال آخر 14 يومًا":"Tendance sur les 14 derniers jours",
+    alertes:   isAr?"قائمة مرتبة حسب الأولوية":"Liste priorisée des signaux terrain",
+    rapports:  isAr?"ملخص سريع للمتابعة الأسبوعية":"Synthèse rapide pour suivi hebdomadaire",
+  };
+  ["dashboard","capteurs","alertes","rapports"].forEach(s => {
+    const title = document.getElementById("title-"+s);
+    const sub   = document.getElementById("sub-"+s);
+    if (title) title.textContent = titles[s];
+    if (sub)   sub.textContent   = subs[s];
+  });
+
+  // Re-render active tab
+  const active = document.querySelector(".section.active");
+  if (active) loadTab(active.id.replace("tab-",""));
+}
+
+init();
+</script>
+</body>
+</html>
