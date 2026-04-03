@@ -10,7 +10,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --green:#2D6A4F;--green-mid:#40916C;--green-light:#74C69D;--green-pale:#D8F3DC;--green-bg:#EFF6F0;
+  --green:#16A34A;--green-mid:#22C55E;--green-light:#4ADE80;--green-pale:#DCFCE7;--green-bg:#F0FDF4;
   --amber:#E9A719;--amber-light:#FEF3C7;--red:#E05252;--red-light:#FEE2E2;
   --blue:#3B82F6;--blue-light:#DBEAFE;
   --text:#1A2E1A;--text-mid:#4A5E4A;--text-muted:#8A9E8A;
@@ -254,7 +254,7 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
   <div class="farm-label" id="farm-label">Exploitation</div>
   <div class="farm-name" id="farm-name">Ferme Atlas • Beni Mellal, Maroc</div>
   <div class="farm-tags">
-    <span class="tag">Saison: Printemps</span>
+    <span class="tag" id="season-tag">Saison: Printemps</span>
     <span class="tag green" id="culture-tag">Culture: Olivier</span>
   </div>
   <div class="parcelles-scroll" id="parcellesScroll"></div>
@@ -484,8 +484,8 @@ async function loadDashboard() {
 
     <!-- Current stats -->
     <div class="stat-grid">
-      <div class="stat-card"><div class="sc-label">${lang==='ar'?'رطوبة التربة':'Humidité du sol'} <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 9 5 13 5 17a7 7 0 0 0 14 0c0-4-3-8-7-15z"/></svg></div><div class="sc-value">${lr.soil_moisture || 0}%</div></div>
-      <div class="stat-card temp"><div class="sc-label">${lang==='ar'?'درجة حرارة الهواء':'Température air'} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div><div class="sc-value">${lr.air_temperature || 0}°C</div></div>
+      <div class="stat-card"><div class="sc-label">${lang==='ar'?'رطوبة التربة':'Humidité du sol'} <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 9 5 13 5 17a7 7 0 0 0 14 0c0-4-3-8-7-15z"/></svg></div><div class="sc-value">${Math.round((lr.soil_moisture||0)*10)/10}%</div></div>
+      <div class="stat-card temp"><div class="sc-label">${lang==='ar'?'درجة حرارة الهواء':'Température air'} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div><div class="sc-value">${Math.round((lr.air_temperature||0)*10)/10}°C</div></div>
       <div class="stat-card rain"><div class="sc-label">${lang==='ar'?'أمطار 24 ساعة':'Pluie 24h'} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25M8 19v1M12 17v1M16 19v1"/></svg></div><div class="sc-value">${lr.rain_mm || 0} mm</div></div>
       <div class="stat-card"><div class="sc-label">${lang==='ar'?'البطارية':'Batterie'} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></div><div class="sc-value">${Math.round(sn.battery_level || 0)}%</div></div>
     </div>
@@ -565,12 +565,17 @@ function renderSimulation(rec) {
 }
 
 function simBody(s, curMoisture, curHealth) {
+  const isAr = lang === 'ar';
+  const desc = isAr ? s.description
+    .replace("L'irrigation immédiate stabilise l'humidité pour les prochaines 24h.", "الري الفوري يستقر الرطوبة للـ 24 ساعة القادمة.")
+    .replace("Attendre préserve les ressources si la pluie est confirmée.", "الانتظار يحافظ على الموارد إذا تأكد المطر.") 
+    : s.description;
   return `<div class="sim-results">
-    <div class="sim-result-card"><div class="sr-label">Humidité estimée</div><div class="sr-value">${s.estimated_moisture}%</div><div class="sr-delta">Impact humidité: ${s.moisture_impact >= 0 ? '+' : ''}${s.moisture_impact}%</div></div>
-    <div class="sim-result-card"><div class="sr-label">Santé estimée</div><div class="sr-value">${s.estimated_health}</div><div class="sr-delta">Impact santé: ${s.health_impact >= 0 ? '+' : ''}${s.health_impact}</div></div>
+    <div class="sim-result-card"><div class="sr-label">${isAr?'الرطوبة المتوقعة':'Humidité estimée'}</div><div class="sr-value">${s.estimated_moisture}%</div><div class="sr-delta">${isAr?'تأثير الرطوبة':'Impact humidité'}: ${s.moisture_impact >= 0 ? '+' : ''}${s.moisture_impact}%</div></div>
+    <div class="sim-result-card"><div class="sr-label">${isAr?'الصحة المتوقعة':'Santé estimée'}</div><div class="sr-value">${s.estimated_health}</div><div class="sr-delta">${isAr?'تأثير الصحة':'Impact santé'}: ${s.health_impact >= 0 ? '+' : ''}${s.health_impact}</div></div>
   </div>
-  <div class="sim-desc">${s.description}</div>
-  <div class="sim-current">Niveau actuel: ${curMoisture}% / ${curHealth}</div>`;
+  <div class="sim-desc">${desc}</div>
+  <div class="sim-current">${isAr?'المستوى الحالي':'Niveau actuel'}: ${curMoisture}% / ${curHealth}</div>`;
 }
 
 function switchSim(which) {
@@ -606,63 +611,68 @@ async function loadCapteurs() {
   const trendRain    = rain.length >= 2 ? round1(rain[rain.length-1]-rain[0]) : 0;
   const trendBat     = battery.length >= 2 ? round1(battery[battery.length-1]-battery[0]) : 0;
 
+  const isAr = lang === 'ar';
+  const trendUp = isAr ? '↗ في ارتفاع' : '↗ En hausse';
+  const trendDown = isAr ? '↘ في انخفاض' : '↘ En baisse';
+  const normalLabel = isAr ? 'طبيعي' : 'Normal';
+
   el.innerHTML = `
     <!-- Meta -->
     <div class="meta-grid">
-      <div class="meta-card"><div class="label">${lang==='ar'?'ثقة البيانات':'Confiance données'}</div><div class="value">${rec ? rec.data_confidence : 76}%</div></div>
-      <div class="meta-card"><div class="label">${lang==='ar'?'موثوقية المستشعرات':'Fiabilité capteurs'}</div><div class="value">${rec ? (lang==='ar' ? (rec.sensor_reliability==='Fiable'?'موثوق':'تحت المراقبة') : rec.sensor_reliability) : 'À surveiller'}</div></div>
-      <div class="meta-card"><div class="label">${lang==='ar'?'اتساق الاتجاهات':'Cohérence tendances'}</div><div class="value">${rec ? (lang==='ar'?'مستقر':rec.trend_coherence) : 'Stable'}</div></div>
-      <div class="meta-card"><div class="label">${lang==='ar'?'حداثة البيانات':'Fraîcheur'}</div><div class="value">${rec ? rec.freshness_min : '--'} ${lang==='ar'?'د':'min'}</div></div>
+      <div class="meta-card"><div class="label">${isAr?'ثقة البيانات':'Confiance données'}</div><div class="value">${rec ? rec.data_confidence : 76}%</div></div>
+      <div class="meta-card"><div class="label">${isAr?'موثوقية المستشعرات':'Fiabilité capteurs'}</div><div class="value">${rec ? (isAr ? (rec.sensor_reliability==='Fiable'?'موثوق':'تحت المراقبة') : rec.sensor_reliability) : 'À surveiller'}</div></div>
+      <div class="meta-card"><div class="label">${isAr?'اتساق الاتجاهات':'Cohérence tendances'}</div><div class="value">${rec ? (isAr?'مستقر':rec.trend_coherence) : 'Stable'}</div></div>
+      <div class="meta-card"><div class="label">${isAr?'حداثة البيانات':'Fraîcheur'}</div><div class="value">${rec ? rec.freshness_min : '--'} ${isAr?'د':'min'}</div></div>
     </div>
 
     <!-- Moisture chart -->
     <div class="chart-card">
       <div class="chart-header">
-        <div><div class="chart-title">Humidité du sol (%)</div></div>
-        <span class="trend-badge ${trendMoist<=0?'trend-down':'trend-up'}">${trendMoist<=0?'↘ En baisse':'↗ En hausse'} ${trendMoist>0?'+':''}${trendMoist}%</span>
+        <div><div class="chart-title">${isAr?'رطوبة التربة (%)':'Humidité du sol (%)'}</div></div>
+        <span class="trend-badge ${trendMoist<=0?'trend-down':'trend-up'}">${trendMoist<=0?trendDown:trendUp} ${trendMoist>0?'+':''}${trendMoist}%</span>
       </div>
-      <div class="chart-sub">Humidité dans la plage attendue • Normal</div>
+      <div class="chart-sub">${isAr?'الرطوبة في النطاق المتوقع •':'Humidité dans la plage attendue •'} ${normalLabel}</div>
       <div class="chart-wrap"><canvas id="chart-moisture"></canvas></div>
     </div>
 
     <!-- Temp chart -->
     <div class="chart-card">
       <div class="chart-header">
-        <div><div class="chart-title">Température (°C)</div></div>
-        <span class="trend-badge ${trendTemp>=0?'trend-up':'trend-down'}">${trendTemp>=0?'↗ En hausse':'↘ En baisse'} ${trendTemp>0?'+':''}${trendTemp}°C</span>
+        <div><div class="chart-title">${isAr?'درجة الحرارة (°C)':'Température (°C)'}</div></div>
+        <span class="trend-badge ${trendTemp>=0?'trend-up':'trend-down'}">${trendTemp>=0?trendUp:trendDown} ${trendTemp>0?'+':''}${trendTemp}°C</span>
       </div>
-      <div class="chart-sub">Température dans la zone attendue • Normal</div>
+      <div class="chart-sub">${isAr?'الحرارة في النطاق المتوقع •':'Température dans la zone attendue •'} ${normalLabel}</div>
       <div class="chart-wrap"><canvas id="chart-temp"></canvas></div>
     </div>
 
     <!-- Rain chart -->
     <div class="chart-card">
       <div class="chart-header">
-        <div><div class="chart-title">Pluie (mm)</div></div>
-        <span class="trend-badge ${trendRain<=0?'trend-down':'trend-up'}">${trendRain<=0?'↘ En baisse':'↗ En hausse'} ${trendRain>0?'+':''}${trendRain}mm</span>
+        <div><div class="chart-title">${isAr?'الأمطار (ملم)':'Pluie (mm)'}</div></div>
+        <span class="trend-badge ${trendRain<=0?'trend-down':'trend-up'}">${trendRain<=0?trendDown:trendUp} ${trendRain>0?'+':''}${trendRain}mm</span>
       </div>
-      <div class="chart-sub">Pluie dans la normale • Normal</div>
+      <div class="chart-sub">${isAr?'الأمطار في المعدل الطبيعي •':'Pluie dans la normale •'} ${normalLabel}</div>
       <div class="chart-wrap"><canvas id="chart-rain"></canvas></div>
     </div>
 
     <!-- Battery chart -->
     <div class="chart-card">
       <div class="chart-header">
-        <div><div class="chart-title">Batterie (%)</div></div>
-        <span class="trend-badge ${trendBat<=0?'trend-down':'trend-up'}">${trendBat<=0?'↘ En baisse':'↗ En hausse'} ${trendBat>0?'+':''}${trendBat}%</span>
+        <div><div class="chart-title">${isAr?'البطارية (%)':'Batterie (%)'}</div></div>
+        <span class="trend-badge ${trendBat<=0?'trend-down':'trend-up'}">${trendBat<=0?trendDown:trendUp} ${trendBat>0?'+':''}${trendBat}%</span>
       </div>
-      <div class="chart-sub">Niveau batterie correct • Normal</div>
+      <div class="chart-sub">${isAr?'مستوى البطارية جيد •':'Niveau batterie correct •'} ${normalLabel}</div>
       <div class="chart-wrap"><canvas id="chart-battery"></canvas></div>
     </div>
 
     <!-- Signal → decision link -->
     ${rec ? `<div class="signal-card">
-      <div class="signal-title">Lien vers décision</div>
-      <div class="signal-sub">Ces signaux alimentent la décision</div>
-      <div class="signal-text">Baisse continue d'humidité détectée.</div>
+      <div class="signal-title">${isAr?'الرابط بالقرار':'Lien vers décision'}</div>
+      <div class="signal-sub">${isAr?'هذه الإشارات تغذي القرار':'Ces signaux alimentent la décision'}</div>
+      <div class="signal-text">${isAr?'باستمرار انخفاض الرطوبة.':'Baisse continue d\'humidité détectée.'}</div>
       <span class="signal-action-badge">${t(rec.action)}</span>
-      <div class="signal-reason">${rec.reason}</div>
-      <button class="btn-outline" onclick="showTab('dashboard')">Voir la décision →</button>
+      <div class="signal-reason">${isAr?translateReason(rec.reason):rec.reason}</div>
+      <button class="btn-outline" onclick="showTab('dashboard')">${isAr?'عرض القرار →':'Voir la décision →'}</button>
     </div>` : ""}
   `;
 
@@ -857,6 +867,13 @@ function setLang(l) {
   document.getElementById("farm-label").textContent = isAr ? "المزرعة" : "Exploitation";
   document.getElementById("farm-name").textContent = isAr ? "فيرم أطلس • بني ملال، المغرب" : "Ferme Atlas • Beni Mellal, Maroc";
   document.getElementById("culture-tag").textContent = (isAr ? "المحصول: " : "Culture: ") + cropLabel(currentSensor ? currentSensor.crop_type : "olive");
+
+  // Season
+  const month = new Date().getMonth();
+  const seasonFr = month>=2&&month<=4?'Printemps':month>=5&&month<=7?'Été':month>=8&&month<=10?'Automne':'Hiver';
+  const seasonAr = month>=2&&month<=4?'ربيع':month>=5&&month<=7?'صيف':month>=8&&month<=10?'خريف':'شتاء';
+  const seasonTag = document.getElementById("season-tag");
+  if (seasonTag) seasonTag.textContent = (isAr?'الموسم: ':'Saison: ') + (isAr?seasonAr:seasonFr);
 
   // Nav buttons text only (leave SVG intact)
   [["btn-dashboard","dashboard"],["btn-capteurs","capteurs"],["btn-alertes","alertes"],["btn-rapports","rapports"]].forEach(([id,key])=>{
