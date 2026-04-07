@@ -11,8 +11,8 @@ from app.models import Alert, Sensor, Reading
 def _get_twilio():
     sid   = os.getenv("TWILIO_ACCOUNT_SID")
     token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_  = os.getenv("TWILIO_PHONE_FROM")    # your Twilio number: +17407373421
-    to_    = os.getenv("FARMER_PHONE")         # farmer's number:    +212643545486
+    from_  = os.getenv("TWILIO_PHONE_FROM")
+    to_    = os.getenv("FARMER_PHONE")
     if not all([sid, token, from_, to_]):
         return None, None, None
     from twilio.rest import Client
@@ -20,7 +20,6 @@ def _get_twilio():
 
 
 def _already_sent_recently(sensor_id, alert_type, hours=6):
-    """Avoid spamming — don't re-send the same alert within `hours`."""
     cutoff = datetime.utcnow() - timedelta(hours=hours)
     return Alert.query.filter(
         Alert.sensor_id  == sensor_id,
@@ -31,7 +30,6 @@ def _already_sent_recently(sensor_id, alert_type, hours=6):
 
 
 def send_sms(message: str) -> bool:
-    """Send a raw SMS. Returns True if sent, False if skipped/failed."""
     client, from_, to_ = _get_twilio()
     if not client:
         print(f"[Twilio] Credentials not set — SMS skipped: {message}")
@@ -51,7 +49,6 @@ def create_alert(sensor_id, alert_type, message,
                  soil_health_impact="Moyen",
                  yield_risk="Faible",
                  send_sms_flag=False) -> Alert:
-    """Persist an alert and optionally send SMS."""
     alert = Alert(
         sensor_id=sensor_id,
         type=alert_type,
@@ -72,14 +69,10 @@ def create_alert(sensor_id, alert_type, message,
     return alert
 
 
-# ── High-level trigger functions called from recommendation_service ─────────
+# ── High-level trigger functions ─────────────────────────────────────────────
 
 def check_and_alert(sensor_id: str, moisture: float, battery: float = None,
                     temp: float = None, last_seen: datetime = None):
-    """
-    Run all alert checks for a sensor after a new reading arrives.
-    Call this from recommendation_service.generate() or your data-ingestion route.
-    """
     sensor = Sensor.query.get(sensor_id)
     if not sensor:
         return
@@ -93,9 +86,11 @@ def check_and_alert(sensor_id: str, moisture: float, battery: float = None,
             sensor_id=sensor_id,
             alert_type="LOW_MOISTURE",
             message=(
-                f"🚨 URGENT IrriSmart — {sensor.name}\n"
-                f"Humidité critique: {moisture}% (seuil: {t['critical']}%)\n"
-                f"Culture: {sensor.crop_type.capitalize()} — Irriguer immédiatement!"
+                f"🚨 URGENT — IrriSmart\n"
+                f"Parcelle: {sensor.name} ({sensor.crop_type.capitalize()})\n"
+                f"💧 Humidité critique: {moisture}%\n"
+                f"Seuil minimum: {t['critical']}%\n"
+                f"👉 Irriguer immédiatement!"
             ),
             severity="critical",
             decision_impact="Élevé",
@@ -123,8 +118,11 @@ def check_and_alert(sensor_id: str, moisture: float, battery: float = None,
             sensor_id=sensor_id,
             alert_type="HIGH_TEMP",
             message=(
-                f"🌡️ IrriSmart — {sensor.name}\n"
-                f"Température élevée: {temp}°C. Risque de stress hydrique."
+                f"🌡️ IrriSmart — Alerte Chaleur\n"
+                f"Parcelle: {sensor.name} ({sensor.crop_type.capitalize()})\n"
+                f"Température: {temp}°C\n"
+                f"⚠️ Risque de stress hydrique élevé.\n"
+                f"Vérifiez l'humidité du sol aujourd'hui."
             ),
             severity="warning",
             decision_impact="Moyen",
@@ -139,8 +137,11 @@ def check_and_alert(sensor_id: str, moisture: float, battery: float = None,
             sensor_id=sensor_id,
             alert_type="FROST_WARNING",
             message=(
-                f"❄️ IrriSmart — {sensor.name}\n"
-                f"Risque de gel: {temp}°C. Protégez vos cultures!"
+                f"❄️ IrriSmart — Alerte Gel\n"
+                f"Parcelle: {sensor.name} ({sensor.crop_type.capitalize()})\n"
+                f"Température: {temp}°C\n"
+                f"🚨 Risque de gel détecté!\n"
+                f"Protégez vos cultures immédiatement."
             ),
             severity="critical",
             decision_impact="Élevé",
@@ -156,7 +157,7 @@ def check_and_alert(sensor_id: str, moisture: float, battery: float = None,
             alert_type="LOW_BATTERY",
             message=f"🔋 {sensor.name}: Batterie faible ({battery:.0f}%). Remplacer bientôt.",
             severity="info",
-            send_sms_flag=False,   # no SMS for battery
+            send_sms_flag=False,
         )
 
     # 6. Sensor offline (>2h without reading)
@@ -165,10 +166,12 @@ def check_and_alert(sensor_id: str, moisture: float, battery: float = None,
             sensor_id=sensor_id,
             alert_type="SENSOR_OFFLINE",
             message=(
-          message=(
                 f"📡 IrriSmart — Alerte Capteur\n"
                 f"Parcelle: {sensor.name}\n"
                 f"Culture: {sensor.crop_type.capitalize()}\n"
                 f"⚠️ Capteur hors ligne depuis {int((datetime.utcnow()-last_seen).total_seconds()/3600)}h.\n"
                 f"Veuillez vérifier le matériel."
             ),
+            severity="warning",
+            send_sms_flag=True,
+        )
