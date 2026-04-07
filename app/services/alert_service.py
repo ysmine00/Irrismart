@@ -165,9 +165,10 @@ def check_and_alert(sensor_id: str, moisture: float, battery: float = None,
             sensor_id=sensor_id,
             alert_type="SENSOR_OFFLINE",
             message=(
-                f"📡 IrriSmart — {sensor.name}\n"
-                f"Capteur hors ligne depuis {int((datetime.utcnow()-last_seen).total_seconds()/3600)}h."
+          message=(
+                f"📡 IrriSmart — Alerte Capteur\n"
+                f"Parcelle: {sensor.name}\n"
+                f"Culture: {sensor.crop_type.capitalize()}\n"
+                f"⚠️ Capteur hors ligne depuis {int((datetime.utcnow()-last_seen).total_seconds()/3600)}h.\n"
+                f"Veuillez vérifier le matériel."
             ),
-            severity="warning",
-            send_sms_flag=True,
-        )
