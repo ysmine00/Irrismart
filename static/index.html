@@ -6,11 +6,31 @@
 <title>IrriSmart MVP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+#map{height:340px;border-radius:var(--radius);overflow:hidden;z-index:1}
+.map-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;margin-bottom:14px}
+.map-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid)}
+.map-legend-dot{width:12px;height:12px;border-radius:50%}
+.parcelle-info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.parcelle-info-card{background:var(--card);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow);border-top:3px solid var(--green)}
+.parcelle-info-card.low{border-top-color:var(--amber)}
+.parcelle-info-card.critical{border-top-color:var(--red)}
+.pic-name{font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.pic-val{font-size:20px;font-weight:700;color:var(--green)}
+.pic-val.low{color:var(--amber)}
+.pic-val.critical{color:var(--red)}
+.pic-label{font-size:10px;color:var(--text-muted)}
+.pic-action{display:inline-block;margin-top:6px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:var(--green-pale);color:var(--green)}
+.pic-action.wait{background:var(--amber-light);color:#B45309}
+@media(max-width:900px){.parcelle-info-grid{grid-template-columns:1fr}}
+</style>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --green:#16A34A;--green-mid:#22C55E;--green-light:#4ADE80;--green-pale:#DCFCE7;--green-bg:#F0FDF4;
+  --green:#1A9B50;--green-mid:#27AE60;--green-light:#52C87A;--green-pale:#D5F5E3;--green-bg:#EAFAF1;
   --amber:#E9A719;--amber-light:#FEF3C7;--red:#E05252;--red-light:#FEE2E2;
   --blue:#3B82F6;--blue-light:#DBEAFE;
   --text:#1A2E1A;--text-mid:#4A5E4A;--text-muted:#8A9E8A;
@@ -278,6 +298,10 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
     Rapports
   </button>
+  <button class="nav-btn" onclick="showTab('carte')" id="btn-carte">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+    Carte
+  </button>
 </div>
 
 </div><!-- end nav -->
@@ -328,6 +352,17 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
   </div>
 </div>
 
+<!-- CARTE TAB -->
+<div class="section" id="tab-carte">
+  <div style="padding:0 12px 8px">
+    <div class="section-title" id="title-carte">Carte de la ferme</div>
+    <div class="section-sub" id="sub-carte">Localisation des parcelles et capteurs</div>
+  </div>
+  <div style="padding:0 12px" id="carte-content">
+    <div class="loading"><div class="spinner"></div>Chargement…</div>
+  </div>
+</div>
+
 <div class="bottom-pad"></div>
 </div><!-- end right-panel -->
 
@@ -342,7 +377,7 @@ let lang = "fr";
 const T = {
   fr: {
     "IRRIGATE":"Irriguer","WAIT":"Attendre","MONITOR":"Surveiller","NO_ACTION":"Aucune action",
-    "dashboard":"Dashboard","capteurs":"Capteurs","alertes":"Alertes","rapports":"Rapports",
+    "dashboard":"Dashboard","capteurs":"Capteurs","alertes":"Alertes","rapports":"Rapports","carte":"Carte",
     "decision_title":"Décision du jour","decision_sub":"Irriguer aujourd'hui, ou attendre ?",
     "confiance":"Confiance données","fiabilite":"Fiabilité capteurs",
     "coherence":"Cohérence tendances","fraicheur":"Fraîcheur",
@@ -360,7 +395,7 @@ const T = {
   },
   ar: {
     "IRRIGATE":"ري","WAIT":"انتظر","MONITOR":"مراقبة","NO_ACTION":"لا إجراء",
-    "dashboard":"لوحة التحكم","capteurs":"المستشعرات","alertes":"التنبيهات","rapports":"التقارير",
+    "dashboard":"لوحة التحكم","capteurs":"المستشعرات","alertes":"التنبيهات","rapports":"التقارير","carte":"الخريطة",
     "decision_title":"توصية اليوم","decision_sub":"هل يجب الري اليوم؟ وكم المدة؟",
     "confiance":"ثقة البيانات","fiabilite":"موثوقية المستشعرات",
     "coherence":"اتساق الاتجاهات","fraicheur":"حداثة البيانات",
@@ -423,6 +458,7 @@ function loadTab(name) {
   if (name === "capteurs")   loadCapteurs();
   if (name === "alertes")    loadAlertes();
   if (name === "rapports")   loadRapports();
+  if (name === "carte")      loadCarte();
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -829,6 +865,85 @@ async function loadRapports() {
   `;
 }
 
+// ── Carte tab ─────────────────────────────────────────────────────────────────
+let mapInstance = null;
+async function loadCarte() {
+  const el = document.getElementById("carte-content");
+  const isAr = lang === 'ar';
+  const res = await fetch(`${API}/api/recommendation`);
+  const recs = (await res.json()).data || [];
+
+  // Build lookup by sensor_id
+  const recMap = {};
+  recs.forEach(r => recMap[r.sensor_id] = r);
+
+  el.innerHTML = `
+    <div class="card" style="padding:16px;margin-bottom:12px">
+      <div style="font-size:14px;color:var(--text-muted);margin-bottom:10px">
+        ${isAr?'موقع المزرعة • بني ملال، المغرب':'Localisation • Beni Mellal, Maroc'}
+      </div>
+      <div id="map"></div>
+      <div class="map-legend">
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#1A9B50"></div>${isAr?'رطوبة جيدة':'Humidité optimale'}</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#E9A719"></div>${isAr?'رطوبة منخفضة':'Humidité faible'}</div>
+        <div class="map-legend-item"><div class="map-legend-dot" style="background:#E05252"></div>${isAr?'رطوبة حرجة':'Humidité critique'}</div>
+      </div>
+    </div>
+    <div class="parcelle-info-grid">
+      ${sensors.map(s => {
+        const rec = recMap[s.id];
+        const moisture = rec ? rec.moisture_pct : (s.latest_reading ? s.latest_reading.soil_moisture : 0);
+        const action = rec ? rec.action : 'WAIT';
+        const level = moisture < 20 ? 'critical' : moisture < 30 ? 'low' : '';
+        return `<div class="parcelle-info-card ${level}">
+          <div class="pic-name">${s.name}</div>
+          <div class="pic-label">${isAr?'رطوبة التربة':'Humidité sol'}</div>
+          <div class="pic-val ${level}">${Math.round(moisture*10)/10}%</div>
+          <div class="pic-label">${isAr?'المحصول':'Culture'}: ${cropLabel(s.crop_type)}</div>
+          <span class="pic-action ${action==='WAIT'||action==='NO_ACTION'?'wait':''}">${t(action)}</span>
+        </div>`;
+      }).join("")}
+    </div>
+  `;
+
+  // Init or reset map
+  if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+  mapInstance = L.map("map").setView([32.337, -6.352], 14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(mapInstance);
+
+  // Farm boundary
+  const farmBounds = [[32.330,-6.360],[32.344,-6.344]];
+  L.rectangle(farmBounds, {color:"#1A9B50", weight:2, fillOpacity:0.05}).addTo(mapInstance);
+
+  // Sensor markers
+  sensors.forEach(s => {
+    const rec = recMap[s.id];
+    const moisture = rec ? rec.moisture_pct : 40;
+    const color = moisture < 20 ? "#E05252" : moisture < 30 ? "#E9A719" : "#1A9B50";
+    const action = rec ? t(rec.action) : t("WAIT");
+
+    const icon = L.divIcon({
+      html: `<div style="background:${color};width:36px;height:36px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700">${Math.round(moisture)}%</div>`,
+      className:"",
+      iconSize:[36,36],
+      iconAnchor:[18,18]
+    });
+
+    L.marker([s.latitude, s.longitude], {icon})
+      .addTo(mapInstance)
+      .bindPopup(`
+        <div style="font-family:DM Sans,sans-serif;min-width:160px">
+          <div style="font-weight:700;margin-bottom:6px">${s.name}</div>
+          <div style="font-size:12px;color:#666;margin-bottom:4px">${cropLabel(s.crop_type)} • ${s.area_ha} ha</div>
+          <div style="font-size:14px;font-weight:700;color:${color}">${Math.round(moisture*10)/10}% humidité</div>
+          <div style="margin-top:6px;background:${color}22;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:600;color:${color};display:inline-block">${action}</div>
+        </div>
+      `);
+  });
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function cropLabel(type){ return {olive:"Olivier",citrus:"Agrumes",wheat:"Blé",alfalfa:"Luzerne",beet:"Betterave"}[type]||type; }
 function levelBadge(l){ return {Faible:"green",Moyen:"amber",Élevé:"red"}[l]||"green"; }
@@ -876,7 +991,7 @@ function setLang(l) {
   if (seasonTag) seasonTag.textContent = (isAr?'الموسم: ':'Saison: ') + (isAr?seasonAr:seasonFr);
 
   // Nav buttons text only (leave SVG intact)
-  [["btn-dashboard","dashboard"],["btn-capteurs","capteurs"],["btn-alertes","alertes"],["btn-rapports","rapports"]].forEach(([id,key])=>{
+  [["btn-dashboard","dashboard"],["btn-capteurs","capteurs"],["btn-alertes","alertes"],["btn-rapports","rapports"],["btn-carte","carte"]].forEach(([id,key])=>{
     const btn = document.getElementById(id);
     if (btn) btn.lastChild.textContent = " " + t(key);
   });
@@ -887,12 +1002,14 @@ function setLang(l) {
     capteurs:  isAr?"تفاصيل المستشعرات":"Détails capteurs",
     alertes:   isAr?"التنبيهات":"Alertes",
     rapports:  isAr?"تقارير خفيفة":"Rapports légers",
+    carte:     isAr?"خريطة المزرعة":"Carte de la ferme",
   };
   const subs = {
     dashboard: isAr?"هل يجب الري اليوم؟ وكم المدة؟":"Irriguer aujourd'hui, ou attendre ?",
     capteurs:  isAr?"الاتجاه خلال آخر 14 يومًا":"Tendance sur les 14 derniers jours",
     alertes:   isAr?"قائمة مرتبة حسب الأولوية":"Liste priorisée des signaux terrain",
     rapports:  isAr?"ملخص سريع للمتابعة الأسبوعية":"Synthèse rapide pour suivi hebdomadaire",
+    carte:     isAr?"موقع القطع والمستشعرات":"Localisation des parcelles et capteurs",
   };
   ["dashboard","capteurs","alertes","rapports"].forEach(s => {
     const title = document.getElementById("title-"+s);
