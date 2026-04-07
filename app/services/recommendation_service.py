@@ -24,13 +24,13 @@ CROP_THRESHOLDS = {
 @dataclass
 class DayForecastCard:
     date: str
-    besoin: str        # Faible | Moyen | Élevé
+    besoin: str
     pluie_pct: float
     stress_thermique: str
 
 @dataclass
 class SimulationResult:
-    scenario: str            # "irrigate" | "wait"
+    scenario: str
     estimated_moisture: float
     estimated_health: int
     moisture_impact: float
@@ -68,7 +68,7 @@ def _duration(deficit, flow_rate):
 
 
 def _besoin(moisture, thresholds):
-    if moisture < thresholds["low"]:   return "Élevé"
+    if moisture < thresholds["low"]:     return "Élevé"
     if moisture < thresholds["opt_low"]: return "Moyen"
     return "Faible"
 
@@ -87,20 +87,16 @@ def _soil_health(sensor_id, moisture, thresholds):
     moistures = [r.soil_moisture for r in readings]
     temps     = [r.air_temperature for r in readings if r.air_temperature]
 
-    # Stability: how far readings stray from optimal mid
-    opt_mid = thresholds["opt_mid"]
-    avg_dev = sum(abs(m - opt_mid) for m in moistures) / len(moistures)
+    opt_mid   = thresholds["opt_mid"]
+    avg_dev   = sum(abs(m - opt_mid) for m in moistures) / len(moistures)
     stabilite = max(0, min(100, int(100 - avg_dev * 2)))
 
-    # Irrigation balance: how often in optimal range
     in_range  = sum(1 for m in moistures if thresholds["opt_low"] <= m <= thresholds["opt_high"])
     equilibre = int(100 * in_range / len(moistures))
 
-    # Thermal stress: avg max below 38°C target
-    avg_temp    = sum(temps) / len(temps) if temps else 25
-    stress_th   = max(0, min(100, int(100 - max(0, avg_temp - 28) * 3)))
+    avg_temp  = sum(temps) / len(temps) if temps else 25
+    stress_th = max(0, min(100, int(100 - max(0, avg_temp - 28) * 3)))
 
-    # Decision coherence (past recs)
     recs = Recommendation.query.filter_by(sensor_id=sensor_id)\
         .order_by(Recommendation.created_at.desc()).limit(14).all()
     coherence = 75 if recs else 60
@@ -113,12 +109,12 @@ def _soil_health(sensor_id, moisture, thresholds):
 
 def _data_confidence(readings):
     if not readings: return 50.0
-    recent  = [r for r in readings if (datetime.utcnow()-r.timestamp).total_seconds() < 3600*3]
-    gaps    = 0
+    recent = [r for r in readings if (datetime.utcnow()-r.timestamp).total_seconds() < 3600*3]
+    gaps   = 0
     for i in range(1, len(readings)):
         delta = (readings[i].timestamp - readings[i-1].timestamp).total_seconds()
         if delta > 7200: gaps += 1
-    freshness = 100 if recent else 60
+    freshness   = 100 if recent else 60
     gap_penalty = min(40, gaps * 5)
     return round(max(40, freshness - gap_penalty), 1)
 
@@ -136,7 +132,17 @@ def generate(sensor_id, forecasts=None):
             reason="Aucune donnée capteur disponible.", confidence=0,
             moisture_pct=0, is_critical=False, factors=[], forecast_cards=[])
 
-    t = CROP_THRESHOLDS.get(sensor.crop_type, CROP_THRESHOLDS["olive"])
+    # ── Trigger alerts ──
+    from app.services.alert_service import check_and_alert
+    check_and_alert(
+        sensor_id=sensor_id,
+        moisture=reading.soil_moisture,
+        battery=sensor.battery_level,
+        temp=reading.air_temperature,
+        last_seen=reading.timestamp,
+    )
+
+    t        = CROP_THRESHOLDS.get(sensor.crop_type, CROP_THRESHOLDS["olive"])
     moisture = reading.soil_moisture
 
     if forecasts is None:
@@ -178,7 +184,6 @@ def generate(sensor_id, forecasts=None):
         factors.append({"label": f"Humidité actuelle: {moisture}%", "type": "moisture"})
         if rain_prob: factors.append({"label": f"Probabilité de pluie: {int(rain_prob)}%", "type": "rain"})
 
-    # hot days coming
     hot_days = sum(1 for f in forecasts if f.get("temp_max", 0) > 32)
     if hot_days: factors.append({"label": f"Jours chauds à venir: {hot_days}d", "type": "heat"})
 
@@ -190,7 +195,7 @@ def generate(sensor_id, forecasts=None):
     # ── Forecast cards ──
     cards = []
     for f in forecasts[1:6]:
-        fdate = f.get("forecast_date","")
+        fdate = f.get("forecast_date", "")
         cards.append(DayForecastCard(
             date=fdate,
             besoin=_besoin(moisture, t),
@@ -201,21 +206,21 @@ def generate(sensor_id, forecasts=None):
     all_readings = Reading.query.filter_by(sensor_id=sensor_id)\
         .order_by(Reading.timestamp.desc()).limit(30).all()
     soil_score, sub = _soil_health(sensor_id, moisture, t)
-    data_conf = _data_confidence(all_readings)
+    data_conf       = _data_confidence(all_readings)
 
     mins_ago = abs(int((datetime.utcnow() - reading.timestamp).total_seconds() / 60))
 
     # ── Simulation ──
-    irr_moisture = min(t["opt_high"], moisture + _duration(t["opt_mid"]-moisture, sensor.flow_rate) * sensor.flow_rate / 60 / 2)
-    irr_health   = min(100, soil_score + 3)
-    wait_moisture= max(t["critical"], moisture - 1.5)
-    wait_health  = soil_score
+    irr_moisture  = min(t["opt_high"], moisture + _duration(t["opt_mid"]-moisture, sensor.flow_rate) * sensor.flow_rate / 60 / 2)
+    irr_health    = min(100, soil_score + 3)
+    wait_moisture = max(t["critical"], moisture - 1.5)
+    wait_health   = soil_score
 
-    sim_irrigate = SimulationResult("irrigate", round(irr_moisture,1), irr_health,
-                                    round(irr_moisture-moisture,1), irr_health-soil_score,
+    sim_irrigate = SimulationResult("irrigate", round(irr_moisture, 1), irr_health,
+                                    round(irr_moisture-moisture, 1), irr_health-soil_score,
                                     "L'irrigation immédiate stabilise l'humidité pour les prochaines 24h.")
-    sim_wait     = SimulationResult("wait", round(wait_moisture,1), wait_health,
-                                    round(wait_moisture-moisture,1), 0,
+    sim_wait     = SimulationResult("wait", round(wait_moisture, 1), wait_health,
+                                    round(wait_moisture-moisture, 1), 0,
                                     "Attendre préserve les ressources si la pluie est confirmée.")
 
     # ── Persist ──
