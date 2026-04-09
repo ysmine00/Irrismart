@@ -61,9 +61,17 @@ def adc_to_pct(adc):
     return round(max(0, min(100, 100 * (800 - adc) / 500)), 1)
 
 
-def _duration(deficit, flow_rate):
+def _duration(deficit, flow_rate, soil_type="limoneux", high_temp=False, wind_kmh=0):
     mm = deficit * 2
-    mins = (mm / flow_rate) * 60
+    # Soil type correction: clay retains water (-10%), sandy drains faster (+15%)
+    if soil_type == "argileux":
+        mm *= 0.90
+    elif soil_type == "sableux":
+        mm *= 1.15
+    mins = (mm / max(flow_rate, 0.1)) * 60
+    # Temperature correction: +20% when >35°C
+    if high_temp:
+        mins *= 1.20
     return int(max(15, min(120, round(mins / 5) * 5)))
 
 
@@ -76,6 +84,12 @@ def _stress(temp_max):
     if temp_max > 38: return "Élevé"
     if temp_max > 32: return "Moyen"
     return "Faible"
+
+
+def _recent_rain_mm(readings):
+    """Sum rain_mm from readings in the last 48 hours."""
+    cutoff = datetime.utcnow() - timedelta(hours=48)
+    return sum(r.rain_mm or 0 for r in readings if r.timestamp >= cutoff)
 
 
 def _soil_health(sensor_id, moisture, thresholds):
@@ -132,7 +146,7 @@ def generate(sensor_id, forecasts=None):
             reason="Aucune donnée capteur disponible.", confidence=0,
             moisture_pct=0, is_critical=False, factors=[], forecast_cards=[])
 
-    # ── Trigger alerts ──
+    # ── Trigger alerts on every call ──
     from app.services.alert_service import check_and_alert
     check_and_alert(
         sensor_id=sensor_id,
@@ -147,27 +161,45 @@ def generate(sensor_id, forecasts=None):
 
     if forecasts is None:
         forecasts = weather_service.get_forecast(days=5)
-    tomorrow  = forecasts[1] if len(forecasts) > 1 else (forecasts[0] if forecasts else {})
+    tomorrow = forecasts[1] if len(forecasts) > 1 else (forecasts[0] if forecasts else {})
+
+    # Pre-fetch readings once for rain check and data confidence
+    all_readings = Reading.query.filter_by(sensor_id=sensor_id)\
+        .order_by(Reading.timestamp.desc()).limit(48).all()
 
     rain_exp  = tomorrow.get("precipitation_mm", 0) >= 5
     rain_prob = tomorrow.get("precipitation_prob", 0)
     high_temp = tomorrow.get("temp_max", 0) > 35
     temp_max  = tomorrow.get("temp_max", 30)
     precip    = tomorrow.get("precipitation_mm", 0)
+    wind_kmh  = tomorrow.get("wind_speed_kmh", 0)
     is_crit   = moisture < t["critical"]
+
+    # Rain > 10mm in last 48h → skip irrigation
+    recent_rain   = _recent_rain_mm(all_readings)
+    skip_for_rain = recent_rain > 10
 
     # ── Decision ──
     factors = []
-    if moisture < t["low"]:
+    if skip_for_rain:
+        action, duration = "NO_ACTION", 0
+        reason = f"Pluies récentes ({recent_rain:.0f} mm en 48h). Irrigation non nécessaire."
+        factors.append({"label": f"Pluies récentes: {recent_rain:.0f} mm", "type": "rain"})
+    elif moisture < t["low"]:
         if rain_exp:
             action, duration = "WAIT", 0
-            reason = "Humidité actuelle suffisante pour aujourd'hui."
+            reason = (f"Humidité insuffisante ({moisture}% < {t['low']}%) "
+                      f"mais {precip:.0f} mm de pluie prévus demain. Attendre.")
         else:
             deficit  = t["opt_mid"] - moisture
-            duration = _duration(deficit, sensor.flow_rate)
-            if high_temp: duration = min(120, int(duration * 1.2))
+            duration = _duration(deficit, sensor.flow_rate,
+                                 soil_type=getattr(sensor, "soil_type", "limoneux"),
+                                 high_temp=high_temp, wind_kmh=wind_kmh)
             action = "IRRIGATE"
             reason = f"Humidité insuffisante ({moisture}% < {t['low']}%). Irriguer {duration} min."
+            if wind_kmh > 20:
+                reason += " Privilégier l'irrigation goutte-à-goutte (vent fort)."
+                factors.append({"label": f"Vent fort: {wind_kmh:.0f} km/h — goutte-à-goutte", "type": "wind"})
         factors.append({"label": f"Humidité actuelle: {moisture}%", "type": "moisture"})
         if rain_prob: factors.append({"label": f"Probabilité de pluie: {int(rain_prob)}%", "type": "rain"})
     elif moisture > t["high"]:
@@ -203,8 +235,6 @@ def generate(sensor_id, forecasts=None):
             stress_thermique=_stress(f.get("temp_max", 25))))
 
     # ── Soil health ──
-    all_readings = Reading.query.filter_by(sensor_id=sensor_id)\
-        .order_by(Reading.timestamp.desc()).limit(30).all()
     soil_score, sub = _soil_health(sensor_id, moisture, t)
     data_conf       = _data_confidence(all_readings)
 
