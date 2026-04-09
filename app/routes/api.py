@@ -3,7 +3,7 @@ from datetime import datetime, date, timedelta
 from sqlalchemy import func
 from app import db
 from app.models import Sensor, Reading, WeatherCache, Recommendation, Alert
-from app.services import weather_service, recommendation_service
+from app.services import weather_service, recommendation_service, alert_service
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -50,19 +50,56 @@ def sensor_history(sid):
 
 
 # ── Ingest sensor data (from ESP32 gateway) ───────────────────────────────────
+def _parse_makerfabs(raw):
+    """
+    Parse Makerfabs raw string:
+      "ID010003 REPLY: SOIL INDEX:0 H:48.85 T:30.50 ADC:896 BAT:1016"
+    Returns dict with sensor_id, air_humidity, air_temperature, soil_moisture, battery_pct
+    or None if the string doesn't match the expected format.
+    """
+    import re
+    m_id  = re.match(r'^(ID\w+)', raw)
+    m_h   = re.search(r'\bH:([\d.]+)', raw)
+    m_t   = re.search(r'\bT:([\d.]+)', raw)
+    m_adc = re.search(r'\bADC:(\d+)', raw)
+    m_bat = re.search(r'\bBAT:(\d+)', raw)
+    if not (m_id and m_adc):
+        return None
+    adc = int(m_adc.group(1))
+    # BAT: 1016 ≈ 3.0V ≈ 100%; linear scale 800=0% … 1016=100%
+    bat_raw = int(m_bat.group(1)) if m_bat else 1016
+    bat_pct = round(max(0, min(100, (bat_raw - 800) / (1016 - 800) * 100)), 1)
+    return {
+        "sensor_id":       m_id.group(1),
+        "soil_moisture":   recommendation_service.adc_to_pct(adc),
+        "air_humidity":    float(m_h.group(1)) if m_h else None,
+        "air_temperature": float(m_t.group(1)) if m_t else None,
+        "battery_pct":     bat_pct,
+    }
+
 @api.route("/data", methods=["POST"])
 def ingest():
-    b = request.get_json(silent=True) or {}
+    # Support both JSON body and raw Makerfabs string
+    raw = request.get_data(as_text=True).strip()
+    if raw.startswith("ID") and "ADC:" in raw:
+        b = _parse_makerfabs(raw)
+        if b is None:
+            return err("Impossible d'analyser la chaîne Makerfabs")
+    else:
+        b = request.get_json(silent=True) or {}
+
     sid = b.get("sensor_id")
     if not sid: return err("Missing sensor_id")
     s = Sensor.query.get(sid)
     if not s: return err(f"Unknown sensor: {sid}")
+
     # Accept raw ADC or pre-converted percentage
     soil = b.get("soil_moisture")
     if soil is None:
         adc = b.get("soil_adc")
         if adc is None: return err("Missing soil_moisture or soil_adc")
         soil = recommendation_service.adc_to_pct(int(adc))
+
     bat = b.get("battery_pct", 100.0)
     r = Reading(sensor_id=sid, soil_moisture=float(soil),
                 air_temperature=b.get("air_temperature"),
@@ -70,7 +107,12 @@ def ingest():
                 battery_voltage=float(bat),
                 rain_mm=b.get("rain_mm", 0))
     s.battery_level = float(bat)
-    db.session.add(r); db.session.commit()
+    db.session.add(r)
+    db.session.commit()
+
+    # Check for alert conditions after every new reading
+    alert_service.check_reading(s, r)
+
     return ok({"reading_id": r.id})
 
 

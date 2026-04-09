@@ -10,7 +10,11 @@ db = SQLAlchemy()
 def create_app(config=None):
     app = Flask(__name__, static_folder="../static", static_url_path="/static")
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///irrismart.db")
+    db_url = os.getenv("DATABASE_URL", "sqlite:///irrismart.db")
+    # Railway sets postgres:// but SQLAlchemy requires postgresql://
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     if config:
         app.config.update(config)
