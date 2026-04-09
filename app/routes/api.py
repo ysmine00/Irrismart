@@ -111,7 +111,7 @@ def ingest():
     db.session.commit()
 
     # Check for alert conditions after every new reading
-    alert_service.check_reading(s, r)
+    alert_service.check_and_alert(s.id, r.soil_moisture, r.battery_voltage, r.air_temperature, r.timestamp)
 
     return ok({"reading_id": r.id})
 
