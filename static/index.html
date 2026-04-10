@@ -797,10 +797,25 @@ async function loadRapports() {
   if (!currentSensor) return;
   const el = document.getElementById("rapports-content");
   el.innerHTML = `<div class="loading"><div class="spinner"></div>${lang==='ar'?'جاري التحميل…':'Chargement…'}</div>`;
-  const res = await fetch(`${API}/api/reports/weekly?sensor_id=${currentSensor.id}`);
-  const r = (await res.json()).data;
+  const [weeklyRes, histRes] = await Promise.all([
+    fetch(`${API}/api/reports/weekly?sensor_id=${currentSensor.id}`),
+    fetch(`${API}/api/sensors/${currentSensor.id}/history?limit=7`)
+  ]);
+  const r = (await weeklyRes.json()).data;
+  const histRaw = (await histRes.json()).data || [];
   const isAr = lang === 'ar';
   if (!r) { el.innerHTML = `<p style='padding:20px;color:#888'>${isAr?'لا توجد بيانات':'Aucune donnée'}</p>`; return; }
+
+  // Use live history if weekly report has no data (readings older than 7 days)
+  if (!r.history_table || r.history_table.length === 0) {
+    r.history_table = histRaw.slice(-7).map(row => ({
+      date: new Date(row.timestamp).toLocaleDateString("fr-FR",{day:"2-digit",month:"short"}),
+      soil_pct: row.soil_moisture,
+      temp_c: row.air_temperature,
+      rain_mm: row.rain_mm || 0,
+      battery_pct: row.battery_voltage || 0,
+    }));
+  }
 
   const total = (r.irrigate_count||0) + (r.wait_count||0);
   const irrPct = total ? Math.round(100*r.irrigate_count/total) : 0;
