@@ -1,103 +1,65 @@
 # IrriSmart
 
-An intelligent irrigation advisory system for Moroccan farms. IrriSmart collects real-time soil and environmental data from wireless sensors, analyzes it, and gives farmers clear irrigation recommendations — irrigate, wait, or monitor — through a bilingual (French/Arabic) web dashboard.
+Irrigation advisory system for small farms in Morocco. Sensors in the field send soil and weather data wirelessly to a central gateway, which forwards it to a backend that decides whether to irrigate or wait — and why.
 
-## What it does
+The dashboard runs in French and Arabic and is accessible from any device.
 
-- Receives soil moisture, temperature, humidity, and battery data from LoRa sensors in the field
-- Recommends irrigation decisions per crop type (olive, citrus, wheat, alfalfa, beet) with adjustments for soil type, temperature, wind, and rain forecast
-- Integrates live weather forecasts from Open-Meteo API
-- Sends SMS alerts via Twilio when conditions are critical (low moisture, frost risk, sensor offline, high temperature)
-- Displays a responsive dashboard with charts, alerts, reports, and a live map
-- Supports French and Arabic
+---
 
-## Architecture
+## How it works
 
-```
-[Makerfabs LoRa Sensors] 
-        ↓ LoRa 433MHz
-[Heltec WiFi LoRa 32 V3 Gateway]
-        ↓ HTTP POST
-[Flask Backend on Railway]
-        ↓
-[PostgreSQL Database]
-        ↓
-[Web Dashboard] + [Twilio SMS]
-```
+Capacitive soil moisture sensors (Makerfabs) sit in the ground across different farm parcels. They communicate over LoRa (433 MHz) to a gateway (Heltec WiFi LoRa 32 V3) which relays readings to the backend over WiFi. The backend processes the data, runs a recommendation engine, and updates the dashboard in real time.
 
-## Tech Stack
+If moisture drops critically, the farmer gets an SMS.
 
-- **Backend:** Python / Flask, SQLAlchemy, PostgreSQL
-- **Frontend:** HTML/CSS/JavaScript (SPA), Chart.js, Leaflet.js
-- **Hardware:** Heltec WiFi LoRa 32 V3 (gateway), Makerfabs capacitive soil sensors
-- **APIs:** Open-Meteo (weather), Twilio (SMS alerts)
-- **Deployment:** Railway
+---
 
-## Setup
+## Stack
 
-### 1. Clone and install
+- Flask + SQLAlchemy + PostgreSQL
+- Open-Meteo API for weather forecasts
+- Twilio for SMS alerts
+- Chart.js + Leaflet.js for the frontend
+- Arduino (Heltec ESP32 LoRa) for the gateway
+- Deployed on Railway
+
+---
+
+## Running locally
 
 ```bash
-git clone https://github.com/ysmine00/Irrismart.git
-cd irrismart
 pip install -r requirements.txt
-```
-
-### 2. Configure environment
-
-```bash
 cp .env.example .env
-```
-
-Fill in `.env`:
-
-```
-DATABASE_URL=postgresql://user:password@host:5432/irrismart
-SECRET_KEY=your-secret-key
-FARM_LATITUDE=32.34
-FARM_LONGITUDE=-6.35
-TWILIO_ACCOUNT_SID=your-sid
-TWILIO_AUTH_TOKEN=your-token
-TWILIO_PHONE_FROM=+1234567890
-FARMER_PHONE=+212600000000
-```
-
-### 3. Run
-
-```bash
+# fill in .env with your database URL and API credentials
 python run.py
 ```
 
-The app auto-creates all database tables and seeds sample sensor data on first run.
+The database is created and seeded automatically on first run.
 
-### 4. Gateway (Arduino)
+---
 
-Open `gateway.ino` in Arduino IDE, set your WiFi credentials, and flash to a Heltec WiFi LoRa 32 V3. The gateway listens for Makerfabs LoRa packets on 433 MHz and forwards them to the backend.
+## Gateway
 
-**Required libraries:** Heltec ESP32 Dev-Boards, ArduinoJson
+Flash `gateway.ino` to a Heltec WiFi LoRa 32 V3. Set your WiFi credentials in the sketch. It will listen for Makerfabs packets on 433 MHz and POST them to the backend.
 
-## API Endpoints
+Libraries needed: Heltec ESP32 Dev-Boards, ArduinoJson
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | System health check |
-| GET | `/api/sensors` | List all active sensors |
-| POST | `/api/sensors` | Register a new sensor |
-| POST | `/api/data` | Ingest sensor reading (raw Makerfabs or JSON) |
-| GET | `/api/recommendation` | Get irrigation recommendation |
-| GET | `/api/soil-health` | Get soil health score |
+---
+
+## API
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/api/sensors` | List sensors |
+| POST | `/api/sensors` | Register a sensor |
+| POST | `/api/data` | Ingest a reading |
+| GET | `/api/recommendation` | Get irrigation decision |
 | GET | `/api/alerts` | List active alerts |
-| POST | `/api/alerts/<id>/acknowledge` | Acknowledge an alert |
-| GET | `/api/weather` | Get weather forecast |
-| GET | `/api/reports/weekly` | Weekly summary report |
-| GET | `/api/reports/daily` | Daily summary |
+| GET | `/api/weather` | Weather forecast |
+| GET | `/api/reports/weekly` | Weekly report |
 
-## Deployment
+---
 
-Deployed on Railway with PostgreSQL. The `Procfile` runs gunicorn with 2 workers:
+## Live
 
-```
-web: gunicorn run:app --bind 0.0.0.0:$PORT --workers 2
-```
-
-Live: https://irrismart.up.railway.app
+https://irrismart.up.railway.app
