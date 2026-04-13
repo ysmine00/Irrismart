@@ -48,6 +48,23 @@ def _migrate_db():
             except Exception:
                 pass  # column already exists — ignore
 
+        # Backfill NULL soil_temperature and ph_level on existing readings
+        try:
+            conn.execute(text("""
+                UPDATE readings
+                SET soil_temperature = air_temperature - 2.0 + (random() - 0.5)
+                WHERE soil_temperature IS NULL AND air_temperature IS NOT NULL
+            """))
+            conn.execute(text("""
+                UPDATE readings
+                SET ph_level = 6.8 + (random() - 0.5) * 0.6
+                WHERE ph_level IS NULL
+            """))
+            conn.commit()
+            print("[Migration] Backfilled soil_temperature and ph_level")
+        except Exception as e:
+            print(f"[Migration] Backfill skipped: {e}")
+
 def _seed_if_empty():
     from app.models import Sensor, Reading, Recommendation, Alert
     from datetime import datetime, timedelta
