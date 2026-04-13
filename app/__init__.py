@@ -26,8 +26,27 @@ def create_app(config=None):
     app.register_blueprint(pages)
     with app.app_context():
         db.create_all()
+        _migrate_db()
         _seed_if_empty()
     return app
+
+def _migrate_db():
+    """Add columns introduced after initial deploy. Safe to run on every startup."""
+    from sqlalchemy import text
+    new_columns = [
+        ("readings",        "soil_temperature", "FLOAT"),
+        ("readings",        "ph_level",         "FLOAT"),
+        ("recommendations", "moisture_at_time",  "FLOAT"),
+        ("recommendations", "health_impact",     "INTEGER"),
+    ]
+    with db.engine.connect() as conn:
+        for table, col, col_type in new_columns:
+            try:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
+                conn.commit()
+                print(f"[Migration] Added {table}.{col}")
+            except Exception:
+                pass  # column already exists — ignore
 
 def _seed_if_empty():
     from app.models import Sensor, Reading, Recommendation, Alert
