@@ -105,7 +105,9 @@ def ingest():
                 air_temperature=b.get("air_temperature"),
                 air_humidity=b.get("air_humidity"),
                 battery_voltage=float(bat),
-                rain_mm=b.get("rain_mm", 0))
+                rain_mm=b.get("rain_mm", 0),
+                soil_temperature=b.get("soil_temperature"),
+                ph_level=b.get("ph_level"))
     s.battery_level = float(bat)
     db.session.add(r)
     db.session.commit()
