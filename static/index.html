@@ -636,16 +636,20 @@ async function loadCapteurs() {
   Object.values(chartInstances).forEach(c => c.destroy());
   chartInstances = {};
 
-  const labels   = hist.map(r => new Date(r.timestamp).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"}));
-  const moisture = hist.map(r => r.soil_moisture);
-  const temp     = hist.map(r => r.air_temperature);
-  const rain     = hist.map(r => r.rain_mm || 0);
-  const battery  = hist.map(r => r.battery_voltage || 0);
+  const labels    = hist.map(r => new Date(r.timestamp).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"}));
+  const moisture  = hist.map(r => r.soil_moisture);
+  const temp      = hist.map(r => r.air_temperature);
+  const rain      = hist.map(r => r.rain_mm || 0);
+  const battery   = hist.map(r => r.battery_voltage || 0);
+  const soilTemp  = hist.map(r => r.soil_temperature);
+  const phLevel   = hist.map(r => r.ph_level);
 
-  const trendMoist   = moisture.length >= 2 ? round1(moisture[moisture.length-1]-moisture[0]) : 0;
-  const trendTemp    = temp.length >= 2 ? round1(temp[temp.length-1]-temp[0]) : 0;
-  const trendRain    = rain.length >= 2 ? round1(rain[rain.length-1]-rain[0]) : 0;
-  const trendBat     = battery.length >= 2 ? round1(battery[battery.length-1]-battery[0]) : 0;
+  const trendMoist    = moisture.length >= 2 ? round1(moisture[moisture.length-1]-moisture[0]) : 0;
+  const trendTemp     = temp.length >= 2 ? round1(temp[temp.length-1]-temp[0]) : 0;
+  const trendRain     = rain.length >= 2 ? round1(rain[rain.length-1]-rain[0]) : 0;
+  const trendBat      = battery.length >= 2 ? round1(battery[battery.length-1]-battery[0]) : 0;
+  const trendSoilTemp = soilTemp.filter(v=>v!=null).length >= 2 ? round1(soilTemp.filter(v=>v!=null).at(-1) - soilTemp.filter(v=>v!=null)[0]) : 0;
+  const trendPh       = phLevel.filter(v=>v!=null).length >= 2 ? round1(phLevel.filter(v=>v!=null).at(-1) - phLevel.filter(v=>v!=null)[0]) : 0;
 
   const isAr = lang === 'ar';
   const trendUp = isAr ? '↗ في ارتفاع' : '↗ En hausse';
@@ -701,6 +705,26 @@ async function loadCapteurs() {
       <div class="chart-wrap"><canvas id="chart-battery"></canvas></div>
     </div>
 
+    <!-- Soil temperature chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">${isAr?'حرارة التربة (°C)':'Température sol (°C)'}</div></div>
+        <span class="trend-badge ${trendSoilTemp>=0?'trend-up':'trend-down'}">${trendSoilTemp>=0?trendUp:trendDown} ${trendSoilTemp>0?'+':''}${trendSoilTemp}°C</span>
+      </div>
+      <div class="chart-sub">${isAr?'التربة أبرد من الهواء بنحو 2°C •':'Sol typiquement 2°C plus frais que l\'air •'} ${normalLabel}</div>
+      <div class="chart-wrap"><canvas id="chart-soil-temp"></canvas></div>
+    </div>
+
+    <!-- pH chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div><div class="chart-title">${isAr?'حموضة التربة (pH)':'pH du sol'}</div></div>
+        <span class="trend-badge ${Math.abs(trendPh)<0.1?'trend-up':'trend-down'}">${Math.abs(trendPh)<0.1?'→ Stable':'→ Var.'} ${trendPh>0?'+':''}${trendPh}</span>
+      </div>
+      <div class="chart-sub">${isAr?'النطاق الزراعي المثالي: 6.0 – 7.5 •':'Plage agricole optimale : 6,0 – 7,5 •'} ${normalLabel}</div>
+      <div class="chart-wrap"><canvas id="chart-ph"></canvas></div>
+    </div>
+
     <!-- Signal → decision link -->
     ${rec ? `<div class="signal-card">
       <div class="signal-title">${isAr?'الرابط بالقرار':'Lien vers décision'}</div>
@@ -740,6 +764,22 @@ async function loadCapteurs() {
       data: battery, borderColor:"#6B7280", backgroundColor:"transparent",
       fill:false, tension:.2, pointRadius:3, pointBackgroundColor:"#6B7280", borderWidth:2}]},
     options: cDefaults});
+
+  chartInstances.soilTemp = new Chart(document.getElementById("chart-soil-temp"), {
+    type:"line", data:{ labels, datasets:[{
+      data: soilTemp, borderColor:"#C27C2C", backgroundColor:"rgba(194,124,44,.1)",
+      fill:true, tension:.4, pointRadius:3, pointBackgroundColor:"#C27C2C", borderWidth:2,
+      spanGaps:true}]},
+    options: cDefaults});
+
+  chartInstances.ph = new Chart(document.getElementById("chart-ph"), {
+    type:"line", data:{ labels, datasets:[{
+      data: phLevel, borderColor:"#7C3AED", backgroundColor:"rgba(124,58,237,.08)",
+      fill:true, tension:.4, pointRadius:3, pointBackgroundColor:"#7C3AED", borderWidth:2,
+      spanGaps:true}]},
+    options: {...cDefaults, scales:{...cDefaults.scales,
+      y:{...cDefaults.scales.y, min:4, max:9,
+         ticks:{...cDefaults.scales.y.ticks, stepSize:0.5}}}}});
 }
 
 // ── Alertes tab ───────────────────────────────────────────────────────────────

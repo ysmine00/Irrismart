@@ -36,11 +36,13 @@ class Reading(db.Model):
     id              = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sensor_id       = db.Column(db.String,  db.ForeignKey("sensors.id"), nullable=False, index=True)
     timestamp       = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    soil_moisture   = db.Column(db.Float,   nullable=False)
-    air_temperature = db.Column(db.Float)
-    air_humidity    = db.Column(db.Float)
-    battery_voltage = db.Column(db.Float)
-    rain_mm         = db.Column(db.Float,   default=0.0)
+    soil_moisture    = db.Column(db.Float,   nullable=False)
+    air_temperature  = db.Column(db.Float)
+    air_humidity     = db.Column(db.Float)
+    battery_voltage  = db.Column(db.Float)
+    rain_mm          = db.Column(db.Float,   default=0.0)
+    soil_temperature = db.Column(db.Float)
+    ph_level         = db.Column(db.Float)
 
     def to_dict(self):
         return {
@@ -51,6 +53,8 @@ class Reading(db.Model):
             "air_humidity": self.air_humidity,
             "battery_voltage": self.battery_voltage,
             "rain_mm": self.rain_mm,
+            "soil_temperature": self.soil_temperature,
+            "ph_level": self.ph_level,
         }
 
 

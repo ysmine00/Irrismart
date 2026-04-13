@@ -31,10 +31,12 @@ while True:
         moisture = s["base_moisture"] + math.sin(day / 7) * 5 + random.uniform(-2, 2)
         moisture = max(20, min(70, round(moisture, 1)))
 
-        temp     = round(25 + math.sin(day / 14) * 8 + random.uniform(-1, 1), 1)
-        humidity = round(55 + random.uniform(-5, 5), 1)
-        rain     = round(random.uniform(0, 4), 1) if random.random() > 0.75 else 0.0
-        battery  = round(s["battery"] - day * 0.05, 1)
+        temp      = round(25 + math.sin(day / 14) * 8 + random.uniform(-1, 1), 1)
+        humidity  = round(55 + random.uniform(-5, 5), 1)
+        rain      = round(random.uniform(0, 4), 1) if random.random() > 0.75 else 0.0
+        battery   = round(s["battery"] - day * 0.05, 1)
+        soil_temp = round(temp - 2.0 + random.uniform(-0.5, 0.5), 1)  # soil ~2°C cooler than air
+        ph        = round(6.8 + random.uniform(-0.3, 0.3), 2)          # typical agricultural pH
 
         try:
             r = requests.post(f"{API}/api/data", json={
@@ -44,9 +46,11 @@ while True:
                 "air_humidity":    humidity,
                 "battery_pct":     battery,
                 "rain_mm":         rain,
+                "soil_temperature": soil_temp,
+                "ph_level":        ph,
             }, timeout=10)
             status = "✅" if r.status_code == 200 else f"❌ {r.status_code}"
-            print(f"  {s['name']}: moisture={moisture}% temp={temp}°C rain={rain}mm battery={battery}% {status}")
+            print(f"  {s['name']}: moisture={moisture}% airTemp={temp}°C soilTemp={soil_temp}°C pH={ph} rain={rain}mm battery={battery}% {status}")
         except Exception as e:
             print(f"  {s['name']}: ❌ Error - {e}")
 
