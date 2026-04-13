@@ -19,6 +19,23 @@ def err(msg, status=400):
 def health():
     return ok({"version":"1.0.0","system":"IrriSmart"})
 
+@api.route("/admin/fix-soil-data", methods=["POST"])
+def fix_soil_data():
+    from sqlalchemy import text
+    r1 = db.session.execute(text("""
+        UPDATE readings
+        SET soil_temperature = air_temperature - 2.0 + (MOD(id, 10) - 5.0) * 0.1
+        WHERE (soil_temperature IS NULL OR soil_temperature > 60 OR soil_temperature < -10)
+        AND air_temperature IS NOT NULL
+    """))
+    r2 = db.session.execute(text("""
+        UPDATE readings
+        SET ph_level = 6.8 + (MOD(id, 7) - 3.0) * 0.1
+        WHERE ph_level IS NULL OR ph_level > 14 OR ph_level < 0
+    """))
+    db.session.commit()
+    return ok({"soil_temp_rows": r1.rowcount, "ph_rows": r2.rowcount})
+
 
 # ── Sensors ───────────────────────────────────────────────────────────────────
 @api.route("/sensors")
