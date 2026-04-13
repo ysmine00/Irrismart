@@ -39,17 +39,19 @@ def _migrate_db():
         ("recommendations", "moisture_at_time",  "FLOAT"),
         ("recommendations", "health_impact",     "INTEGER"),
     ]
-    with db.engine.connect() as conn:
-        for table, col, col_type in new_columns:
+    # Step 1: add missing columns (separate connection per statement so a failed
+    # ALTER TABLE does not leave the transaction in an aborted state)
+    for table, col, col_type in new_columns:
+        with db.engine.connect() as conn:
             try:
                 conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
                 conn.commit()
                 print(f"[Migration] Added {table}.{col}")
             except Exception:
-                pass  # column already exists — ignore
+                conn.rollback()  # column already exists — reset and continue
 
-        # Fix bad soil_temperature and ph_level values (out of realistic range)
-        # Uses SIN(id) for deterministic variation without relying on random()
+    # Step 2: fix/backfill soil_temperature and ph_level (fresh connection)
+    with db.engine.connect() as conn:
         try:
             conn.execute(text("""
                 UPDATE readings
@@ -67,9 +69,9 @@ def _migrate_db():
                     OR ph_level < 0
             """))
             conn.commit()
-            print("[Migration] Fixed soil_temperature and ph_level values")
+            print("[Migration] Backfilled soil_temperature and ph_level")
         except Exception as e:
-            print(f"[Migration] Fix skipped: {e}")
+            print(f"[Migration] Backfill skipped: {e}")
 
 def _seed_if_empty():
     from app.models import Sensor, Reading, Recommendation, Alert
