@@ -48,22 +48,28 @@ def _migrate_db():
             except Exception:
                 pass  # column already exists — ignore
 
-        # Backfill NULL soil_temperature and ph_level on existing readings
+        # Fix bad soil_temperature and ph_level values (out of realistic range)
+        # Uses SIN(id) for deterministic variation without relying on random()
         try:
             conn.execute(text("""
                 UPDATE readings
-                SET soil_temperature = air_temperature - 2.0 + (random() - 0.5)
-                WHERE soil_temperature IS NULL AND air_temperature IS NOT NULL
+                SET soil_temperature = air_temperature - 2.0 + SIN(id::float) * 0.5
+                WHERE (soil_temperature IS NULL
+                    OR soil_temperature > 60
+                    OR soil_temperature < -10)
+                AND air_temperature IS NOT NULL
             """))
             conn.execute(text("""
                 UPDATE readings
-                SET ph_level = 6.8 + (random() - 0.5) * 0.6
+                SET ph_level = 6.8 + SIN(id::float * 1.3) * 0.3
                 WHERE ph_level IS NULL
+                    OR ph_level > 14
+                    OR ph_level < 0
             """))
             conn.commit()
-            print("[Migration] Backfilled soil_temperature and ph_level")
+            print("[Migration] Fixed soil_temperature and ph_level values")
         except Exception as e:
-            print(f"[Migration] Backfill skipped: {e}")
+            print(f"[Migration] Fix skipped: {e}")
 
 def _seed_if_empty():
     from app.models import Sensor, Reading, Recommendation, Alert
