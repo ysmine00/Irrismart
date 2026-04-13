@@ -253,12 +253,15 @@ def generate(sensor_id, forecasts=None):
                                     round(wait_moisture-moisture, 1), 0,
                                     "Attendre préserve les ressources si la pluie est confirmée.")
 
-    # ── Persist ──
-    rec = Recommendation(sensor_id=sensor_id, action=action, duration_minutes=duration,
-                         reason=reason, confidence=confidence,
-                         moisture_at_time=moisture, health_impact=irr_health-soil_score)
-    db.session.add(rec)
-    db.session.commit()
+    # ── Persist (at most once per hour per sensor) ──
+    last_rec = Recommendation.query.filter_by(sensor_id=sensor_id)\
+        .order_by(Recommendation.created_at.desc()).first()
+    if not last_rec or (datetime.utcnow() - last_rec.created_at).total_seconds() > 3600:
+        rec = Recommendation(sensor_id=sensor_id, action=action, duration_minutes=duration,
+                             reason=reason, confidence=confidence,
+                             moisture_at_time=moisture, health_impact=irr_health-soil_score)
+        db.session.add(rec)
+        db.session.commit()
 
     return RecommendationResult(
         action=action, duration_minutes=duration, reason=reason, confidence=confidence,

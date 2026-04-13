@@ -26,6 +26,15 @@ def _already_sent_recently(sensor_id, alert_type, hours=6):
         Alert.created_at >= cutoff
     ).first() is not None
 
+def _already_created_recently(sensor_id, alert_type, hours=4):
+    """Prevent duplicate alert records (not just SMS) within the cooldown window."""
+    cutoff = datetime.utcnow() - timedelta(hours=hours)
+    return Alert.query.filter(
+        Alert.sensor_id  == sensor_id,
+        Alert.type       == alert_type,
+        Alert.created_at >= cutoff
+    ).first() is not None
+
 def send_sms(message: str) -> bool:
     client, from_, to_ = _get_twilio()
     if not client:
@@ -45,6 +54,9 @@ def create_alert(sensor_id, alert_type, message,
                  soil_health_impact="Moyen",
                  yield_risk="Faible",
                  send_sms_flag=False) -> Alert:
+    # Skip if a record for the same sensor+type already exists within the cooldown window
+    if _already_created_recently(sensor_id, alert_type):
+        return None
     alert = Alert(
         sensor_id=sensor_id,
         type=alert_type,

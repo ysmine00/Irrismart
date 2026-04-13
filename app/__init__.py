@@ -53,18 +53,23 @@ def _seed_if_empty():
             battery  -= random.uniform(0.1, 0.15)
             rain = round(random.uniform(0, 5.0), 1) if 4 <= d <= 10 else 0.0
             temp = round(22 + 8 * math.sin(d / 14 * math.pi) + random.uniform(-1, 1), 1)
+            soil_temp = round(temp - 2.0 + random.uniform(-0.5, 0.5), 1)
+            ph        = round(6.8 + random.uniform(-0.3, 0.3), 2)
             db.session.add(Reading(
                 sensor_id=sensor.id, timestamp=ts,
                 soil_moisture=round(moisture, 1),
                 air_temperature=temp,
                 air_humidity=round(55 + random.uniform(-5, 5), 1),
                 battery_voltage=round(battery, 1),
-                rain_mm=rain))
+                rain_mm=rain,
+                soil_temperature=soil_temp,
+                ph_level=ph))
             action = "WAIT" if moisture > 35 else "IRRIGATE"
             db.session.add(Recommendation(
                 sensor_id=sensor.id, created_at=ts, action=action,
                 duration_minutes=0 if action == "WAIT" else 45,
                 reason="Humidité actuelle suffisante pour aujourd'hui." if action == "WAIT" else "Humidité insuffisante.",
+                moisture_at_time=round(moisture, 1),
                 acknowledged=True))
     db.session.add(Alert(
         sensor_id="ID010001", type="TREND_CHANGE",
