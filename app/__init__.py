@@ -51,24 +51,19 @@ def _migrate_db():
                 conn.rollback()  # column already exists — reset and continue
 
     # Step 2: fix/backfill soil_temperature and ph_level (fresh connection)
-    with db.engine.connect() as conn:
+    with db.engine.begin() as conn:
         try:
             conn.execute(text("""
                 UPDATE readings
-                SET soil_temperature = air_temperature - 2.0 + SIN(id::float) * 0.5
-                WHERE (soil_temperature IS NULL
-                    OR soil_temperature > 60
-                    OR soil_temperature < -10)
+                SET soil_temperature = air_temperature - 2.0 + (MOD(id, 10) - 5.0) * 0.1
+                WHERE (soil_temperature IS NULL OR soil_temperature > 60 OR soil_temperature < -10)
                 AND air_temperature IS NOT NULL
             """))
             conn.execute(text("""
                 UPDATE readings
-                SET ph_level = 6.8 + SIN(id::float * 1.3) * 0.3
-                WHERE ph_level IS NULL
-                    OR ph_level > 14
-                    OR ph_level < 0
+                SET ph_level = 6.8 + (MOD(id, 7) - 3.0) * 0.1
+                WHERE ph_level IS NULL OR ph_level > 14 OR ph_level < 0
             """))
-            conn.commit()
             print("[Migration] Backfilled soil_temperature and ph_level")
         except Exception as e:
             print(f"[Migration] Backfill skipped: {e}")
