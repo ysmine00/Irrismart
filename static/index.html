@@ -256,67 +256,97 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 .chart-refresh{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:inherit}
 .chart-refresh:hover{border-color:var(--green);color:var(--green)}
 
-/* ── IA Tab ── */
-.ia-hero{background:linear-gradient(135deg,var(--green),#0d6e35);border-radius:var(--radius);padding:20px;color:white;margin-bottom:14px}
-.ia-hero-title{font-size:18px;font-weight:700;margin-bottom:6px}
-.ia-hero-sub{font-size:13px;opacity:.85}
-.ia-form{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
-.ia-form-title{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)}
+/* ── IA Tab (dark control panel) ── */
+.ia-hero{background:#1A4D2E;border-radius:var(--radius);padding:20px;color:white;margin-bottom:14px;border:1px solid #2d6b40;position:relative;overflow:hidden}
+.ia-hero::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
+.ia-hero-title{font-size:16px;font-weight:700;margin-bottom:6px;color:#4AE54A;font-family:monospace;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.ia-hero-sub{font-size:11px;color:rgba(74,229,74,.6);font-family:monospace}
+.ia-form{background:#1A4D2E;border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid #2d6b40;position:relative;overflow:hidden}
+.ia-form::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
+.ia-form-title{font-size:11px;font-weight:700;margin-bottom:12px;color:#4AE54A;font-family:monospace;text-transform:uppercase;letter-spacing:.5px}
 .ia-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.ia-field label{display:block;font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:4px}
-.ia-field select,.ia-field input{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;background:var(--bg);color:var(--text);outline:none}
-.ia-field select:focus,.ia-field input:focus{border-color:var(--green)}
-.ia-btn{width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
-.ia-btn:hover{background:var(--green-mid)}
-.ia-result{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px;display:none}
+.ia-field label{display:block;font-size:10px;color:rgba(74,229,74,.6);font-weight:600;margin-bottom:4px;font-family:monospace;text-transform:uppercase;letter-spacing:.3px}
+.ia-field select,.ia-field input{width:100%;padding:8px 10px;border:1px solid #2d6b40;border-radius:3px;font-family:monospace;font-size:14px;background:#0F2D1A;color:#4AE54A;outline:none;-webkit-appearance:none}
+.ia-field select:focus,.ia-field input:focus{border-color:#4AE54A}
+.ia-btn{width:100%;padding:12px;background:transparent;color:#4AE54A;border:1.5px solid #4AE54A;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;transition:.15s;letter-spacing:.5px;text-transform:uppercase}
+.ia-btn:hover{background:#4AE54A;color:#0F2D1A}
+.ia-btn-disabled{opacity:.4;cursor:not-allowed}.ia-btn-disabled:hover{background:transparent;color:#4AE54A}
+.ia-result{background:#1A4D2E;border-radius:var(--radius);padding:16px;margin-bottom:14px;display:none;border:1px solid #2d6b40;position:relative;overflow:hidden}
+.ia-result::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
 .ia-result.show{display:block}
-.ia-decision-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:99px;font-size:16px;font-weight:700;margin-bottom:12px}
-.ia-decision-badge.irrigate{background:var(--blue-light);color:var(--blue)}
-.ia-decision-badge.wait{background:var(--green-pale);color:var(--green)}
-.ia-confidence-bar{height:8px;border-radius:99px;background:var(--border);margin:8px 0 4px;overflow:hidden}
-.ia-confidence-fill{height:100%;border-radius:99px;background:var(--green);transition:width .6s ease}
-.ia-reasons{margin-top:12px}
-.ia-reason-item{font-size:13px;color:var(--text-mid);padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.ia-decision-badge{display:inline-flex;align-items:center;padding:10px 20px;border-radius:2px;font-size:16px;font-weight:700;margin-bottom:12px;font-family:monospace;letter-spacing:1.5px;text-transform:uppercase;border-left:4px solid currentColor}
+.ia-decision-badge.irrigate{background:rgba(127,29,29,.5);color:#fca5a5;border-left-color:#E05252}
+.ia-decision-badge.wait{background:rgba(120,53,15,.5);color:#fcd34d;border-left-color:#E9A719}
+.ia-decision-badge.ok{background:rgba(20,83,45,.5);color:#4AE54A;border-left-color:#4AE54A}
+.ia-decision-badge.monitor,.ia-decision-badge.surveiller{background:rgba(124,45,18,.5);color:#fdba74;border-left-color:#f97316}
+.ia-confidence-bar{height:6px;border-radius:2px;background:#0F2D1A;margin:8px 0 4px;overflow:hidden;border:1px solid #2d6b40}
+.ia-confidence-fill{height:100%;border-radius:2px;background:#4AE54A;transition:width .6s ease}
+.ia-reasons{margin-top:10px}
+.ia-reason-item{font-size:12px;color:rgba(74,229,74,.75);padding:5px 0;border-bottom:1px solid #2d6b40;display:flex;gap:8px;font-family:monospace}
 .ia-reason-item:last-child{border-bottom:none}
-.ia-anomaly-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
-.ia-anomaly-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
-.ia-anomaly-badge.normal{background:var(--green-pale);color:var(--green)}
-.ia-anomaly-badge.warning{background:var(--amber-light);color:#B45309}
-.ia-anomaly-badge.critical{background:var(--red-light);color:var(--red)}
-.ia-impact-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px;display:none}
+.ia-anomaly-card{background:#1A4D2E;border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid #2d6b40;position:relative;overflow:hidden}
+.ia-anomaly-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
+.ia-anomaly-badge{display:inline-block;padding:4px 14px;border-radius:2px;font-size:12px;font-weight:700;font-family:monospace;text-transform:uppercase;letter-spacing:.5px}
+.ia-anomaly-badge.normal{background:rgba(20,83,45,.6);color:#4AE54A}
+.ia-anomaly-badge.warning{background:rgba(120,53,15,.6);color:#fcd34d}
+.ia-anomaly-badge.critical{background:rgba(127,29,29,.6);color:#fca5a5}
+.ia-impact-card{background:#1A4D2E;border-radius:var(--radius);padding:16px;margin-bottom:14px;display:none;border:1px solid #2d6b40;position:relative;overflow:hidden}
+.ia-impact-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
 .ia-impact-card.show{display:block}
 .ia-impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.ia-impact-item{background:var(--bg);border-radius:var(--radius-sm);padding:10px}
-.ia-impact-label{font-size:11px;color:var(--text-muted);margin-bottom:3px}
-.ia-impact-value{font-size:18px;font-weight:700;color:var(--green)}
-.ia-impact-value.risk{color:var(--amber)}
-.ia-impact-value.risk-critical{color:var(--red)}
+.ia-impact-item{background:#0F2D1A;border-radius:3px;padding:10px;border:1px solid #2d6b40}
+.ia-impact-label{font-size:10px;color:rgba(74,229,74,.55);margin-bottom:4px;font-family:monospace;text-transform:uppercase}
+.ia-impact-value{font-size:17px;font-weight:700;color:#4AE54A;font-family:monospace}
+.ia-impact-value.risk{color:#fcd34d}
+.ia-impact-value.risk-critical{color:#fca5a5}
+#ia-content .card{background:#1A4D2E;border:1px solid #2d6b40;box-shadow:none;color:white;position:relative;overflow:hidden}
+#ia-content .card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
+#ia-content .card-title{color:#4AE54A;font-family:monospace;font-size:13px;text-transform:uppercase;letter-spacing:.3px}
+#ia-content .card-sub{color:rgba(74,229,74,.55);font-size:11px}
+#ia-content .chart-card{background:#1A4D2E;border:1px solid #2d6b40;box-shadow:none;position:relative;overflow:hidden}
+#ia-content .chart-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
+#ia-content .chart-card-title{color:#4AE54A;font-family:monospace;font-size:12px}
+#ia-content .chart-refresh{border-color:#2d6b40;color:rgba(74,229,74,.5);background:transparent;font-family:monospace}
+#ia-content .chart-refresh:hover{border-color:#4AE54A;color:#4AE54A}
+#ia-content .loading{color:rgba(74,229,74,.5)}
+#ia-content .spinner{border-color:#2d6b40;border-top-color:#4AE54A}
 
-/* ── Chatbot ── */
-.chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(26,155,80,.35);border:none;z-index:9999;transition:.2s}
-.chat-fab:hover{background:var(--green-mid);transform:scale(1.05)}
-.chat-fab svg{width:26px;height:26px;fill:white}
-.chat-window{position:fixed;bottom:92px;right:24px;width:340px;max-height:520px;background:var(--card);border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,.15);display:none;flex-direction:column;z-index:9998;overflow:hidden}
+/* ── Chatbot (terminal dark) ── */
+.chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:#4AE54A;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(74,229,74,.4);border:none;z-index:9999;transition:.2s}
+.chat-fab:hover{background:#3dd448;transform:scale(1.05)}
+.chat-window{position:fixed;bottom:92px;right:24px;width:360px;max-height:540px;background:#0F2D1A;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.6);display:none;flex-direction:column;z-index:9998;overflow:hidden;border:1px solid #2d6b40}
 .chat-window.open{display:flex}
-.chat-header{background:var(--green);color:white;padding:14px 16px;display:flex;align-items:center;gap:10px}
-.chat-header-icon{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center}
-.chat-header-icon svg{width:18px;height:18px;fill:white}
+.chat-header{background:#1A4D2E;color:white;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:2px solid #4AE54A}
+.chat-header-icon{width:36px;height:36px;background:#0F2D1A;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(74,229,74,.3);flex-shrink:0}
 .chat-header-text{flex:1}
-.chat-header-text h3{font-size:14px;font-weight:700;line-height:1}
-.chat-header-text p{font-size:11px;opacity:.8;margin-top:2px}
-.chat-close{background:none;border:none;color:white;cursor:pointer;padding:4px;opacity:.8;font-size:18px;line-height:1}
-.chat-close:hover{opacity:1}
-.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:200px;max-height:340px}
-.chat-bubble{max-width:85%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.45}
-.chat-bubble.bot{background:var(--green-pale);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
-.chat-bubble.user{background:var(--green);color:white;align-self:flex-end;border-bottom-right-radius:4px}
-.chat-bubble.thinking{opacity:.6;font-style:italic}
-.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border)}
-.chat-input{flex:1;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-family:inherit;font-size:13px;outline:none;background:var(--bg)}
-.chat-input:focus{border-color:var(--green)}
-.chat-send{background:var(--green);color:white;border:none;border-radius:var(--radius-sm);width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
-.chat-send:hover{background:var(--green-mid)}
-.chat-send svg{width:16px;height:16px;fill:white}
+.chat-header-text h3{font-size:13px;font-weight:700;line-height:1;font-family:monospace;color:#4AE54A;letter-spacing:1px}
+.chat-header-text p{font-size:10px;color:rgba(74,229,74,.55);margin-top:2px;font-family:monospace}
+.chat-close{background:none;border:none;color:rgba(74,229,74,.6);cursor:pointer;padding:4px;font-size:16px;line-height:1;font-family:monospace}
+.chat-close:hover{color:#4AE54A}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:300px;background:#0F2D1A}
+.chat-messages::-webkit-scrollbar{width:3px}
+.chat-messages::-webkit-scrollbar-track{background:#0F2D1A}
+.chat-messages::-webkit-scrollbar-thumb{background:#2d6b40}
+.chat-bubble{max-width:85%;padding:9px 13px;font-size:13px;line-height:1.5;border-radius:2px}
+.chat-bubble.bot{background:#1A4D2E;color:rgba(74,229,74,.9);align-self:flex-start;border-left:2px solid #4AE54A}
+.chat-bubble.user{background:#1A4D2E;color:white;align-self:flex-end;border-right:2px solid #4AE54A}
+.chat-dots{display:flex;align-items:center;gap:5px;padding:9px 13px;background:#1A4D2E;border-left:2px solid #4AE54A;border-radius:2px;max-width:85%;align-self:flex-start}
+.chat-dot{width:5px;height:5px;background:#4AE54A;border-radius:50%;animation:chatBlink 1.2s infinite}
+.chat-dot:nth-child(2){animation-delay:.2s}
+.chat-dot:nth-child(3){animation-delay:.4s}
+@keyframes chatBlink{0%,100%{opacity:.15}50%{opacity:1}}
+.chat-dot-label{font-size:11px;font-family:monospace;color:rgba(74,229,74,.55);margin-left:4px}
+.chat-chips{display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-top:1px solid #1A4D2E;background:#0F2D1A}
+.chat-chip{background:none;border:none;color:rgba(74,229,74,.6);font-size:12px;font-family:monospace;cursor:pointer;text-align:left;padding:3px 0;line-height:1.4}
+.chat-chip::before{content:'> ';color:#4AE54A;opacity:.5}
+.chat-chip:hover{color:#4AE54A}
+.chat-input-row{display:flex;gap:0;padding:10px 12px;border-top:1px solid #2d6b40;background:#1A4D2E;align-items:center}
+.chat-input{flex:1;border:none;border-bottom:1.5px solid #2d6b40;padding:6px 4px;font-family:monospace;font-size:13px;outline:none;background:transparent;color:#4AE54A}
+.chat-input::placeholder{color:rgba(74,229,74,.3)}
+.chat-input:focus{border-bottom-color:#4AE54A}
+.chat-send{background:transparent;color:#4AE54A;border:1px solid #4AE54A;border-radius:2px;padding:5px 10px;cursor:pointer;font-family:monospace;font-size:12px;font-weight:700;flex-shrink:0;transition:.15s;margin-left:10px;white-space:nowrap}
+.chat-send:hover{background:#4AE54A;color:#0F2D1A}
+.chat-brand{text-align:center;font-size:10px;font-family:monospace;color:rgba(74,229,74,.3);padding:5px 12px;background:#0F2D1A;border-top:1px solid #1A4D2E}
 @media(max-width:500px){.chat-window{width:calc(100vw - 32px);right:16px}}
 </style>
 </head>
@@ -457,22 +487,44 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 </div><!-- end right-panel -->
 
 <!-- CHATBOT FAB -->
-<button class="chat-fab" onclick="toggleChat()" title="Assistant IrriSmart">
-  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+<button class="chat-fab" onclick="toggleChat()" title="IRRISMART-01">
+  <svg viewBox="0 0 40 44" width="28" height="30" fill="none">
+    <line x1="20" y1="5" x2="20" y2="1" stroke="#1A4D2E" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="20" cy="1" r="2.5" fill="#1A4D2E"/>
+    <path d="M20 8L34 16V32L20 40L6 32V16Z" fill="#1A4D2E"/>
+    <rect x="11" y="18" width="7" height="5" rx="0.5" fill="#4AE54A"/>
+    <rect x="22" y="18" width="7" height="5" rx="0.5" fill="#4AE54A"/>
+    <rect x="14" y="28" width="12" height="2.5" rx="1" fill="#4AE54A" opacity="0.55"/>
+  </svg>
 </button>
 <div class="chat-window" id="chatWindow">
   <div class="chat-header">
-    <div class="chat-header-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h2a2 2 0 0 1 2 2v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1v-1a2 2 0 0 1 2-2h2V9.5C8.8 8.8 8 7.5 8 6a4 4 0 0 1 4-4z"/></svg></div>
-    <div class="chat-header-text"><h3>Assistant IrriSmart</h3><p>Assistant agricole intelligent</p></div>
+    <div class="chat-header-icon">
+      <svg viewBox="0 0 40 44" width="22" height="24" fill="none">
+        <line x1="20" y1="5" x2="20" y2="1" stroke="#4AE54A" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="20" cy="1" r="2.5" fill="#4AE54A"/>
+        <path d="M20 8L34 16V32L20 40L6 32V16Z" fill="#4AE54A" opacity="0.25"/>
+        <rect x="11" y="18" width="7" height="5" rx="0.5" fill="#4AE54A"/>
+        <rect x="22" y="18" width="7" height="5" rx="0.5" fill="#4AE54A"/>
+        <rect x="14" y="28" width="12" height="2.5" rx="1" fill="#4AE54A" opacity="0.55"/>
+      </svg>
+    </div>
+    <div class="chat-header-text"><h3>IRRISMART-01</h3><p>Système de conseil agricole</p></div>
     <button class="chat-close" onclick="toggleChat()">✕</button>
   </div>
   <div class="chat-messages" id="chatMessages">
-    <div class="chat-bubble bot">🌱 Bonjour ! Je suis votre assistant agricole intelligent.<br>Posez-moi vos questions sur l'irrigation, les cultures ou les alertes — en français ou en arabe.</div>
+    <div class="chat-bubble bot" id="chat-init-msg">Initialisation système... Bonjour. Je suis IRRISMART-01, votre conseiller agricole pour la région Beni Mellal-Khénifra. Posez vos questions sur l&#39;irrigation, les cultures ou les alertes — en français ou en arabe.</div>
+  </div>
+  <div class="chat-chips" id="chatChips">
+    <button class="chat-chip" onclick="chipSend(this)" data-fr="Quand irriguer mon olivier ?" data-ar="متى أروي زيتوني؟">Quand irriguer mon olivier ?</button>
+    <button class="chat-chip" onclick="chipSend(this)" data-fr="Quel est le besoin en eau des agrumes ?" data-ar="ما هي احتياجات الماء للحمضيات؟">Quel est le besoin en eau des agrumes ?</button>
+    <button class="chat-chip" onclick="chipSend(this)" data-fr="Comment lire mon score de confiance ?" data-ar="كيف أقرأ درجة الثقة؟">Comment lire mon score de confiance ?</button>
   </div>
   <div class="chat-input-row">
     <input class="chat-input" id="chatInput" placeholder="Votre question…" onkeydown="if(event.key==='Enter')sendChat()"/>
-    <button class="chat-send" onclick="sendChat()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+    <button class="chat-send" onclick="sendChat()">[ → ]</button>
   </div>
+  <div class="chat-brand">IRRISMART-01 v2.0</div>
 </div>
 
 <script>
@@ -1203,6 +1255,22 @@ function setLang(l) {
     if (sub)   sub.textContent   = subs[s];
   });
 
+  // Chatbot input & chips
+  const chatInput = document.getElementById("chatInput");
+  if (chatInput) {
+    chatInput.placeholder = isAr ? "سؤالك..." : "Votre question…";
+    chatInput.dir = isAr ? "rtl" : "ltr";
+  }
+  const initMsg = document.getElementById("chat-init-msg");
+  if (initMsg) {
+    initMsg.textContent = isAr
+      ? "تهيئة النظام... مرحباً. أنا IRRISMART-01، مستشارك الزراعي لمنطقة بني ملال-خنيفرة. اطرح أسئلتك حول الري والمحاصيل أو التنبيهات — بالعربية أو بالفرنسية."
+      : "Initialisation système... Bonjour. Je suis IRRISMART-01, votre conseiller agricole pour la région Beni Mellal-Khénifra. Posez vos questions sur l'irrigation, les cultures ou les alertes — en français ou en arabe.";
+  }
+  document.querySelectorAll(".chat-chip").forEach(el => {
+    el.textContent = isAr ? (el.dataset.ar || el.textContent) : (el.dataset.fr || el.textContent);
+  });
+
   // Re-render active tab
   const active = document.querySelector(".section.active");
   if (active) loadTab(active.id.replace("tab-",""));
@@ -1259,7 +1327,7 @@ async function loadIA() {
 
   el.innerHTML = `
     <div class="ia-hero">
-      <div class="ia-hero-title"><svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;fill:white;opacity:.9" viewBox="0 0 24 24"><path d="M9 3H7v2H5v2H3v2h2v6H3v2h2v2h2v2h2v-2h6v2h2v-2h2v-2h2v-2h-2V9h2V7h-2V5h-2V3h-2v2H9V3zm0 4h6v10H9V7z"/></svg>Moteur IA IrriSmart</div>
+      <div class="ia-hero-title"><svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;fill:#4AE54A" viewBox="0 0 24 24"><path d="M9 3H7v2H5v2H3v2h2v6H3v2h2v2h2v2h2v-2h6v2h2v-2h2v-2h2v-2h-2V9h2V7h-2V5h-2V3h-2v2H9V3zm0 4h6v10H9V7z"/></svg>Moteur IA IrriSmart</div>
       <div class="ia-hero-sub">RandomForest entraîné sur 36 000 échantillons FAO-56 — Olive, Agrumes, Blé</div>
     </div>
 
@@ -1298,7 +1366,7 @@ async function loadIA() {
 
     <!-- Impact predictor -->
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;fill:var(--green)" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Prédicteur d'impact économique</div>
+      <div class="card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;fill:#4AE54A" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Prédicteur d'impact économique</div>
       <div class="card-sub">Estime le déficit hydrique et les économies d'eau réalisées par l'IA</div>
       <div class="ia-row" style="margin-top:12px">
         <div class="ia-field"><label>Superficie (m²)</label>
@@ -1314,14 +1382,21 @@ async function loadIA() {
 
     <!-- Anomaly detection -->
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;fill:var(--green)" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/></svg>Détection d'anomalies capteur</div>
+      <div class="card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;fill:#4AE54A" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/></svg>Détection d'anomalies capteur</div>
       <div class="card-sub">Isolation Forest — vérifie la cohérence de la lecture en cours</div>
       <button class="ia-btn" style="margin-top:12px" onclick="runAnomaly()">Analyser la lecture actuelle</button>
     </div>
     <div class="ia-anomaly-card" id="ia-anomaly-card" style="display:none"></div>
 
+    <!-- Actuator control -->
+    <div class="ia-form">
+      <div class="ia-form-title">[ Contrôle actionneur ]</div>
+      <div style="font-size:11px;color:rgba(74,229,74,.45);font-family:monospace;margin-bottom:12px">Statut: DÉCONNECTÉ — aucun actionneur physique détecté</div>
+      <button class="ia-btn ia-btn-disabled" onclick="showToast('Actionneur non connecté — commande enregistrée')">[ Exécuter toutes les irrigations ]</button>
+    </div>
+
     <!-- Charts -->
-    <div style="margin-bottom:6px;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px"><svg style="width:16px;height:16px;fill:var(--green)" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>Tableaux de bord temps réel</div>
+    <div style="margin-bottom:6px;font-size:12px;font-weight:700;color:#4AE54A;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px"><svg style="width:14px;height:14px;fill:#4AE54A" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>Tableaux de bord temps réel</div>
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
@@ -1383,13 +1458,12 @@ async function runIAPredict() {
     const d = (await res.json()).data;
     if (!d) { card.innerHTML = "<p style='padding:12px;color:#888'>Modèle non chargé — entraîner les modèles d'abord.</p>"; return; }
 
-    const isIrrigate = d.decision === "irrigate";
     card.innerHTML = `
-      <div class="ia-decision-badge ${d.decision}">${d.icon} ${d.action}</div>
-      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">Confiance: <strong>${d.confidence_pct}%</strong> — Stade: ${d.stage_name} — Demande hydrique: ${d.water_demand_mm} mm/j</div>
-      <div class="ia-confidence-bar"><div class="ia-confidence-fill" style="width:${d.confidence_pct}%;background:${isIrrigate?'var(--blue)':'var(--green)'}"></div></div>
+      <div class="ia-decision-badge ${d.decision}">${d.action}</div>
+      <div style="font-size:12px;color:rgba(74,229,74,.65);margin-bottom:4px;font-family:monospace">Confiance: <strong style="color:#4AE54A">${d.confidence_pct}%</strong> — ${d.stage_name} — Demande: ${d.water_demand_mm} mm/j</div>
+      <div class="ia-confidence-bar"><div class="ia-confidence-fill" style="width:${d.confidence_pct}%"></div></div>
       <div class="ia-reasons">
-        ${d.reasons.map(r=>`<div class="ia-reason-item"><span>•</span><span>${r}</span></div>`).join("")}
+        ${d.reasons.map(r=>`<div class="ia-reason-item"><span>›</span><span>${r}</span></div>`).join("")}
       </div>
     `;
   } catch(e) {
@@ -1422,7 +1496,7 @@ async function runImpact() {
         <div class="ia-impact-item"><div class="ia-impact-label">Risque rendement</div><div class="ia-impact-value ${riskClass}">${d.yield_risk_pct}% — ${d.yield_risk_label}</div></div>
         <div class="ia-impact-item"><div class="ia-impact-label">Économies IA vs manuel</div><div class="ia-impact-value">−${d.estimated_savings_pct}%</div></div>
       </div>
-      <div style="font-size:13px;color:var(--text-mid);line-height:1.5">${d.recommendation}</div>
+      <div style="font-size:12px;color:rgba(74,229,74,.7);line-height:1.6;font-family:monospace">${d.recommendation}</div>
     `;
   } catch(e) {
     card.innerHTML = `<p style='color:var(--red)'>${e.message}</p>`;
@@ -1451,11 +1525,11 @@ async function runAnomaly() {
     const d = (await res.json()).data;
     card.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div class="ia-form-title" style="margin-bottom:0">Résultat analyse capteur</div>
-        <span class="ia-anomaly-badge ${d.severity}">${d.severity === "normal" ? "✓ Normal" : d.severity === "warning" ? "⚠ Attention" : "🚨 Critique"}</span>
+        <div class="ia-form-title" style="margin-bottom:0">Résultat analyse</div>
+        <span class="ia-anomaly-badge ${d.severity}">${d.severity === "normal" ? "OK" : d.severity === "warning" ? "ATTENTION" : "CRITIQUE"}</span>
       </div>
-      <div style="font-size:13px;color:var(--text-mid);margin-bottom:8px">${d.message}</div>
-      <div style="font-size:11px;color:var(--text-muted)">Score anomalie: ${d.anomaly_score}</div>
+      <div style="font-size:12px;color:rgba(74,229,74,.75);margin-bottom:8px;font-family:monospace">${d.message}</div>
+      <div style="font-size:11px;color:rgba(74,229,74,.45);font-family:monospace">Score: <strong style="color:#4AE54A">${d.anomaly_score}</strong></div>
     `;
   } catch(e) {
     card.innerHTML = `<p style='color:var(--red)'>${e.message}</p>`;
@@ -1572,8 +1646,10 @@ async function sendChat() {
   input.value = "";
 
   const msgs = document.getElementById("chatMessages");
+  const chips = document.getElementById("chatChips");
+  if (chips) chips.style.display = "none";
   msgs.innerHTML += `<div class="chat-bubble user">${escHtml(msg)}</div>`;
-  msgs.innerHTML += `<div class="chat-bubble bot thinking" id="chat-thinking">…</div>`;
+  msgs.innerHTML += `<div class="chat-dots" id="chat-thinking"><span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot-label">Analyse en cours...</span></div>`;
   msgs.scrollTop = msgs.scrollHeight;
 
   try {
@@ -1587,13 +1663,33 @@ async function sendChat() {
     const reply = data.data?.reply || "Je n'ai pas pu obtenir une réponse.";
     document.getElementById("chat-thinking").outerHTML = `<div class="chat-bubble bot">${escHtml(reply)}</div>`;
   } catch(e) {
-    document.getElementById("chat-thinking").outerHTML = `<div class="chat-bubble bot">⚠️ Erreur réseau. Vérifiez votre connexion.</div>`;
+    document.getElementById("chat-thinking").outerHTML = `<div class="chat-bubble bot">Erreur réseau. Vérifiez votre connexion.</div>`;
   }
   msgs.scrollTop = msgs.scrollHeight;
 }
 
 function escHtml(s) {
   return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+}
+
+function chipSend(el) {
+  const msg = lang === "ar" && el.dataset.ar ? el.dataset.ar : (el.dataset.fr || el.textContent.replace(/^>\s*/,""));
+  document.getElementById("chatInput").value = msg;
+  sendChat();
+}
+
+function showToast(msg) {
+  let t = document.getElementById("irrismart-toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "irrismart-toast";
+    t.style.cssText = "position:fixed;bottom:108px;left:50%;transform:translateX(-50%);background:#1A4D2E;color:#4AE54A;font-family:monospace;font-size:12px;padding:9px 20px;border:1px solid #4AE54A;border-radius:2px;z-index:99999;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = "1";
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.style.opacity = "0"; }, 3000);
 }
 
 init();
