@@ -1062,12 +1062,15 @@ def chat():
         return ok({"reply": "Assistant non configuré. Ajoutez ANTHROPIC_API_KEY dans les variables Railway."})
 
     system_prompt = (
-        "Tu es un assistant agronomique pour IrriSmart, un système d'irrigation intelligent "
-        "pour la région Beni Mellal-Khénifra au Maroc. Tu aides les agriculteurs à prendre "
-        "des décisions d'irrigation pour l'olivier, les agrumes et le blé. "
-        "Tu réponds en français ou en arabe selon la langue de la question. "
-        "Tu es concis, pratique et bienveillant. "
-        + (f"Contexte capteur actif : {sensor_ctx}." if sensor_ctx else "")
+        "You are IrriSmart's agricultural advisor for the Beni Mellal-Khénifra region of Morocco.\n"
+        "You specialize in irrigation guidance for olive, citrus, and durum wheat farms.\n"
+        "Your knowledge is grounded in FAO-56 Penman-Monteith evapotranspiration methodology and INRA Tadla field guidelines.\n\n"
+        "CRITICAL: Always detect the language of the user's message and respond ENTIRELY in that language.\n"
+        "- If the user writes in French → respond in French\n"
+        "- If the user writes in Arabic (فصحى or دارجة) → respond in Arabic script\n"
+        "- If the user writes in Darija with French characters → respond in French/Darija mix\n"
+        "Never switch languages mid-response.\n"
+        + (f"\nActive sensor context: {sensor_ctx}." if sensor_ctx else "")
     )
 
     try:
