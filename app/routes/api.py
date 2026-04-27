@@ -1045,3 +1045,49 @@ def chart_confidence_stats():
         "low":    round(low  / total * 100, 1),
         "total_decisions": len(entries),
     })
+
+
+# ── Chat (proxied through backend so API key stays server-side) ───────────────
+@api.route("/chat", methods=["POST"])
+def chat():
+    import os, requests as _req
+    b = request.get_json(silent=True) or {}
+    message = (b.get("message") or "").strip()
+    sensor_ctx = b.get("sensor_ctx", "")
+    if not message:
+        return err("Missing message")
+
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return ok({"reply": "Assistant non configuré. Ajoutez ANTHROPIC_API_KEY dans les variables Railway."})
+
+    system_prompt = (
+        "Tu es un assistant agronomique pour IrriSmart, un système d'irrigation intelligent "
+        "pour la région Beni Mellal-Khénifra au Maroc. Tu aides les agriculteurs à prendre "
+        "des décisions d'irrigation pour l'olivier, les agrumes et le blé. "
+        "Tu réponds en français ou en arabe selon la langue de la question. "
+        "Tu es concis, pratique et bienveillant. "
+        + (f"Contexte capteur actif : {sensor_ctx}." if sensor_ctx else "")
+    )
+
+    try:
+        resp = _req.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 400,
+                "system": system_prompt,
+                "messages": [{"role": "user", "content": message}],
+            },
+            timeout=20,
+        )
+        resp.raise_for_status()
+        reply = resp.json()["content"][0]["text"]
+        return ok({"reply": reply})
+    except Exception as e:
+        return err(f"Erreur assistant: {e}", 502)
