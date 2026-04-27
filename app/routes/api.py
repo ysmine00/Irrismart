@@ -556,7 +556,6 @@ def ai_predict():
         "confidence": round(confidence, 3),
         "action": "IRRIGUER" if decision == "irrigate" else "ATTENDRE",
         "confidence_pct": round(confidence * 100, 1),
-        "icon": "💧" if decision == "irrigate" else "✅",
         "reasons": reasons,
         "stage_name": stage_name,
         "water_demand_mm": round(etc_mm_day, 1),
@@ -701,6 +700,73 @@ def ai_stats():
         return ok(metadata)
     except Exception as e:
         return err(f"Failed to load metadata: {e}", 500)
+
+
+# ── 72h Moisture Forecast ────────────────────────────────────────────────────
+FORECAST_THRESHOLDS = {"olive": 28, "citrus": 45, "wheat": 40}
+
+@api.route("/forecast/<sid>")
+def moisture_forecast(sid):
+    sensor = Sensor.query.get_or_404(sid)
+    reading = Reading.query.filter_by(sensor_id=sid).order_by(Reading.timestamp.desc()).first()
+    if not reading:
+        return err("No readings available for this sensor")
+
+    crop = sensor.crop_type
+    current_moisture = reading.soil_moisture
+    temp = reading.air_temperature or 25.0
+    humidity = reading.air_humidity or 50.0
+
+    month = datetime.utcnow().month
+    stage = get_growth_stage_for_month(crop, month)
+    kc = KC_BY_STAGE[crop][stage]
+
+    eto = simplified_eto(temp, humidity, 5.0)
+    etc = eto * kc
+
+    SOIL_DEPTH = 300.0
+    step_drop = etc / SOIL_DEPTH * 100
+
+    critical_threshold = FORECAST_THRESHOLDS.get(crop, 30)
+    warning_threshold = critical_threshold * 1.05
+
+    def _status(m):
+        if m < critical_threshold:
+            return "critical"
+        if m < warning_threshold:
+            return "warning"
+        return "ok"
+
+    forecast = []
+    m = current_moisture
+    for h in [24, 48, 72]:
+        m = max(0.0, m - step_drop)
+        forecast.append({"hours": h, "moisture": round(m, 1), "status": _status(m)})
+
+    if current_moisture <= critical_threshold:
+        days_until_critical = 0.0
+    elif step_drop <= 0:
+        days_until_critical = None
+    else:
+        days_until_critical = round((current_moisture - critical_threshold) / step_drop, 1)
+
+    if days_until_critical is None or days_until_critical > 3:
+        urgency = "stable"
+    elif days_until_critical <= 1:
+        urgency = "irrigate_immediately"
+    elif days_until_critical <= 2:
+        urgency = "irrigate_within_48h"
+    else:
+        urgency = "irrigate_within_72h"
+
+    return ok({
+        "crop": crop,
+        "current_moisture": round(current_moisture, 1),
+        "critical_threshold": critical_threshold,
+        "forecast": forecast,
+        "days_until_critical": days_until_critical,
+        "urgency": urgency,
+    })
 
 
 # ── Anomaly Detection ─────────────────────────────────────────────────────────

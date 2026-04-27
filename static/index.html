@@ -1411,15 +1411,10 @@ async function loadIA() {
 function buildIAShell() {
   const ar = lang === 'ar';
   return `
-    <div class="card" style="margin-bottom:14px;border-left:4px solid var(--green)">
-      <div class="card-title">${ar ? 'محرك الذكاء الاصطناعي IrriSmart' : 'Moteur IA IrriSmart'}</div>
-      <div class="card-sub">${ar ? 'نموذج RandomForest مدرب على 36 000 عينة FAO-56 — زيتون · حمضيات · قمح' : 'RandomForest entraîné sur 36 000 échantillons FAO-56 — Olivier · Agrumes · Blé'}</div>
-    </div>
-
     ${IA_CROPS.map(c=>`
     <div class="ia-crop-card" id="ia-card-${c.key}">
       <div class="ia-crop-card-header">
-        <div class="ia-crop-title">${CROP_ICONS[c.key]}${ar ? c.labelAr : c.label}</div>
+        <div class="ia-crop-title">${ar ? c.labelAr : c.label}</div>
         <button class="btn-outline" onclick="refreshCropCard('${c.key}','${c.sensor_id}')">${ar ? 'تحليل' : 'Analyser'}</button>
       </div>
       <div id="ia-body-${c.key}"><div class="loading"><div class="spinner"></div>${ar ? 'جارٍ التحميل…' : 'Chargement…'}</div></div>
@@ -1515,13 +1510,18 @@ async function refreshCropCard(cropKey, sensorId, moistureOverride, tempOverride
       wind_speed_kmh: 5,
       days_since_irrigation: 3,
     };
-    const res = await fetch(`${API}/api/predict`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(payload),
-    });
-    const d = (await res.json()).data;
+    const [predRes, fcastRes] = await Promise.all([
+      fetch(`${API}/api/predict`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload),
+      }),
+      fetch(`${API}/api/forecast/${sensorId}`).catch(() => null),
+    ]);
+    const d = (await predRes.json()).data;
     if (!d) { body_el.innerHTML = `<p style='color:var(--text-muted);font-size:13px'>Modèle non chargé.</p>`; return; }
+
+    const fcast = fcastRes ? (await fcastRes.json()).data : null;
 
     // Update card border color
     if (card_el) { card_el.className = `ia-crop-card ${d.decision}`; }
@@ -1531,6 +1531,30 @@ async function refreshCropCard(cropKey, sensorId, moistureOverride, tempOverride
     const actionLabel = ar
       ? (d.decision === 'irrigate' ? 'ري' : 'انتظر')
       : d.action;
+
+    // Build forecast strip
+    let forecastHtml = '';
+    if (fcast && fcast.forecast) {
+      const statusColor = s => s === 'critical' ? 'var(--red)' : s === 'warning' ? 'var(--amber)' : 'var(--green)';
+      const statusLabel = s => s === 'critical' ? (ar ? 'حرج' : 'CRITIQUE') : s === 'warning' ? (ar ? 'تحذير' : 'ATTENTION') : (ar ? 'جيد' : 'OK');
+      const cols = fcast.forecast.map(f =>
+        `<div style="flex:1;text-align:center;font-size:12px;color:${statusColor(f.status)}">
+          <div style="font-weight:600">+${f.hours}h</div>
+          <div>${f.moisture}%</div>
+          <div style="font-size:10px;font-weight:700">${statusLabel(f.status)}</div>
+        </div>`
+      ).join('');
+      const allOk = fcast.forecast.every(f => f.status === 'ok');
+      const footer = allOk
+        ? `<div style="font-size:11px;color:var(--green);margin-top:6px">${ar ? 'احتياطي الماء مستقر على 72 ساعة' : 'Réserve hydrique stable sur 72h'}</div>`
+        : `<div style="font-size:11px;color:var(--red);margin-top:6px">${ar ? 'بدون ري: العتبة الحرجة خلال ~' + fcast.days_until_critical + ' يوم' : 'Sans irrigation : seuil critique dans ~' + fcast.days_until_critical + ' jours'}</div>`;
+      forecastHtml = `
+        <div style="margin:10px 0 6px;padding:8px 10px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border)">
+          <div style="display:flex;gap:4px">${cols}</div>
+          ${footer}
+        </div>`;
+    }
+
     body_el.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <span class="ia-decision-pill ${d.decision}">${actionLabel}</span>
@@ -1538,6 +1562,7 @@ async function refreshCropCard(cropKey, sensorId, moistureOverride, tempOverride
       </div>
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">${ar?'الثقة':'Confiance'}: <strong style="color:var(--text)">${d.confidence_pct}%</strong></div>
       <div class="ia-conf-bar"><div class="ia-conf-fill ${confClass}" style="width:${d.confidence_pct}%"></div></div>
+      ${forecastHtml}
       <div class="ia-stat-row">
         <div class="ia-stat-item"><div class="isl">${ar?'رطوبة التربة':'Humidité sol'}</div><div class="isv">${Math.round(moisture)}%</div></div>
         <div class="ia-stat-item"><div class="isl">${ar?'الحاجة المائية':'Besoin eau'}</div><div class="isv">${d.water_demand_mm} mm/j</div></div>
@@ -1632,7 +1657,7 @@ async function loadAnomalyStrip() {
           <div class="anomaly-rec-box">${a.recommended_action}</div>
         </div>` : "";
       return `<div class="ia-anom-row ${hasAnom?'anomaly':'normal'}" onclick="toggleAnomalyDetail('${detailId}')">
-        <div class="ia-anom-crop">${CROP_ICONS[crop]}${cropNames[crop]}</div>
+        <div class="ia-anom-crop">${cropNames[crop]}</div>
         <div class="ia-anom-status" style="color:${hasAnom?'#B45309':'var(--green)'}">${statusText}</div>
         <div class="ia-anom-detail">${detailText}</div>
       </div>${detailBlock}`;
