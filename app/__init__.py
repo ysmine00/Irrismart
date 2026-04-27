@@ -28,6 +28,7 @@ def create_app(config=None):
         db.create_all()
         _migrate_db()
         _seed_if_empty()
+        _seed_seasonal_baselines()
     return app
 
 def _migrate_db():
@@ -67,6 +68,41 @@ def _migrate_db():
             print("[Migration] Backfilled soil_temperature and ph_level")
         except Exception as e:
             print(f"[Migration] Backfill skipped: {e}")
+
+def _seed_seasonal_baselines():
+    """Seed INRA Tadla monthly soil moisture baselines. Runs only if table is empty."""
+    from app.models import SeasonalBaseline
+    if SeasonalBaseline.query.count() > 0:
+        return
+
+    # Source: INRA Tadla field data for Beni Mellal-Khénifra region
+    BASELINES = {
+        "olive": [
+            (1,40,60,50,5),(2,38,58,48,5),(3,35,55,45,5),(4,32,52,42,5),
+            (5,28,50,39,6),(6,22,45,34,6),(7,18,40,29,6),(8,20,42,31,6),
+            (9,28,50,39,5),(10,35,55,45,5),(11,38,58,48,5),(12,40,62,51,5),
+        ],
+        "citrus": [
+            (1,50,70,60,5),(2,48,68,58,5),(3,45,65,55,5),(4,42,62,52,5),
+            (5,38,60,49,6),(6,32,55,44,6),(7,28,50,39,6),(8,30,52,41,6),
+            (9,38,60,49,5),(10,42,62,52,5),(11,48,68,58,5),(12,50,72,61,5),
+        ],
+        "wheat": [
+            (1,45,65,55,5),(2,43,63,53,5),(3,40,60,50,5),(4,38,58,48,5),
+            (5,32,55,44,6),(6,25,48,37,6),(7,20,42,31,6),(8,22,45,34,6),
+            (9,32,55,44,5),(10,38,60,49,5),(11,43,63,53,5),(12,45,65,55,5),
+        ],
+    }
+    for crop, rows in BASELINES.items():
+        for month, mn, mx, mean, std in rows:
+            db.session.add(SeasonalBaseline(
+                crop_type=crop, month=month,
+                moisture_min=mn, moisture_max=mx,
+                moisture_mean=mean, moisture_std=std,
+            ))
+    db.session.commit()
+    print("[Seed] Seasonal baselines inserted (INRA Tadla)")
+
 
 def _seed_if_empty():
     from app.models import Sensor, Reading, Recommendation, Alert, AnomalyLog, AIDecisionLog

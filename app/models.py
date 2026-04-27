@@ -176,3 +176,56 @@ class AIDecisionLog(db.Model):
             "reasoning": json.loads(self.reasoning) if self.reasoning else [],
             "timestamp": self.timestamp.isoformat(),
         }
+
+
+class SeasonalBaseline(db.Model):
+    """Monthly soil moisture baselines derived from INRA Tadla data."""
+    __tablename__ = "seasonal_baselines"
+    id            = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    crop_type     = db.Column(db.String, nullable=False)
+    month         = db.Column(db.Integer, nullable=False)   # 1-12
+    moisture_min  = db.Column(db.Float)
+    moisture_max  = db.Column(db.Float)
+    moisture_mean = db.Column(db.Float)
+    moisture_std  = db.Column(db.Float)
+    __table_args__ = (db.UniqueConstraint("crop_type", "month", name="uq_baseline_crop_month"),)
+
+    def to_dict(self):
+        return {
+            "crop_type": self.crop_type, "month": self.month,
+            "moisture_min": self.moisture_min, "moisture_max": self.moisture_max,
+            "moisture_mean": self.moisture_mean, "moisture_std": self.moisture_std,
+        }
+
+
+class SeasonalAnomalyLog(db.Model):
+    """Records statistical seasonal anomaly detections."""
+    __tablename__ = "seasonal_anomaly_log"
+    id               = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    sensor_id        = db.Column(db.String, db.ForeignKey("sensors.id"))
+    crop_type        = db.Column(db.String, nullable=False)
+    timestamp        = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    moisture_pct     = db.Column(db.Float)
+    z_score          = db.Column(db.Float)
+    deviation_type   = db.Column(db.String)   # "above" | "below"
+    rolling_mean     = db.Column(db.Float)
+    seasonal_mean    = db.Column(db.Float)
+    seasonal_min     = db.Column(db.Float)
+    seasonal_max     = db.Column(db.Float)
+    severity         = db.Column(db.String)   # "moderate" | "high"
+    possible_causes  = db.Column(db.Text)     # JSON list
+    recommended_action = db.Column(db.String)
+
+    def to_dict(self):
+        import json
+        return {
+            "id": self.id, "sensor_id": self.sensor_id, "crop_type": self.crop_type,
+            "timestamp": self.timestamp.isoformat(),
+            "moisture_pct": self.moisture_pct, "z_score": self.z_score,
+            "deviation_type": self.deviation_type, "rolling_mean": self.rolling_mean,
+            "seasonal_mean": self.seasonal_mean,
+            "seasonal_range": [self.seasonal_min, self.seasonal_max],
+            "severity": self.severity,
+            "possible_causes": json.loads(self.possible_causes) if self.possible_causes else [],
+            "recommended_action": self.recommended_action,
+        }

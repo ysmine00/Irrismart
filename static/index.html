@@ -256,60 +256,54 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 .chart-refresh{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:inherit}
 .chart-refresh:hover{border-color:var(--green);color:var(--green)}
 
-/* ── IA Tab (dark control panel) ── */
-.ia-hero{background:#1A4D2E;border-radius:var(--radius);padding:20px;color:white;margin-bottom:14px;border:1px solid #2d6b40;position:relative;overflow:hidden}
-.ia-hero::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
-.ia-hero-title{font-size:16px;font-weight:700;margin-bottom:6px;color:#4AE54A;font-family:monospace;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
-.ia-hero-sub{font-size:11px;color:rgba(74,229,74,.6);font-family:monospace}
-.ia-form{background:#1A4D2E;border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid #2d6b40;position:relative;overflow:hidden}
-.ia-form::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
-.ia-form-title{font-size:11px;font-weight:700;margin-bottom:12px;color:#4AE54A;font-family:monospace;text-transform:uppercase;letter-spacing:.5px}
-.ia-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.ia-field label{display:block;font-size:10px;color:rgba(74,229,74,.6);font-weight:600;margin-bottom:4px;font-family:monospace;text-transform:uppercase;letter-spacing:.3px}
-.ia-field select,.ia-field input{width:100%;padding:8px 10px;border:1px solid #2d6b40;border-radius:3px;font-family:monospace;font-size:14px;background:#0F2D1A;color:#4AE54A;outline:none;-webkit-appearance:none}
-.ia-field select:focus,.ia-field input:focus{border-color:#4AE54A}
-.ia-btn{width:100%;padding:12px;background:transparent;color:#4AE54A;border:1.5px solid #4AE54A;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;transition:.15s;letter-spacing:.5px;text-transform:uppercase}
-.ia-btn:hover{background:#4AE54A;color:#0F2D1A}
-.ia-btn-disabled{opacity:.4;cursor:not-allowed}.ia-btn-disabled:hover{background:transparent;color:#4AE54A}
-.ia-result{background:#1A4D2E;border-radius:var(--radius);padding:16px;margin-bottom:14px;display:none;border:1px solid #2d6b40;position:relative;overflow:hidden}
-.ia-result::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
-.ia-result.show{display:block}
-.ia-decision-badge{display:inline-flex;align-items:center;padding:10px 20px;border-radius:2px;font-size:16px;font-weight:700;margin-bottom:12px;font-family:monospace;letter-spacing:1.5px;text-transform:uppercase;border-left:4px solid currentColor}
-.ia-decision-badge.irrigate{background:rgba(127,29,29,.5);color:#fca5a5;border-left-color:#E05252}
-.ia-decision-badge.wait{background:rgba(120,53,15,.5);color:#fcd34d;border-left-color:#E9A719}
-.ia-decision-badge.ok{background:rgba(20,83,45,.5);color:#4AE54A;border-left-color:#4AE54A}
-.ia-decision-badge.monitor,.ia-decision-badge.surveiller{background:rgba(124,45,18,.5);color:#fdba74;border-left-color:#f97316}
-.ia-confidence-bar{height:6px;border-radius:2px;background:#0F2D1A;margin:8px 0 4px;overflow:hidden;border:1px solid #2d6b40}
-.ia-confidence-fill{height:100%;border-radius:2px;background:#4AE54A;transition:width .6s ease}
-.ia-reasons{margin-top:10px}
-.ia-reason-item{font-size:12px;color:rgba(74,229,74,.75);padding:5px 0;border-bottom:1px solid #2d6b40;display:flex;gap:8px;font-family:monospace}
-.ia-reason-item:last-child{border-bottom:none}
-.ia-anomaly-card{background:#1A4D2E;border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid #2d6b40;position:relative;overflow:hidden}
-.ia-anomaly-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
-.ia-anomaly-badge{display:inline-block;padding:4px 14px;border-radius:2px;font-size:12px;font-weight:700;font-family:monospace;text-transform:uppercase;letter-spacing:.5px}
-.ia-anomaly-badge.normal{background:rgba(20,83,45,.6);color:#4AE54A}
-.ia-anomaly-badge.warning{background:rgba(120,53,15,.6);color:#fcd34d}
-.ia-anomaly-badge.critical{background:rgba(127,29,29,.6);color:#fca5a5}
-.ia-impact-card{background:#1A4D2E;border-radius:var(--radius);padding:16px;margin-bottom:14px;display:none;border:1px solid #2d6b40;position:relative;overflow:hidden}
-.ia-impact-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
-.ia-impact-card.show{display:block}
-.ia-impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.ia-impact-item{background:#0F2D1A;border-radius:3px;padding:10px;border:1px solid #2d6b40}
-.ia-impact-label{font-size:10px;color:rgba(74,229,74,.55);margin-bottom:4px;font-family:monospace;text-transform:uppercase}
-.ia-impact-value{font-size:17px;font-weight:700;color:#4AE54A;font-family:monospace}
-.ia-impact-value.risk{color:#fcd34d}
-.ia-impact-value.risk-critical{color:#fca5a5}
-#ia-content .card{background:#1A4D2E;border:1px solid #2d6b40;box-shadow:none;color:white;position:relative;overflow:hidden}
-#ia-content .card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
-#ia-content .card-title{color:#4AE54A;font-family:monospace;font-size:13px;text-transform:uppercase;letter-spacing:.3px}
-#ia-content .card-sub{color:rgba(74,229,74,.55);font-size:11px}
-#ia-content .chart-card{background:#1A4D2E;border:1px solid #2d6b40;box-shadow:none;position:relative;overflow:hidden}
-#ia-content .chart-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#4AE54A}
-#ia-content .chart-card-title{color:#4AE54A;font-family:monospace;font-size:12px}
-#ia-content .chart-refresh{border-color:#2d6b40;color:rgba(74,229,74,.5);background:transparent;font-family:monospace}
-#ia-content .chart-refresh:hover{border-color:#4AE54A;color:#4AE54A}
-#ia-content .loading{color:rgba(74,229,74,.5)}
-#ia-content .spinner{border-color:#2d6b40;border-top-color:#4AE54A}
+/* ── IA Tab (clean, uses design system) ── */
+.ia-crop-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px;border-left:4px solid var(--border)}
+.ia-crop-card.irrigate{border-left-color:var(--blue)}
+.ia-crop-card.wait{border-left-color:var(--green)}
+.ia-crop-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ia-crop-title{font-size:16px;font-weight:700}
+.ia-decision-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:700}
+.ia-decision-pill.irrigate{background:var(--blue-light);color:var(--blue)}
+.ia-decision-pill.wait{background:var(--green-pale);color:var(--green)}
+.ia-conf-bar{background:#E8F0EA;border-radius:99px;height:8px;margin:8px 0 3px;overflow:hidden}
+.ia-conf-fill{height:100%;border-radius:99px;background:var(--green);transition:width .6s ease}
+.ia-conf-fill.medium{background:var(--amber)}
+.ia-conf-fill.low{background:var(--red)}
+.ia-reason-list{list-style:none;padding:0;margin:10px 0 0}
+.ia-reason-list li{font-size:13px;color:var(--text-mid);padding:4px 0 4px 14px;position:relative;line-height:1.4;border-bottom:1px solid var(--border)}
+.ia-reason-list li::before{content:'›';position:absolute;left:0;color:var(--green-mid)}
+.ia-reason-list li:last-child{border-bottom:none}
+.ia-stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.ia-stat-item{background:#F8FAF8;border-radius:var(--radius-sm);padding:8px 12px}
+.ia-stat-item .isl{font-size:10px;color:var(--text-muted);margin-bottom:3px}
+.ia-stat-item .isv{font-size:15px;font-weight:700;color:var(--text)}
+/* History table */
+.ia-hist-table{width:100%;border-collapse:collapse;font-size:13px}
+.ia-hist-table th{text-align:left;padding:6px 8px;font-size:11px;color:var(--text-muted);font-weight:600;border-bottom:2px solid var(--border)}
+.ia-hist-table td{padding:8px;border-bottom:1px solid var(--border);color:var(--text-mid)}
+.ia-hist-table tr.irrigate-row td{background:var(--blue-light)}
+.ia-hist-table tr.wait-row td{background:var(--green-pale)}
+/* Seasonal anomaly strip */
+.ia-anom-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:6px;border:1.5px solid var(--border);cursor:pointer}
+.ia-anom-row.normal{background:#F8FAF8}
+.ia-anom-row.anomaly{background:var(--amber-light);border-color:var(--amber)}
+.ia-anom-crop{font-weight:700;font-size:14px;flex:0 0 80px}
+.ia-anom-status{font-size:13px;font-weight:600;flex:1}
+.ia-anom-detail{font-size:12px;color:var(--text-muted)}
+/* Anomaly cards in Alertes tab */
+.anomaly-section{margin-bottom:16px}
+.anomaly-section-hdr{font-size:15px;font-weight:700;color:#B45309;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.anomaly-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:10px;border-left:4px solid var(--amber)}
+.anomaly-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.anomaly-badge-sev{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.anomaly-badge-sev.high{background:var(--red-light);color:var(--red)}
+.anomaly-badge-sev.moderate{background:var(--amber-light);color:#B45309}
+.anomaly-cause-list{list-style:none;padding:0;margin:6px 0}
+.anomaly-cause-list li{font-size:13px;color:var(--text-mid);padding:3px 0 3px 14px;position:relative}
+.anomaly-cause-list li::before{content:'•';position:absolute;left:0;color:var(--amber)}
+.anomaly-rec-box{background:var(--amber-light);border-radius:var(--radius-sm);padding:10px 12px;margin-top:8px;border-left:3px solid var(--amber);font-size:13px;color:#B45309}
+.anomaly-detail-card{background:#FFFBEB;border-radius:var(--radius-sm);padding:12px;margin-top:8px;border:1px solid #FDE68A;display:none}
+.anomaly-detail-card.open{display:block}
 
 /* ── Chatbot (terminal dark) ── */
 .chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:#4AE54A;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(74,229,74,.4);border:none;z-index:9999;transition:.2s}
@@ -968,10 +962,15 @@ async function loadCapteurs() {
 async function loadAlertes() {
   const el = document.getElementById("alertes-content");
   el.innerHTML = `<div class="loading"><div class="spinner"></div>${lang==='ar'?'جاري التحميل…':'Chargement…'}</div>`;
-  const res = await fetch(`${API}/api/alerts`);
-  const alerts = (await res.json()).data || [];
-  const recRes = await fetch(`${API}/api/recommendation?sensor_id=${currentSensor.id}`);
-  const rec    = (await recRes.json()).data;
+
+  const [alertsRes, recRes, anomRes] = await Promise.all([
+    fetch(`${API}/api/alerts`),
+    fetch(`${API}/api/recommendation?sensor_id=${currentSensor.id}`),
+    fetch(`${API}/api/anomalies`),
+  ]);
+  const alerts   = (await alertsRes.json()).data || [];
+  const rec      = (await recRes.json()).data;
+  const anomalies = (await anomRes.json()).data || [];
   const isAr = lang === 'ar';
 
   let html = `<div class="meta-grid">
@@ -979,6 +978,47 @@ async function loadAlertes() {
     <div class="meta-card"><div class="label">${isAr?'موثوقية المستشعرات':'Fiabilité capteurs'}</div><div class="value">${rec ? (isAr?(rec.sensor_reliability==='Fiable'?'موثوق':'تحت المراقبة'):rec.sensor_reliability) : 'À surveiller'}</div></div>
   </div>`;
 
+  // ── Anomaly section at top ─────────────────────────────────────────────────
+  if (anomalies.length) {
+    html += `<div class="anomaly-section">
+      <div class="anomaly-section-hdr">⚠️ Anomalies Détectées</div>`;
+    const cropLabel3 = {olive:"🫒 Olivier",citrus:"🍊 Agrumes",wheat:"🌾 Blé"};
+    anomalies.forEach(a => {
+      const locale = isAr ? "ar-MA" : "fr-FR";
+      const now = new Date();
+      const ts  = new Date(a.timestamp);
+      const diffH = Math.round((now - ts) / 3600000);
+      const relTime = diffH < 1 ? "il y a moins d'1h" : `il y a ${diffH}h`;
+      const sevChip = a.severity === "high"
+        ? `<span class="anomaly-badge-sev high">🔴 CRITIQUE</span>`
+        : `<span class="anomaly-badge-sev moderate">🟡 MODÉRÉE</span>`;
+      const rangeStr = a.seasonal_range && a.seasonal_range[0] != null
+        ? `${a.seasonal_range[0]}–${a.seasonal_range[1]}%`
+        : "—";
+      html += `<div class="anomaly-card">
+        <div class="anomaly-card-hdr">
+          <div style="font-weight:700;font-size:14px">⚠️ ANOMALIE — ${cropLabel3[a.crop_type]||a.crop_type}</div>
+          ${sevChip}
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${relTime}</div>
+        <div style="font-size:13px;margin-bottom:6px">
+          <strong>${Math.round(a.moisture_pct||0)}%</strong> détecté —
+          normal ${new Date().toLocaleDateString("fr-FR",{month:"long"})}: <strong>${rangeStr}</strong>
+        </div>
+        ${a.z_score !== null ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Déviation: <strong>${a.z_score}σ</strong></div>` : ""}
+        <ul class="anomaly-cause-list">
+          ${(a.possible_causes||[]).map(c=>`<li>${c}</li>`).join("")}
+        </ul>
+        <div class="anomaly-rec-box">${a.recommended_action}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;font-style:italic">Détecté par analyse statistique saisonnière</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="background:var(--green-pale);border-radius:var(--radius-sm);padding:10px 14px;color:var(--green);font-size:13px;margin-bottom:12px">✅ Aucune anomalie saisonnière détectée</div>`;
+  }
+
+  // ── Regular alerts ─────────────────────────────────────────────────────────
   if (!alerts.length) {
     html += `<div class="card" style="text-align:center;padding:32px;color:var(--text-muted)">✅ ${isAr?'لا توجد تنبيهات نشطة':'Aucune alerte active'}</div>`;
   } else {
@@ -1012,6 +1052,11 @@ async function loadAlertes() {
     });
   }
   el.innerHTML = html;
+
+  // Auto-refresh anomalies every 60s
+  if (!el._anomalyTimer) {
+    el._anomalyTimer = setInterval(() => loadAlertes(), 60000);
+  }
 }
 
 // ── Rapports tab ──────────────────────────────────────────────────────────────
@@ -1317,86 +1362,76 @@ async function loadDashConfidenceChart() {
 }
 
 // ── IA Tab ────────────────────────────────────────────────────────────────────
-let iaChartsLoaded = false;
 const iaCharts = {};
+let iaShellBuilt = false;
+let iaRefreshTimer = null;
+
+const IA_CROPS = [
+  {key:"olive",  label:"Olivier", emoji:"🫒", sensor_id:"ID010001"},
+  {key:"citrus", label:"Agrumes", emoji:"🍊", sensor_id:"ID010002"},
+  {key:"wheat",  label:"Blé dur", emoji:"🌾", sensor_id:"ID010003"},
+];
 
 async function loadIA() {
   const el = document.getElementById("ia-content");
-  if (iaChartsLoaded) return; // already rendered
-  iaChartsLoaded = true;
 
-  el.innerHTML = `
-    <div class="ia-hero">
-      <div class="ia-hero-title"><svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;fill:#4AE54A" viewBox="0 0 24 24"><path d="M9 3H7v2H5v2H3v2h2v6H3v2h2v2h2v2h2v-2h6v2h2v-2h2v-2h2v-2h-2V9h2V7h-2V5h-2V3h-2v2H9V3zm0 4h6v10H9V7z"/></svg>Moteur IA IrriSmart</div>
-      <div class="ia-hero-sub">RandomForest entraîné sur 36 000 échantillons FAO-56 — Olive, Agrumes, Blé</div>
+  if (!iaShellBuilt) {
+    iaShellBuilt = true;
+    el.innerHTML = buildIAShell();
+    setTimeout(() => {
+      loadMoistureChart();
+      loadDecisionChart();
+      loadScatterChart();
+      loadConfidenceChart();
+    }, 120);
+  }
+
+  await refreshAllCropCards();
+  loadAIHistory();
+  loadAnomalyStrip();
+
+  if (!iaRefreshTimer) {
+    iaRefreshTimer = setInterval(async () => {
+      await refreshAllCropCards();
+      loadAIHistory();
+      loadAnomalyStrip();
+    }, 30000);
+  }
+}
+
+function buildIAShell() {
+  return `
+    <div class="card" style="margin-bottom:14px;border-left:4px solid var(--green)">
+      <div class="card-title">Moteur IA IrriSmart</div>
+      <div class="card-sub">RandomForest entraîné sur 36 000 échantillons FAO-56 — Olivier · Agrumes · Blé</div>
     </div>
 
-    <!-- Predict form -->
-    <div class="ia-form">
-      <div class="ia-form-title">Simuler une décision IA</div>
-      <div class="ia-row">
-        <div class="ia-field"><label>Culture</label>
-          <select id="ia-crop"><option value="olive">Olivier</option><option value="citrus">Agrumes</option><option value="wheat">Blé</option></select>
-        </div>
-        <div class="ia-field"><label>Humidité sol (%)</label>
-          <input type="number" id="ia-moisture" value="28" min="5" max="80"/>
-        </div>
+    ${IA_CROPS.map(c=>`
+    <div class="ia-crop-card" id="ia-card-${c.key}">
+      <div class="ia-crop-card-header">
+        <div class="ia-crop-title">${c.emoji} ${c.label}</div>
+        <button class="btn-outline" onclick="refreshCropCard('${c.key}','${c.sensor_id}')">Analyser</button>
       </div>
-      <div class="ia-row">
-        <div class="ia-field"><label>Température (°C)</label>
-          <input type="number" id="ia-temp" value="26" min="-5" max="50"/>
-        </div>
-        <div class="ia-field"><label>Humidité air (%)</label>
-          <input type="number" id="ia-humidity" value="48" min="10" max="95"/>
-        </div>
-      </div>
-      <div class="ia-row">
-        <div class="ia-field"><label>Pluie 24h (mm)</label>
-          <input type="number" id="ia-rain" value="0" min="0" max="100"/>
-        </div>
-        <div class="ia-field"><label>Jours sans irrigation</label>
-          <input type="number" id="ia-days" value="4" min="0" max="30"/>
-        </div>
-      </div>
-      <button class="ia-btn" onclick="runIAPredict()">Lancer la prédiction IA</button>
-    </div>
+      <div id="ia-body-${c.key}"><div class="loading"><div class="spinner"></div>Chargement…</div></div>
+    </div>`).join("")}
 
-    <!-- Result placeholder -->
-    <div class="ia-result" id="ia-result-card"></div>
+    <button onclick="refreshAllCropCards()" style="width:100%;padding:12px;border-radius:var(--radius);border:1.5px solid var(--green);background:var(--green-pale);color:var(--green);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:14px">
+      💧 Lancer analyse IA complète
+    </button>
 
-    <!-- Impact predictor -->
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;fill:#4AE54A" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Prédicteur d'impact économique</div>
-      <div class="card-sub">Estime le déficit hydrique et les économies d'eau réalisées par l'IA</div>
-      <div class="ia-row" style="margin-top:12px">
-        <div class="ia-field"><label>Superficie (m²)</label>
-          <input type="number" id="ia-area" value="1000" min="100" max="100000"/>
-        </div>
-        <div class="ia-field"><label>Stade phénologique</label>
-          <select id="ia-stage"><option value="0">0 — Dormance</option><option value="1">1 — Débourrement</option><option value="2">2 — Floraison</option><option value="3">3 — Fructification</option><option value="4">4 — Maturation</option></select>
-        </div>
-      </div>
-      <button class="ia-btn" onclick="runImpact()">Calculer l'impact</button>
+      <div class="card-title" style="margin-bottom:2px">Surveillance Saisonnière — Analyse Statistique</div>
+      <div class="card-sub" style="margin-bottom:10px">Comparaison avec les baselines INRA Tadla</div>
+      <div id="ia-anomaly-strip"><div class="loading"><div class="spinner"></div></div></div>
     </div>
-    <div class="ia-impact-card" id="ia-impact-card"></div>
 
-    <!-- Anomaly detection -->
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;fill:#4AE54A" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/></svg>Détection d'anomalies capteur</div>
-      <div class="card-sub">Isolation Forest — vérifie la cohérence de la lecture en cours</div>
-      <button class="ia-btn" style="margin-top:12px" onclick="runAnomaly()">Analyser la lecture actuelle</button>
-    </div>
-    <div class="ia-anomaly-card" id="ia-anomaly-card" style="display:none"></div>
-
-    <!-- Actuator control -->
-    <div class="ia-form">
-      <div class="ia-form-title">[ Contrôle actionneur ]</div>
-      <div style="font-size:11px;color:rgba(74,229,74,.45);font-family:monospace;margin-bottom:12px">Statut: DÉCONNECTÉ — aucun actionneur physique détecté</div>
-      <button class="ia-btn ia-btn-disabled" onclick="showToast('Actionneur non connecté — commande enregistrée')">[ Exécuter toutes les irrigations ]</button>
+      <div class="card-title" style="margin-bottom:2px">Historique Décisions IA</div>
+      <div class="card-sub" style="margin-bottom:10px">10 dernières décisions — plus récentes en premier</div>
+      <div id="ia-history-table"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
-    <!-- Charts -->
-    <div style="margin-bottom:6px;font-size:12px;font-weight:700;color:#4AE54A;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px"><svg style="width:14px;height:14px;fill:#4AE54A" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>Tableaux de bord temps réel</div>
+    <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Tableaux de bord temps réel</div>
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
@@ -1428,112 +1463,158 @@ async function loadIA() {
       </div>
     </div>
   `;
-
-  // Load charts after DOM is rendered
-  setTimeout(() => {
-    loadMoistureChart();
-    loadDecisionChart();
-    loadScatterChart();
-    loadConfidenceChart();
-  }, 100);
 }
 
-async function runIAPredict() {
-  const card = document.getElementById("ia-result-card");
-  card.className = "ia-result show";
-  card.innerHTML = `<div class="loading"><div class="spinner"></div>Prédiction en cours…</div>`;
-
-  const body = {
-    crop: document.getElementById("ia-crop").value,
-    soil_moisture_pct: parseFloat(document.getElementById("ia-moisture").value),
-    temperature_c: parseFloat(document.getElementById("ia-temp").value),
-    humidity_pct: parseFloat(document.getElementById("ia-humidity").value),
-    rainfall_24h_mm: parseFloat(document.getElementById("ia-rain").value),
-    wind_speed_kmh: 5,
-    days_since_irrigation: parseInt(document.getElementById("ia-days").value),
-  };
-
+async function refreshAllCropCards() {
+  let sensorLatest = {};
   try {
-    const res = await fetch(`${API}/api/predict`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
-    const d = (await res.json()).data;
-    if (!d) { card.innerHTML = "<p style='padding:12px;color:#888'>Modèle non chargé — entraîner les modèles d'abord.</p>"; return; }
+    const r = await fetch(`${API}/api/sensors/latest`);
+    sensorLatest = (await r.json()).data || {};
+  } catch(e) {}
+  await Promise.all(IA_CROPS.map(c => {
+    const moisture = sensorLatest[c.key]?.soil_moisture_pct ?? 35;
+    const temp     = sensorLatest[c.key]?.temperature_c    ?? 25;
+    return refreshCropCard(c.key, c.sensor_id, moisture, temp);
+  }));
+}
 
-    card.innerHTML = `
-      <div class="ia-decision-badge ${d.decision}">${d.action}</div>
-      <div style="font-size:12px;color:rgba(74,229,74,.65);margin-bottom:4px;font-family:monospace">Confiance: <strong style="color:#4AE54A">${d.confidence_pct}%</strong> — ${d.stage_name} — Demande: ${d.water_demand_mm} mm/j</div>
-      <div class="ia-confidence-bar"><div class="ia-confidence-fill" style="width:${d.confidence_pct}%"></div></div>
-      <div class="ia-reasons">
-        ${d.reasons.map(r=>`<div class="ia-reason-item"><span>›</span><span>${r}</span></div>`).join("")}
-      </div>
-    `;
-  } catch(e) {
-    card.innerHTML = `<p style='padding:12px;color:var(--red)'>${e.message}</p>`;
+async function refreshCropCard(cropKey, sensorId, moistureOverride, tempOverride) {
+  const body_el = document.getElementById(`ia-body-${cropKey}`);
+  const card_el = document.getElementById(`ia-card-${cropKey}`);
+  if (!body_el) return;
+  body_el.innerHTML = `<div class="loading" style="padding:10px 0"><div class="spinner"></div>Analyse…</div>`;
+
+  // If no overrides, fetch from sensors/latest
+  let moisture = moistureOverride;
+  let temp     = tempOverride;
+  if (moisture === undefined) {
+    try {
+      const lr = await fetch(`${API}/api/sensors/latest`).then(r=>r.json());
+      moisture = lr.data?.[cropKey]?.soil_moisture_pct ?? 35;
+      temp     = lr.data?.[cropKey]?.temperature_c    ?? 25;
+    } catch(e) { moisture = 35; temp = 25; }
   }
-}
-
-async function runImpact() {
-  const card = document.getElementById("ia-impact-card");
-  card.className = "ia-impact-card show";
-  card.innerHTML = `<div class="loading"><div class="spinner"></div>Calcul…</div>`;
-
-  const body = {
-    crop: document.getElementById("ia-crop").value,
-    current_moisture: parseFloat(document.getElementById("ia-moisture").value),
-    days_without_irrigation: parseInt(document.getElementById("ia-days").value),
-    growth_stage: parseInt(document.getElementById("ia-stage").value),
-    area_m2: parseFloat(document.getElementById("ia-area").value),
-  };
 
   try {
-    const res = await fetch(`${API}/api/predict/impact`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+    const payload = {
+      crop: cropKey,
+      soil_moisture_pct: moisture,
+      temperature_c: temp ?? 25,
+      humidity_pct: 50,
+      rainfall_24h_mm: 0,
+      wind_speed_kmh: 5,
+      days_since_irrigation: 3,
+    };
+    const res = await fetch(`${API}/api/predict`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload),
+    });
     const d = (await res.json()).data;
-    const riskClass = d.yield_risk_label === "Critique" ? "risk-critical" : d.yield_risk_label !== "Faible" ? "risk" : "";
-    card.innerHTML = `
-      <div class="ia-form-title">Impact prédit — ${d.stage_name}</div>
-      <div class="ia-impact-grid">
-        <div class="ia-impact-item"><div class="ia-impact-label">Déficit hydrique</div><div class="ia-impact-value">${d.water_deficit_mm} mm</div></div>
-        <div class="ia-impact-item"><div class="ia-impact-label">Volume irrigation</div><div class="ia-impact-value">${d.irrigation_volume_liters.toLocaleString()} L</div></div>
-        <div class="ia-impact-item"><div class="ia-impact-label">Risque rendement</div><div class="ia-impact-value ${riskClass}">${d.yield_risk_pct}% — ${d.yield_risk_label}</div></div>
-        <div class="ia-impact-item"><div class="ia-impact-label">Économies IA vs manuel</div><div class="ia-impact-value">−${d.estimated_savings_pct}%</div></div>
-      </div>
-      <div style="font-size:12px;color:rgba(74,229,74,.7);line-height:1.6;font-family:monospace">${d.recommendation}</div>
-    `;
-  } catch(e) {
-    card.innerHTML = `<p style='color:var(--red)'>${e.message}</p>`;
-  }
-}
+    if (!d) { body_el.innerHTML = `<p style='color:var(--text-muted);font-size:13px'>Modèle non chargé.</p>`; return; }
 
-async function runAnomaly() {
-  if (!currentSensor) return;
-  const card = document.getElementById("ia-anomaly-card");
-  card.style.display = "block";
-  card.innerHTML = `<div class="loading"><div class="spinner"></div>Analyse…</div>`;
+    // Update card border color
+    if (card_el) { card_el.className = `ia-crop-card ${d.decision}`; }
 
-  // Use latest sensor reading values
-  const lr = currentSensor.latest_reading || {};
-  const body = {
-    sensor_id: currentSensor.id,
-    crop: currentSensor.crop_type,
-    soil_moisture_pct: lr.soil_moisture || 35,
-    temperature_c: lr.air_temperature || 22,
-    humidity_pct: lr.air_humidity || 55,
-    eto_mm_day: 4.0,
-  };
-
-  try {
-    const res = await fetch(`${API}/api/anomaly/detect`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
-    const d = (await res.json()).data;
-    card.innerHTML = `
+    const confClass = d.confidence > 0.8 ? "" : d.confidence > 0.6 ? "medium" : "low";
+    body_el.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div class="ia-form-title" style="margin-bottom:0">Résultat analyse</div>
-        <span class="ia-anomaly-badge ${d.severity}">${d.severity === "normal" ? "OK" : d.severity === "warning" ? "ATTENTION" : "CRITIQUE"}</span>
+        <span class="ia-decision-pill ${d.decision}">${d.icon} ${d.action}</span>
+        <span style="font-size:13px;color:var(--text-muted)">${d.stage_name}</span>
       </div>
-      <div style="font-size:12px;color:rgba(74,229,74,.75);margin-bottom:8px;font-family:monospace">${d.message}</div>
-      <div style="font-size:11px;color:rgba(74,229,74,.45);font-family:monospace">Score: <strong style="color:#4AE54A">${d.anomaly_score}</strong></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Confiance: <strong style="color:var(--text)">${d.confidence_pct}%</strong></div>
+      <div class="ia-conf-bar"><div class="ia-conf-fill ${confClass}" style="width:${d.confidence_pct}%"></div></div>
+      <div class="ia-stat-row">
+        <div class="ia-stat-item"><div class="isl">Humidité sol</div><div class="isv">${Math.round(moisture)}%</div></div>
+        <div class="ia-stat-item"><div class="isl">Besoin eau</div><div class="isv">${d.water_demand_mm} mm/j</div></div>
+        <div class="ia-stat-item"><div class="isl">Température</div><div class="isv">${Math.round(temp ?? 25)}°C</div></div>
+      </div>
+      <ul class="ia-reason-list" style="margin-top:10px">
+        ${d.reasons.slice(0,3).map(r=>`<li>${r}</li>`).join("")}
+      </ul>
     `;
   } catch(e) {
-    card.innerHTML = `<p style='color:var(--red)'>${e.message}</p>`;
+    body_el.innerHTML = `<p style='color:var(--red);font-size:13px'>${e.message}</p>`;
   }
+}
+
+async function loadAIHistory() {
+  const el = document.getElementById("ia-history-table");
+  if (!el) return;
+  try {
+    const res = await fetch(`${API}/api/ai/history?limit=10`);
+    const entries = (await res.json()).data || [];
+    if (!entries.length) {
+      el.innerHTML = `<p style='color:var(--text-muted);font-size:13px;text-align:center;padding:12px'>Aucune décision enregistrée — lancez une analyse pour alimenter l'historique.</p>`;
+      return;
+    }
+    const cropLabel2 = {olive:"🫒 Olivier",citrus:"🍊 Agrumes",wheat:"🌾 Blé"};
+    el.innerHTML = `<table class="ia-hist-table">
+      <thead><tr>
+        <th>Heure</th><th>Culture</th><th>Décision</th><th>Confiance</th><th>Humidité sol</th>
+      </tr></thead>
+      <tbody>
+        ${entries.map(e => {
+          const dt = new Date(e.timestamp).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+          const rowClass = e.decision === "irrigate" ? "irrigate-row" : "wait-row";
+          const badge = e.decision === "irrigate" ? "💧 IRRIGUER" : "✅ ATTENDRE";
+          return `<tr class="${rowClass}">
+            <td>${dt}</td>
+            <td>${cropLabel2[e.crop]||e.crop}</td>
+            <td>${badge}</td>
+            <td>${Math.round(e.confidence*100)}%</td>
+            <td>${e.soil_moisture ? Math.round(e.soil_moisture)+"%" : "—"}</td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+  } catch(e) {
+    el.innerHTML = `<p style='color:var(--text-muted);font-size:13px'>Erreur chargement historique.</p>`;
+  }
+}
+
+async function loadAnomalyStrip() {
+  const el = document.getElementById("ia-anomaly-strip");
+  if (!el) return;
+  try {
+    const res = await fetch(`${API}/api/anomalies`);
+    const anomalies = (await res.json()).data || [];
+    const cropEmoji = {olive:"🫒",citrus:"🍊",wheat:"🌾"};
+    const cropNames = {olive:"Olivier",citrus:"Agrumes",wheat:"Blé dur"};
+    // Build map of latest anomaly per crop
+    const anomMap = {};
+    anomalies.forEach(a => { if (!anomMap[a.crop_type]) anomMap[a.crop_type] = a; });
+
+    el.innerHTML = ["olive","citrus","wheat"].map(crop => {
+      const a = anomMap[crop];
+      const hasAnom = !!a;
+      const statusText = hasAnom
+        ? `⚠️ Anomalie (${a.z_score !== null ? a.z_score+"σ" : "hors plage"})`
+        : "✅ Normal";
+      const detailText = hasAnom
+        ? `En ${a.deviation_type === "below" ? "dessous" : "dessus"} de la plage saisonnière`
+        : "Humidité dans la plage saisonnière";
+      const detailId = `anom-detail-${crop}`;
+      const detailBlock = hasAnom ? `
+        <div class="anomaly-detail-card" id="${detailId}">
+          <div style="font-size:12px;font-weight:700;color:#B45309;margin-bottom:4px">Causes possibles</div>
+          <ul class="anomaly-cause-list">${(a.possible_causes||[]).map(c=>`<li>${c}</li>`).join("")}</ul>
+          <div class="anomaly-rec-box">${a.recommended_action}</div>
+        </div>` : "";
+      return `<div class="ia-anom-row ${hasAnom?'anomaly':'normal'}" onclick="toggleAnomalyDetail('${detailId}')">
+        <div class="ia-anom-crop">${cropEmoji[crop]} ${cropNames[crop]}</div>
+        <div class="ia-anom-status" style="color:${hasAnom?'#B45309':'var(--green)'}">${statusText}</div>
+        <div class="ia-anom-detail">${detailText}</div>
+      </div>${detailBlock}`;
+    }).join("");
+  } catch(e) {
+    el.innerHTML = `<p style='color:var(--text-muted);font-size:13px'>Données saisonnières non disponibles.</p>`;
+  }
+}
+
+function toggleAnomalyDetail(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle("open");
 }
 
 // ── Charts ────────────────────────────────────────────────────────────────────
@@ -1633,10 +1714,34 @@ async function loadConfidenceChart() {
 // ── Chatbot ───────────────────────────────────────────────────────────────────
 let chatOpen = false;
 
+function getCurrentSeason() {
+  const m = new Date().getMonth() + 1;
+  if ([3,4,5].includes(m)) return "printemps";
+  if ([6,7,8].includes(m)) return "été";
+  if ([9,10,11].includes(m)) return "automne";
+  return "hiver";
+}
+
 function toggleChat() {
   chatOpen = !chatOpen;
   document.getElementById("chatWindow").classList.toggle("open", chatOpen);
   if (chatOpen) document.getElementById("chatInput").focus();
+}
+
+async function buildChatContext() {
+  try {
+    const res = await fetch(`${API}/api/sensors/latest`);
+    const sd  = (await res.json()).data || {};
+    return {
+      olive:  { soil_moisture: sd.olive?.soil_moisture_pct,  recommendation: null },
+      citrus: { soil_moisture: sd.citrus?.soil_moisture_pct, recommendation: null },
+      wheat:  { soil_moisture: sd.wheat?.soil_moisture_pct,  recommendation: null },
+      region: "Beni Mellal-Khénifra, Maroc",
+      season: getCurrentSeason(),
+    };
+  } catch(e) {
+    return { region: "Beni Mellal-Khénifra, Maroc", season: getCurrentSeason() };
+  }
 }
 
 async function sendChat() {
@@ -1653,7 +1758,7 @@ async function sendChat() {
   msgs.scrollTop = msgs.scrollHeight;
 
   try {
-    const sensorCtx = currentSensor ? `${currentSensor.name}, culture ${currentSensor.crop_type}` : "";
+    const sensorCtx = await buildChatContext();
     const res = await fetch(`${API}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

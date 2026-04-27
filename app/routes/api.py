@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime, date, timedelta
+import json as _json
+import math as _math
 from sqlalchemy import func
 from app import db
-from app.models import Sensor, Reading, WeatherCache, Recommendation, Alert
+from app.models import Sensor, Reading, WeatherCache, Recommendation, Alert, SeasonalAnomalyLog
 from app.services import weather_service, recommendation_service, alert_service
 
 api = Blueprint("api", __name__, url_prefix="/api")
@@ -47,6 +49,25 @@ def sensor_history(sid):
     rows  = Reading.query.filter_by(sensor_id=sid)\
         .order_by(Reading.timestamp.desc()).limit(limit).all()
     return ok([r.to_dict() for r in reversed(rows)])
+
+
+@api.route("/sensors/latest")
+def sensors_latest():
+    """Returns latest reading per crop, keyed by crop name. Used by IA tab."""
+    sensors = Sensor.query.filter_by(is_active=True).all()
+    result = {}
+    for s in sensors:
+        reading = Reading.query.filter_by(sensor_id=s.id)\
+            .order_by(Reading.timestamp.desc()).first()
+        if reading:
+            result[s.crop_type] = {
+                "soil_moisture_pct": reading.soil_moisture,
+                "temperature_c": reading.air_temperature,
+                "sensor_id": s.id,
+                "sensor_name": s.name,
+                "timestamp": reading.timestamp.isoformat(),
+            }
+    return ok(result)
 
 
 # ── Ingest sensor data (from ESP32 gateway) ───────────────────────────────────
@@ -112,8 +133,14 @@ def ingest():
     db.session.add(r)
     db.session.commit()
 
-    # Check for alert conditions after every new reading
+    # Standard alert checks
     alert_service.check_and_alert(s.id, r.soil_moisture, r.battery_voltage, r.air_temperature, r.timestamp)
+
+    # Seasonal anomaly detection
+    try:
+        detect_anomaly(s.id, s.crop_type, r.soil_moisture)
+    except Exception as e:
+        print(f"Anomaly detection failed: {e}")
 
     return ok({"reading_id": r.id})
 
@@ -1047,13 +1074,135 @@ def chart_confidence_stats():
     })
 
 
+# ── Seasonal Anomaly Detection ────────────────────────────────────────────────
+
+def detect_anomaly(sensor_id, crop_type, moisture_pct):
+    """
+    Compare moisture reading against 7-day rolling stats and INRA Tadla seasonal
+    baselines. Returns anomaly dict if anomalous, {is_anomaly: False} otherwise.
+    """
+    from app.models import SeasonalBaseline, SeasonalAnomalyLog
+
+    now = datetime.utcnow()
+    month = now.month
+
+    # Fetch seasonal baseline for crop + current month (INRA Tadla data)
+    baseline = SeasonalBaseline.query.filter_by(
+        crop_type=crop_type, month=month
+    ).first()
+
+    # Fetch last 7 days of readings for this sensor
+    seven_days_ago = now - timedelta(days=7)
+    recent = Reading.query.filter(
+        Reading.sensor_id == sensor_id,
+        Reading.timestamp >= seven_days_ago
+    ).all()
+    moistures = [r.soil_moisture for r in recent]
+
+    is_anomaly = False
+    z_score = None
+    deviation_type = None
+    rolling_mean = None
+    seasonal_mean = baseline.moisture_mean if baseline else None
+
+    # Rolling z-score check (requires >= 3 readings)
+    if len(moistures) >= 3:
+        mean_val = sum(moistures) / len(moistures)
+        variance = sum((x - mean_val) ** 2 for x in moistures) / len(moistures)
+        std_val  = _math.sqrt(variance) if variance > 0 else 1.0
+        z = (moisture_pct - mean_val) / std_val
+        rolling_mean = round(mean_val, 1)
+        z_score = round(z, 2)
+        if abs(z) >= 2.0:
+            is_anomaly = True
+            deviation_type = "below" if z < 0 else "above"
+
+    # Seasonal range check (independent of rolling data)
+    if baseline and not is_anomaly:
+        if moisture_pct < baseline.moisture_min or moisture_pct > baseline.moisture_max:
+            is_anomaly = True
+            deviation_type = "below" if moisture_pct < baseline.moisture_min else "above"
+            if z_score is None:
+                std_val = baseline.moisture_std or 5.0
+                z_score = round((moisture_pct - baseline.moisture_mean) / std_val, 2)
+
+    if not is_anomaly:
+        return {"is_anomaly": False}
+
+    severity = "high" if z_score and abs(z_score) >= 3 else "moderate"
+
+    if deviation_type == "below":
+        possible_causes = [
+            "Fuite dans le système d'irrigation",
+            "Défaillance du capteur",
+            "Stress hydrique sévère — risque de perte de récolte",
+        ]
+        recommended_action = "Inspection physique urgente de la parcelle"
+    else:
+        possible_causes = [
+            "Sur-irrigation récente",
+            "Capteur en zone saturée ou inondée",
+            "Drainage insuffisant du sol",
+        ]
+        recommended_action = "Suspendre l'irrigation et vérifier le drainage"
+
+    result = {
+        "is_anomaly": True,
+        "z_score": z_score,
+        "deviation_type": deviation_type,
+        "rolling_mean": rolling_mean,
+        "seasonal_mean": seasonal_mean,
+        "seasonal_range": [
+            baseline.moisture_min if baseline else None,
+            baseline.moisture_max if baseline else None,
+        ],
+        "severity": severity,
+        "possible_causes": possible_causes,
+        "recommended_action": recommended_action,
+    }
+
+    # Persist to DB
+    try:
+        log = SeasonalAnomalyLog(
+            sensor_id=sensor_id,
+            crop_type=crop_type,
+            moisture_pct=moisture_pct,
+            z_score=z_score,
+            deviation_type=deviation_type,
+            rolling_mean=rolling_mean,
+            seasonal_mean=seasonal_mean,
+            seasonal_min=baseline.moisture_min if baseline else None,
+            seasonal_max=baseline.moisture_max if baseline else None,
+            severity=severity,
+            possible_causes=_json.dumps(possible_causes, ensure_ascii=False),
+            recommended_action=recommended_action,
+        )
+        db.session.add(log)
+        db.session.commit()
+    except Exception as e:
+        print(f"SeasonalAnomalyLog write failed: {e}")
+
+    return result
+
+
+@api.route("/anomalies")
+def get_anomalies():
+    """Return last 10 seasonal anomaly detections."""
+    from app.models import SeasonalAnomalyLog
+    limit = request.args.get("limit", 10, type=int)
+    entries = SeasonalAnomalyLog.query\
+        .order_by(SeasonalAnomalyLog.timestamp.desc())\
+        .limit(limit).all()
+    return ok([e.to_dict() for e in entries])
+
+
 # ── Chat (proxied through backend so API key stays server-side) ───────────────
 @api.route("/chat", methods=["POST"])
 def chat():
     import os, requests as _req
     b = request.get_json(silent=True) or {}
     message = (b.get("message") or "").strip()
-    sensor_ctx = b.get("sensor_ctx", "")
+    sensor_ctx = b.get("sensor_ctx") or {}   # structured dict from frontend
     if not message:
         return err("Missing message")
 
@@ -1061,16 +1210,34 @@ def chat():
     if not api_key:
         return ok({"reply": "Assistant non configuré. Ajoutez ANTHROPIC_API_KEY dans les variables Railway."})
 
+    # Build structured context block if sensor data was provided
+    ctx_block = ""
+    if isinstance(sensor_ctx, dict) and sensor_ctx:
+        ctx_block = (
+            "\n\nDonnées capteurs en temps réel:\n"
+            + _json.dumps(sensor_ctx, ensure_ascii=False, indent=2)
+            + "\n\nSeuils critiques (INRA Tadla + FAO-56):\n"
+            "- Olivier: critique < 35%, optimal 50–65%\n"
+            "- Agrumes: critique < 45%, optimal 55–70%\n"
+            "- Blé:     critique < 40%, optimal 50–65%\n"
+        )
+    elif isinstance(sensor_ctx, str) and sensor_ctx:
+        ctx_block = f"\n\nContexte capteurs actif: {sensor_ctx}."
+
     system_prompt = (
-        "You are IrriSmart's agricultural advisor for the Beni Mellal-Khénifra region of Morocco.\n"
-        "You specialize in irrigation guidance for olive, citrus, and durum wheat farms.\n"
-        "Your knowledge is grounded in FAO-56 Penman-Monteith evapotranspiration methodology and INRA Tadla field guidelines.\n\n"
-        "CRITICAL: Always detect the language of the user's message and respond ENTIRELY in that language.\n"
-        "- If the user writes in French → respond in French\n"
-        "- If the user writes in Arabic (فصحى or دارجة) → respond in Arabic script\n"
-        "- If the user writes in Darija with French characters → respond in French/Darija mix\n"
-        "Never switch languages mid-response.\n"
-        + (f"\nActive sensor context: {sensor_ctx}." if sensor_ctx else "")
+        "Tu es le conseiller agricole intelligent d'IrriSmart, spécialisé dans l'irrigation\n"
+        "pour la région de Béni Mellal-Khénifra (plaine du Tadla) au Maroc.\n"
+        "Tes cultures cibles : olive, agrumes (oranges, clémentines), blé dur (variété 'Karim').\n"
+        "Tes connaissances sont fondées sur la méthode FAO-56 Penman-Monteith et les fiches\n"
+        "techniques de l'INRA Tadla.\n\n"
+        "RÈGLE ABSOLUE : Détecte la langue du message et réponds ENTIÈREMENT dans cette langue.\n"
+        "- Français → français. Arabe (فصحى ou دارجة) → arabe. Darija en caractères latins → mélange.\n"
+        "Ne change jamais de langue en cours de réponse.\n\n"
+        "Règles de réponse:\n"
+        "- Fais référence aux données capteurs réelles ci-dessous dans chaque réponse\n"
+        "- Sois précis, pratique, et concis — tu t'adresses à un agriculteur\n"
+        "- Ne réponds pas aux questions hors agriculture et irrigation\n"
+        + ctx_block
     )
 
     try:
@@ -1083,7 +1250,7 @@ def chat():
             },
             json={
                 "model": "claude-haiku-4-5-20251001",
-                "max_tokens": 400,
+                "max_tokens": 450,
                 "system": system_prompt,
                 "messages": [{"role": "user", "content": message}],
             },
