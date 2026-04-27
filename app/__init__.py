@@ -69,7 +69,7 @@ def _migrate_db():
             print(f"[Migration] Backfill skipped: {e}")
 
 def _seed_if_empty():
-    from app.models import Sensor, Reading, Recommendation, Alert
+    from app.models import Sensor, Reading, Recommendation, Alert, AnomalyLog, AIDecisionLog
     from datetime import datetime, timedelta
     import random, math
     if Sensor.query.count() > 0:

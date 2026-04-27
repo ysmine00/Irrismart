@@ -48,6 +48,38 @@ def send_sms(message: str) -> bool:
         print(f"[Twilio] SMS failed: {e}")
         return False
 
+
+def send_whatsapp(sensor_name: str, crop: str, moisture: float,
+                  temp: float, confidence: float, reasons: list) -> bool:
+    client, _, to_ = _get_twilio()
+    if not client or not to_:
+        return False
+    wa_from = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
+    wa_to   = f"whatsapp:{to_}"
+    emoji   = {"olive": "🫒", "citrus": "🍊", "wheat": "🌾"}.get(crop, "🌱")
+    from datetime import datetime as _dt
+    now_str = _dt.utcnow().strftime("%d/%m/%Y à %H:%M")
+    bullet_reasons = "\n".join(f"• {r[:80]}" for r in (reasons or [])[:3])
+    body = (
+        f"🌱 *IrriSmart — Alerte Irrigation*\n\n"
+        f"Culture: *{crop.upper()}* {emoji}\n"
+        f"Parcelle: {sensor_name}\n\n"
+        f"🔴 Décision IA: *IRRIGUER*\n"
+        f"💧 Humidité sol: {moisture:.0f}%\n"
+        f"🌡️ Température: {temp:.0f}°C\n"
+        f"📊 Confiance: {confidence:.0f}%\n\n"
+        f"Raisons:\n{bullet_reasons}\n\n"
+        f"⏰ {now_str}\n"
+        f"🔗 irrismart.up.railway.app"
+    )
+    try:
+        msg = client.messages.create(body=body, from_=wa_from, to=wa_to)
+        print(f"[Twilio] WhatsApp sent: {msg.sid}")
+        return True
+    except Exception as e:
+        print(f"[Twilio] WhatsApp failed: {e}")
+        return False
+
 def create_alert(sensor_id, alert_type, message,
                  severity="warning",
                  decision_impact="Moyen",
