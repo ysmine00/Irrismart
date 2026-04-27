@@ -1259,7 +1259,7 @@ async function loadIA() {
 
   el.innerHTML = `
     <div class="ia-hero">
-      <div class="ia-hero-title">🤖 Moteur IA IrriSmart</div>
+      <div class="ia-hero-title"><svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;fill:white;opacity:.9" viewBox="0 0 24 24"><path d="M9 3H7v2H5v2H3v2h2v6H3v2h2v2h2v2h2v-2h6v2h2v-2h2v-2h2v-2h-2V9h2V7h-2V5h-2V3h-2v2H9V3zm0 4h6v10H9V7z"/></svg>Moteur IA IrriSmart</div>
       <div class="ia-hero-sub">RandomForest entraîné sur 36 000 échantillons FAO-56 — Olive, Agrumes, Blé</div>
     </div>
 
@@ -1290,7 +1290,7 @@ async function loadIA() {
           <input type="number" id="ia-days" value="4" min="0" max="30"/>
         </div>
       </div>
-      <button class="ia-btn" onclick="runIAPredict()">Lancer la prédiction IA ⚡</button>
+      <button class="ia-btn" onclick="runIAPredict()">Lancer la prédiction IA</button>
     </div>
 
     <!-- Result placeholder -->
@@ -1298,7 +1298,7 @@ async function loadIA() {
 
     <!-- Impact predictor -->
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title">💰 Prédicteur d'impact économique</div>
+      <div class="card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;fill:var(--green)" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Prédicteur d'impact économique</div>
       <div class="card-sub">Estime le déficit hydrique et les économies d'eau réalisées par l'IA</div>
       <div class="ia-row" style="margin-top:12px">
         <div class="ia-field"><label>Superficie (m²)</label>
@@ -1314,14 +1314,14 @@ async function loadIA() {
 
     <!-- Anomaly detection -->
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title">🔍 Détection d'anomalies capteur</div>
+      <div class="card-title"><svg style="width:16px;height:16px;vertical-align:middle;margin-right:6px;fill:var(--green)" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/></svg>Détection d'anomalies capteur</div>
       <div class="card-sub">Isolation Forest — vérifie la cohérence de la lecture en cours</div>
       <button class="ia-btn" style="margin-top:12px" onclick="runAnomaly()">Analyser la lecture actuelle</button>
     </div>
     <div class="ia-anomaly-card" id="ia-anomaly-card" style="display:none"></div>
 
     <!-- Charts -->
-    <div style="margin-bottom:6px;font-size:13px;font-weight:700;color:var(--text)">📊 Tableaux de bord temps réel</div>
+    <div style="margin-bottom:6px;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px"><svg style="width:16px;height:16px;fill:var(--green)" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>Tableaux de bord temps réel</div>
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
