@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<meta name="claude-api-key" content=""/>
 <style>
 #map{height:340px;border-radius:var(--radius);overflow:hidden;z-index:1}
 .map-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;margin-bottom:14px}
@@ -243,6 +245,79 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 
 /* ── Bottom padding ── */
 .bottom-pad{height:32px}
+
+/* ── Charts ── */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:900px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.chart-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chart-card-title{font-size:13px;font-weight:700;color:var(--text)}
+.chart-updated{font-size:11px;color:var(--text-muted)}
+.chart-refresh{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:inherit}
+.chart-refresh:hover{border-color:var(--green);color:var(--green)}
+
+/* ── IA Tab ── */
+.ia-hero{background:linear-gradient(135deg,var(--green),#0d6e35);border-radius:var(--radius);padding:20px;color:white;margin-bottom:14px}
+.ia-hero-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.ia-hero-sub{font-size:13px;opacity:.85}
+.ia-form{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.ia-form-title{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text)}
+.ia-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.ia-field label{display:block;font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:4px}
+.ia-field select,.ia-field input{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;background:var(--bg);color:var(--text);outline:none}
+.ia-field select:focus,.ia-field input:focus{border-color:var(--green)}
+.ia-btn{width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.ia-btn:hover{background:var(--green-mid)}
+.ia-result{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px;display:none}
+.ia-result.show{display:block}
+.ia-decision-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:99px;font-size:16px;font-weight:700;margin-bottom:12px}
+.ia-decision-badge.irrigate{background:var(--blue-light);color:var(--blue)}
+.ia-decision-badge.wait{background:var(--green-pale);color:var(--green)}
+.ia-confidence-bar{height:8px;border-radius:99px;background:var(--border);margin:8px 0 4px;overflow:hidden}
+.ia-confidence-fill{height:100%;border-radius:99px;background:var(--green);transition:width .6s ease}
+.ia-reasons{margin-top:12px}
+.ia-reason-item{font-size:13px;color:var(--text-mid);padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.ia-reason-item:last-child{border-bottom:none}
+.ia-anomaly-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.ia-anomaly-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.ia-anomaly-badge.normal{background:var(--green-pale);color:var(--green)}
+.ia-anomaly-badge.warning{background:var(--amber-light);color:#B45309}
+.ia-anomaly-badge.critical{background:var(--red-light);color:var(--red)}
+.ia-impact-card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:14px;display:none}
+.ia-impact-card.show{display:block}
+.ia-impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.ia-impact-item{background:var(--bg);border-radius:var(--radius-sm);padding:10px}
+.ia-impact-label{font-size:11px;color:var(--text-muted);margin-bottom:3px}
+.ia-impact-value{font-size:18px;font-weight:700;color:var(--green)}
+.ia-impact-value.risk{color:var(--amber)}
+.ia-impact-value.risk-critical{color:var(--red)}
+
+/* ── Chatbot ── */
+.chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(26,155,80,.35);border:none;z-index:9999;transition:.2s}
+.chat-fab:hover{background:var(--green-mid);transform:scale(1.05)}
+.chat-fab svg{width:26px;height:26px;fill:white}
+.chat-window{position:fixed;bottom:92px;right:24px;width:340px;max-height:520px;background:var(--card);border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,.15);display:none;flex-direction:column;z-index:9998;overflow:hidden}
+.chat-window.open{display:flex}
+.chat-header{background:var(--green);color:white;padding:14px 16px;display:flex;align-items:center;gap:10px}
+.chat-header-icon{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.chat-header-icon svg{width:18px;height:18px;fill:white}
+.chat-header-text{flex:1}
+.chat-header-text h3{font-size:14px;font-weight:700;line-height:1}
+.chat-header-text p{font-size:11px;opacity:.8;margin-top:2px}
+.chat-close{background:none;border:none;color:white;cursor:pointer;padding:4px;opacity:.8;font-size:18px;line-height:1}
+.chat-close:hover{opacity:1}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:200px;max-height:340px}
+.chat-bubble{max-width:85%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.45}
+.chat-bubble.bot{background:var(--green-pale);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+.chat-bubble.user{background:var(--green);color:white;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-bubble.thinking{opacity:.6;font-style:italic}
+.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border)}
+.chat-input{flex:1;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-family:inherit;font-size:13px;outline:none;background:var(--bg)}
+.chat-input:focus{border-color:var(--green)}
+.chat-send{background:var(--green);color:white;border:none;border-radius:var(--radius-sm);width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.chat-send:hover{background:var(--green-mid)}
+.chat-send svg{width:16px;height:16px;fill:white}
+@media(max-width:500px){.chat-window{width:calc(100vw - 32px);right:16px}}
 </style>
 </head>
 <body>
@@ -301,6 +376,10 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
   <button class="nav-btn" onclick="showTab('carte')" id="btn-carte">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
     Carte
+  </button>
+  <button class="nav-btn" onclick="showTab('ia')" id="btn-ia">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h2a2 2 0 0 1 2 2v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1v-1a2 2 0 0 1 2-2h2V9.5C8.8 8.8 8 7.5 8 6a4 4 0 0 1 4-4z"/></svg>
+    IA
   </button>
 </div>
 
@@ -363,8 +442,38 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
   </div>
 </div>
 
+<!-- IA TAB -->
+<div class="section" id="tab-ia">
+  <div style="padding:0 12px 8px">
+    <div class="section-title" id="title-ia">Intelligence Artificielle</div>
+    <div class="section-sub" id="sub-ia">Moteur de décision IA — prédiction & anomalies en temps réel</div>
+  </div>
+  <div style="padding:0 12px" id="ia-content">
+    <div class="loading"><div class="spinner"></div>Chargement…</div>
+  </div>
+</div>
+
 <div class="bottom-pad"></div>
 </div><!-- end right-panel -->
+
+<!-- CHATBOT FAB -->
+<button class="chat-fab" onclick="toggleChat()" title="Assistant IrriSmart">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+</button>
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <div class="chat-header-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h2a2 2 0 0 1 2 2v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1v-1a2 2 0 0 1 2-2h2V9.5C8.8 8.8 8 7.5 8 6a4 4 0 0 1 4-4z"/></svg></div>
+    <div class="chat-header-text"><h3>Assistant IrriSmart</h3><p>Powered by Claude AI</p></div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-bubble bot">🌱 Bonjour ! Je suis votre assistant agricole intelligent.<br>Posez-moi vos questions sur l'irrigation, les cultures ou les alertes — en français ou en arabe.</div>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" placeholder="Votre question…" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send" onclick="sendChat()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+  </div>
+</div>
 
 <script>
 const API = "";  // same origin
@@ -459,6 +568,7 @@ function loadTab(name) {
   if (name === "alertes")    loadAlertes();
   if (name === "rapports")   loadRapports();
   if (name === "carte")      loadCarte();
+  if (name === "ia")         loadIA();
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -546,7 +656,27 @@ async function loadDashboard() {
     ${renderSimulation(rec)}
 
     <!-- Flux -->
+
+    <!-- Mini live charts -->
+    <div class="chart-grid" style="margin-top:14px">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">${lang==='ar'?'الرطوبة — 24 ساعة':'Humidité sol — 24h'}</div>
+          <button class="chart-refresh" onclick="loadDashMoistureChart()">↻</button>
+        </div>
+        <canvas id="dash-chart-moisture" height="160"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">${lang==='ar'?'ثقة قرارات IA':'Confiance IA'}</div>
+          <button class="chart-refresh" onclick="loadDashConfidenceChart()">↻</button>
+        </div>
+        <canvas id="dash-chart-confidence" height="160"></canvas>
+      </div>
+    </div>
   `;
+
+  setTimeout(() => { loadDashMoistureChart(); loadDashConfidenceChart(); }, 80);
 }
 
 function translateReason(reason) {
@@ -1046,9 +1176,9 @@ function setLang(l) {
   if (seasonTag) seasonTag.textContent = (isAr?'الموسم: ':'Saison: ') + (isAr?seasonAr:seasonFr);
 
   // Nav buttons text only (leave SVG intact)
-  [["btn-dashboard","dashboard"],["btn-capteurs","capteurs"],["btn-alertes","alertes"],["btn-rapports","rapports"],["btn-carte","carte"]].forEach(([id,key])=>{
+  [["btn-dashboard","dashboard"],["btn-capteurs","capteurs"],["btn-alertes","alertes"],["btn-rapports","rapports"],["btn-carte","carte"],["btn-ia","IA"]].forEach(([id,key])=>{
     const btn = document.getElementById(id);
-    if (btn) btn.lastChild.textContent = " " + t(key);
+    if (btn) btn.lastChild.textContent = " " + (key==="IA" ? "IA" : t(key));
   });
 
   // Section titles
@@ -1077,6 +1207,410 @@ function setLang(l) {
   const active = document.querySelector(".section.active");
   if (active) loadTab(active.id.replace("tab-",""));
 }
+
+// ── Dashboard mini charts ─────────────────────────────────────────────────────
+const dashCharts = {};
+function destroyDashChart(id) { if(dashCharts[id]){dashCharts[id].destroy();delete dashCharts[id];} }
+
+async function loadDashMoistureChart() {
+  destroyDashChart("moisture");
+  try {
+    const res = await fetch(`${API}/api/charts/moisture_history?hours=24`);
+    const series = (await res.json()).data;
+    const ctx = document.getElementById("dash-chart-moisture");
+    if (!ctx) return;
+    const colors = {olive:"#1A9B50",citrus:"#FF8C00",wheat:"#DAA520"};
+    const datasets = series.map(s => ({
+      label: s.label.split(" ")[0],
+      data: s.data.map(p => ({x: new Date(p.t), y: p.y})),
+      borderColor: colors[s.crop]||"#1A9B50",
+      backgroundColor: "transparent", borderWidth: 2, tension: 0.4, pointRadius: 1,
+    }));
+    dashCharts["moisture"] = new Chart(ctx, {
+      type:"line", data:{datasets},
+      options:{responsive:true,animation:{duration:500},scales:{x:{type:"time",time:{unit:"hour"},ticks:{maxTicksLimit:4},grid:{display:false}},y:{min:0,max:80,ticks:{callback:v=>v+"%"}}},plugins:{legend:{display:false}}}
+    });
+  } catch(e) {}
+}
+
+async function loadDashConfidenceChart() {
+  destroyDashChart("confidence");
+  try {
+    const res = await fetch(`${API}/api/charts/confidence_stats`);
+    const d = (await res.json()).data;
+    const ctx = document.getElementById("dash-chart-confidence");
+    if (!ctx) return;
+    dashCharts["confidence"] = new Chart(ctx, {
+      type:"doughnut",
+      data:{labels:["Haute","Moyenne","Faible"],datasets:[{data:[d.high,d.medium,d.low],backgroundColor:["#1A9B50","#E9A719","#E05252"],borderWidth:2}]},
+      options:{responsive:true,animation:{duration:500},plugins:{legend:{position:"bottom",labels:{font:{size:10}}},tooltip:{callbacks:{label:c=>c.label+": "+c.parsed+"%"}}}}
+    });
+  } catch(e) {}
+}
+
+// ── IA Tab ────────────────────────────────────────────────────────────────────
+let iaChartsLoaded = false;
+const iaCharts = {};
+
+async function loadIA() {
+  const el = document.getElementById("ia-content");
+  if (iaChartsLoaded) return; // already rendered
+  iaChartsLoaded = true;
+
+  el.innerHTML = `
+    <div class="ia-hero">
+      <div class="ia-hero-title">🤖 Moteur IA IrriSmart</div>
+      <div class="ia-hero-sub">RandomForest entraîné sur 36 000 échantillons FAO-56 — Olive, Agrumes, Blé</div>
+    </div>
+
+    <!-- Predict form -->
+    <div class="ia-form">
+      <div class="ia-form-title">Simuler une décision IA</div>
+      <div class="ia-row">
+        <div class="ia-field"><label>Culture</label>
+          <select id="ia-crop"><option value="olive">Olivier</option><option value="citrus">Agrumes</option><option value="wheat">Blé</option></select>
+        </div>
+        <div class="ia-field"><label>Humidité sol (%)</label>
+          <input type="number" id="ia-moisture" value="28" min="5" max="80"/>
+        </div>
+      </div>
+      <div class="ia-row">
+        <div class="ia-field"><label>Température (°C)</label>
+          <input type="number" id="ia-temp" value="26" min="-5" max="50"/>
+        </div>
+        <div class="ia-field"><label>Humidité air (%)</label>
+          <input type="number" id="ia-humidity" value="48" min="10" max="95"/>
+        </div>
+      </div>
+      <div class="ia-row">
+        <div class="ia-field"><label>Pluie 24h (mm)</label>
+          <input type="number" id="ia-rain" value="0" min="0" max="100"/>
+        </div>
+        <div class="ia-field"><label>Jours sans irrigation</label>
+          <input type="number" id="ia-days" value="4" min="0" max="30"/>
+        </div>
+      </div>
+      <button class="ia-btn" onclick="runIAPredict()">Lancer la prédiction IA ⚡</button>
+    </div>
+
+    <!-- Result placeholder -->
+    <div class="ia-result" id="ia-result-card"></div>
+
+    <!-- Impact predictor -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">💰 Prédicteur d'impact économique</div>
+      <div class="card-sub">Estime le déficit hydrique et les économies d'eau réalisées par l'IA</div>
+      <div class="ia-row" style="margin-top:12px">
+        <div class="ia-field"><label>Superficie (m²)</label>
+          <input type="number" id="ia-area" value="1000" min="100" max="100000"/>
+        </div>
+        <div class="ia-field"><label>Stade phénologique</label>
+          <select id="ia-stage"><option value="0">0 — Dormance</option><option value="1">1 — Débourrement</option><option value="2">2 — Floraison</option><option value="3">3 — Fructification</option><option value="4">4 — Maturation</option></select>
+        </div>
+      </div>
+      <button class="ia-btn" onclick="runImpact()">Calculer l'impact</button>
+    </div>
+    <div class="ia-impact-card" id="ia-impact-card"></div>
+
+    <!-- Anomaly detection -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">🔍 Détection d'anomalies capteur</div>
+      <div class="card-sub">Isolation Forest — vérifie la cohérence de la lecture en cours</div>
+      <button class="ia-btn" style="margin-top:12px" onclick="runAnomaly()">Analyser la lecture actuelle</button>
+    </div>
+    <div class="ia-anomaly-card" id="ia-anomaly-card" style="display:none"></div>
+
+    <!-- Charts -->
+    <div style="margin-bottom:6px;font-size:13px;font-weight:700;color:var(--text)">📊 Tableaux de bord temps réel</div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Humidité sol — 24h</div>
+          <button class="chart-refresh" onclick="loadMoistureChart()">↻</button>
+        </div>
+        <canvas id="chart-moisture" height="180"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Décisions IA — 7 jours</div>
+          <button class="chart-refresh" onclick="loadDecisionChart()">↻</button>
+        </div>
+        <canvas id="chart-decisions" height="180"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">ETo vs Humidité sol</div>
+          <button class="chart-refresh" onclick="loadScatterChart()">↻</button>
+        </div>
+        <canvas id="chart-scatter" height="180"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">Distribution confiance IA</div>
+          <button class="chart-refresh" onclick="loadConfidenceChart()">↻</button>
+        </div>
+        <canvas id="chart-confidence" height="180"></canvas>
+      </div>
+    </div>
+  `;
+
+  // Load charts after DOM is rendered
+  setTimeout(() => {
+    loadMoistureChart();
+    loadDecisionChart();
+    loadScatterChart();
+    loadConfidenceChart();
+  }, 100);
+}
+
+async function runIAPredict() {
+  const card = document.getElementById("ia-result-card");
+  card.className = "ia-result show";
+  card.innerHTML = `<div class="loading"><div class="spinner"></div>Prédiction en cours…</div>`;
+
+  const body = {
+    crop: document.getElementById("ia-crop").value,
+    soil_moisture_pct: parseFloat(document.getElementById("ia-moisture").value),
+    temperature_c: parseFloat(document.getElementById("ia-temp").value),
+    humidity_pct: parseFloat(document.getElementById("ia-humidity").value),
+    rainfall_24h_mm: parseFloat(document.getElementById("ia-rain").value),
+    wind_speed_kmh: 5,
+    days_since_irrigation: parseInt(document.getElementById("ia-days").value),
+  };
+
+  try {
+    const res = await fetch(`${API}/api/predict`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+    const d = (await res.json()).data;
+    if (!d) { card.innerHTML = "<p style='padding:12px;color:#888'>Modèle non chargé — entraîner les modèles d'abord.</p>"; return; }
+
+    const isIrrigate = d.decision === "irrigate";
+    card.innerHTML = `
+      <div class="ia-decision-badge ${d.decision}">${d.icon} ${d.action}</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">Confiance: <strong>${d.confidence_pct}%</strong> — Stade: ${d.stage_name} — Demande hydrique: ${d.water_demand_mm} mm/j</div>
+      <div class="ia-confidence-bar"><div class="ia-confidence-fill" style="width:${d.confidence_pct}%;background:${isIrrigate?'var(--blue)':'var(--green)'}"></div></div>
+      <div class="ia-reasons">
+        ${d.reasons.map(r=>`<div class="ia-reason-item"><span>•</span><span>${r}</span></div>`).join("")}
+      </div>
+    `;
+  } catch(e) {
+    card.innerHTML = `<p style='padding:12px;color:var(--red)'>${e.message}</p>`;
+  }
+}
+
+async function runImpact() {
+  const card = document.getElementById("ia-impact-card");
+  card.className = "ia-impact-card show";
+  card.innerHTML = `<div class="loading"><div class="spinner"></div>Calcul…</div>`;
+
+  const body = {
+    crop: document.getElementById("ia-crop").value,
+    current_moisture: parseFloat(document.getElementById("ia-moisture").value),
+    days_without_irrigation: parseInt(document.getElementById("ia-days").value),
+    growth_stage: parseInt(document.getElementById("ia-stage").value),
+    area_m2: parseFloat(document.getElementById("ia-area").value),
+  };
+
+  try {
+    const res = await fetch(`${API}/api/predict/impact`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+    const d = (await res.json()).data;
+    const riskClass = d.yield_risk_label === "Critique" ? "risk-critical" : d.yield_risk_label !== "Faible" ? "risk" : "";
+    card.innerHTML = `
+      <div class="ia-form-title">Impact prédit — ${d.stage_name}</div>
+      <div class="ia-impact-grid">
+        <div class="ia-impact-item"><div class="ia-impact-label">Déficit hydrique</div><div class="ia-impact-value">${d.water_deficit_mm} mm</div></div>
+        <div class="ia-impact-item"><div class="ia-impact-label">Volume irrigation</div><div class="ia-impact-value">${d.irrigation_volume_liters.toLocaleString()} L</div></div>
+        <div class="ia-impact-item"><div class="ia-impact-label">Risque rendement</div><div class="ia-impact-value ${riskClass}">${d.yield_risk_pct}% — ${d.yield_risk_label}</div></div>
+        <div class="ia-impact-item"><div class="ia-impact-label">Économies IA vs manuel</div><div class="ia-impact-value">−${d.estimated_savings_pct}%</div></div>
+      </div>
+      <div style="font-size:13px;color:var(--text-mid);line-height:1.5">${d.recommendation}</div>
+    `;
+  } catch(e) {
+    card.innerHTML = `<p style='color:var(--red)'>${e.message}</p>`;
+  }
+}
+
+async function runAnomaly() {
+  if (!currentSensor) return;
+  const card = document.getElementById("ia-anomaly-card");
+  card.style.display = "block";
+  card.innerHTML = `<div class="loading"><div class="spinner"></div>Analyse…</div>`;
+
+  // Use latest sensor reading values
+  const lr = currentSensor.latest_reading || {};
+  const body = {
+    sensor_id: currentSensor.id,
+    crop: currentSensor.crop_type,
+    soil_moisture_pct: lr.soil_moisture || 35,
+    temperature_c: lr.air_temperature || 22,
+    humidity_pct: lr.air_humidity || 55,
+    eto_mm_day: 4.0,
+  };
+
+  try {
+    const res = await fetch(`${API}/api/anomaly/detect`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+    const d = (await res.json()).data;
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div class="ia-form-title" style="margin-bottom:0">Résultat analyse capteur</div>
+        <span class="ia-anomaly-badge ${d.severity}">${d.severity === "normal" ? "✓ Normal" : d.severity === "warning" ? "⚠ Attention" : "🚨 Critique"}</span>
+      </div>
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:8px">${d.message}</div>
+      <div style="font-size:11px;color:var(--text-muted)">Score anomalie: ${d.anomaly_score}</div>
+    `;
+  } catch(e) {
+    card.innerHTML = `<p style='color:var(--red)'>${e.message}</p>`;
+  }
+}
+
+// ── Charts ────────────────────────────────────────────────────────────────────
+function destroyChart(id) {
+  if (iaCharts[id]) { iaCharts[id].destroy(); delete iaCharts[id]; }
+}
+
+async function loadMoistureChart() {
+  destroyChart("moisture");
+  try {
+    const res = await fetch(`${API}/api/charts/moisture_history?hours=24`);
+    const series = (await res.json()).data;
+    const ctx = document.getElementById("chart-moisture");
+    if (!ctx) return;
+    const colors = {olive:"#1A9B50",citrus:"#FF8C00",wheat:"#DAA520"};
+    const datasets = series.map(s => ({
+      label: s.label.split(" ")[0],
+      data: s.data.map(p => ({x: new Date(p.t), y: p.y})),
+      borderColor: colors[s.crop]||"#1A9B50",
+      backgroundColor: "transparent",
+      borderWidth: 2, tension: 0.4, pointRadius: 2,
+    }));
+    // Add threshold lines
+    series.forEach(s => {
+      datasets.push({
+        label: `Seuil ${s.label.split(" ")[0]}`,
+        data: s.data.length ? [{x: new Date(s.data[0].t), y: s.threshold}, {x: new Date(s.data[s.data.length-1]?.t||new Date()), y: s.threshold}] : [],
+        borderColor: colors[s.crop]||"#1A9B50",
+        borderWidth: 1, borderDash: [5,4], pointRadius: 0, backgroundColor:"transparent",
+      });
+    });
+    iaCharts["moisture"] = new Chart(ctx, {
+      type: "line",
+      data: { datasets },
+      options: { responsive:true, animation:{duration:600}, scales: {
+        x: { type:"time", time:{unit:"hour"}, ticks:{maxTicksLimit:6}, grid:{display:false} },
+        y: { min:0, max:80, ticks:{callback:v=>v+"%"} }
+      }, plugins:{legend:{display:false}} }
+    });
+  } catch(e) { console.warn("Moisture chart:", e); }
+}
+
+async function loadDecisionChart() {
+  destroyChart("decisions");
+  try {
+    const res = await fetch(`${API}/api/charts/decision_history?days=7`);
+    const data = (await res.json()).data;
+    const ctx = document.getElementById("chart-decisions");
+    if (!ctx) return;
+    iaCharts["decisions"] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: data.map(d=>d.date),
+        datasets: [
+          { label:"Irriguer", data:data.map(d=>d.irrigate), backgroundColor:"#3B82F6", borderRadius:4 },
+          { label:"Attendre", data:data.map(d=>d.wait), backgroundColor:"#1A9B50", borderRadius:4 },
+        ]
+      },
+      options: { responsive:true, animation:{duration:600}, scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:1}}}, plugins:{legend:{position:"bottom",labels:{font:{size:11}}}} }
+    });
+  } catch(e) { console.warn("Decision chart:", e); }
+}
+
+async function loadScatterChart() {
+  destroyChart("scatter");
+  try {
+    const res = await fetch(`${API}/api/charts/eto_scatter`);
+    const pts = (await res.json()).data;
+    const colors = {olive:"#1A9B50",citrus:"#FF8C00",wheat:"#DAA520"};
+    const byGroup = {};
+    pts.forEach(p => { if(!byGroup[p.crop]) byGroup[p.crop]=[];byGroup[p.crop].push({x:p.x,y:p.y}); });
+    const ctx = document.getElementById("chart-scatter");
+    if (!ctx) return;
+    iaCharts["scatter"] = new Chart(ctx, {
+      type:"scatter",
+      data:{datasets:Object.entries(byGroup).map(([crop,data])=>({label:crop,data,backgroundColor:colors[crop]+"99",pointRadius:3}))},
+      options:{responsive:true,animation:{duration:400},scales:{x:{title:{display:true,text:"ETo (mm/j)"}},y:{title:{display:true,text:"Humidité sol (%)"}}},plugins:{legend:{position:"bottom",labels:{font:{size:11}}}}}
+    });
+  } catch(e) { console.warn("Scatter chart:", e); }
+}
+
+async function loadConfidenceChart() {
+  destroyChart("confidence");
+  try {
+    const res = await fetch(`${API}/api/charts/confidence_stats`);
+    const d = (await res.json()).data;
+    const ctx = document.getElementById("chart-confidence");
+    if (!ctx) return;
+    iaCharts["confidence"] = new Chart(ctx, {
+      type:"doughnut",
+      data:{labels:["Haute (>80%)","Moyenne (60-80%)","Faible (<60%)"],datasets:[{data:[d.high,d.medium,d.low],backgroundColor:["#1A9B50","#E9A719","#E05252"],borderWidth:2}]},
+      options:{responsive:true,animation:{duration:600},plugins:{legend:{position:"bottom",labels:{font:{size:11}}},tooltip:{callbacks:{label:c=>c.label+": "+c.parsed+"%"}}}}
+    });
+  } catch(e) { console.warn("Confidence chart:", e); }
+}
+
+// ── Chatbot ───────────────────────────────────────────────────────────────────
+let chatOpen = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById("chatWindow").classList.toggle("open", chatOpen);
+  if (chatOpen) document.getElementById("chatInput").focus();
+}
+
+async function sendChat() {
+  const input = document.getElementById("chatInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = "";
+
+  const msgs = document.getElementById("chatMessages");
+  msgs.innerHTML += `<div class="chat-bubble user">${escHtml(msg)}</div>`;
+  msgs.innerHTML += `<div class="chat-bubble bot thinking" id="chat-thinking">…</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    const sensorCtx = currentSensor ? `Capteur actif: ${currentSensor.name}, culture: ${currentSensor.crop_type}.` : "";
+    const systemPrompt = `Tu es un assistant agronomique pour IrriSmart, un système d'irrigation intelligent basé en région Beni Mellal-Khénifra, Maroc. Tu aides les agriculteurs à prendre des décisions d'irrigation pour l'olivier, les agrumes et le blé. Tu réponds en français ou en arabe selon la langue de la question. Tu es concis, pratique et bienveillant. ${sensorCtx}`;
+
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": window.CLAUDE_API_KEY || "",
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 300,
+        system: systemPrompt,
+        messages: [{ role: "user", content: msg }]
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || "Je n'ai pas pu obtenir une réponse. Vérifiez la clé API.";
+    document.getElementById("chat-thinking").outerHTML = `<div class="chat-bubble bot">${escHtml(reply)}</div>`;
+  } catch(e) {
+    document.getElementById("chat-thinking").outerHTML = `<div class="chat-bubble bot">⚠️ Erreur réseau. Vérifiez votre connexion.</div>`;
+  }
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+}
+
+// Expose API key via meta tag (set in env or hardcoded for demo)
+window.CLAUDE_API_KEY = document.querySelector('meta[name="claude-api-key"]')?.content || "";
 
 init();
 </script>

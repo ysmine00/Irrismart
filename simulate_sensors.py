@@ -19,14 +19,19 @@ SENSORS = [
     {"id": "ID010003", "name": "Parcelle Blé Sud",        "crop": "wheat",  "base_moisture": 35.0, "battery": 88.0},
 ]
 
+CROP_ROTATION = ["olive", "citrus", "wheat"]
+
 print("🌱 IrriSmart Sensor Simulator Started")
 print(f"📡 Sending data to: {API}")
+print("🔄 Crop rotation enabled for AI testing")
 print("Press Ctrl+C to stop\n")
 
 day = 0
 while True:
     print(f"--- Reading #{day+1} ---")
-    for s in SENSORS:
+    for i, s in enumerate(SENSORS):
+        # Rotate crop type every reading for each sensor
+        current_crop = CROP_ROTATION[(day + i) % len(CROP_ROTATION)]
         # Realistic moisture variation
         moisture = s["base_moisture"] + math.sin(day / 7) * 5 + random.uniform(-2, 2)
         moisture = max(20, min(70, round(moisture, 1)))
@@ -50,7 +55,7 @@ while True:
                 "ph_level":        ph,
             }, timeout=10)
             status = "✅" if r.status_code == 200 else f"❌ {r.status_code}"
-            print(f"  {s['name']}: moisture={moisture}% airTemp={temp}°C soilTemp={soil_temp}°C pH={ph} rain={rain}mm battery={battery}% {status}")
+            print(f"  [{current_crop.upper()}] {s['name']}: moisture={moisture}% airTemp={temp}°C soilTemp={soil_temp}°C pH={ph} rain={rain}mm battery={battery}% {status}")
         except Exception as e:
             print(f"  {s['name']}: ❌ Error - {e}")
 

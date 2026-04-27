@@ -133,3 +133,46 @@ class Alert(db.Model):
             "soil_health_impact": self.soil_health_impact,
             "yield_risk": self.yield_risk,
         }
+
+
+class AnomalyLog(db.Model):
+    __tablename__ = "anomaly_log"
+    id            = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    sensor_id     = db.Column(db.String,  db.ForeignKey("sensors.id"))
+    crop          = db.Column(db.String)
+    anomaly_score = db.Column(db.Float,   nullable=False)   # negative = more anomalous
+    severity      = db.Column(db.String,  default="normal") # normal|warning|critical
+    message       = db.Column(db.Text)
+    timestamp     = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id, "sensor_id": self.sensor_id, "crop": self.crop,
+            "anomaly_score": self.anomaly_score, "severity": self.severity,
+            "message": self.message, "timestamp": self.timestamp.isoformat(),
+        }
+
+
+class AIDecisionLog(db.Model):
+    __tablename__ = "ai_decision_log"
+    id              = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    crop            = db.Column(db.String,  nullable=False)
+    decision        = db.Column(db.String,  nullable=False)   # irrigate|wait
+    confidence      = db.Column(db.Float,   nullable=False)   # 0.0-1.0
+    soil_moisture   = db.Column(db.Float)
+    temperature     = db.Column(db.Float)
+    reasoning       = db.Column(db.Text)      # JSON array of French reasoning strings
+    timestamp       = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    def to_dict(self):
+        import json
+        return {
+            "id": self.id,
+            "crop": self.crop,
+            "decision": self.decision,
+            "confidence": self.confidence,
+            "soil_moisture": self.soil_moisture,
+            "temperature": self.temperature,
+            "reasoning": json.loads(self.reasoning) if self.reasoning else [],
+            "timestamp": self.timestamp.isoformat(),
+        }
