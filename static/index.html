@@ -287,7 +287,7 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 .ia-anom-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:6px;border:1.5px solid var(--border);cursor:pointer}
 .ia-anom-row.normal{background:#F8FAF8}
 .ia-anom-row.anomaly{background:var(--amber-light);border-color:var(--amber)}
-.ia-anom-crop{font-weight:700;font-size:14px;flex:0 0 80px}
+.ia-anom-crop{font-weight:700;font-size:14px;flex:0 0 110px;display:flex;align-items:center}
 .ia-anom-status{font-size:13px;font-weight:600;flex:1}
 .ia-anom-detail{font-size:12px;color:var(--text-muted)}
 /* Anomaly cards in Alertes tab */
@@ -305,42 +305,41 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 .anomaly-detail-card{background:#FFFBEB;border-radius:var(--radius-sm);padding:12px;margin-top:8px;border:1px solid #FDE68A;display:none}
 .anomaly-detail-card.open{display:block}
 
-/* ── Chatbot (terminal dark) ── */
-.chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:#4AE54A;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(74,229,74,.4);border:none;z-index:9999;transition:.2s}
-.chat-fab:hover{background:#3dd448;transform:scale(1.05)}
-.chat-window{position:fixed;bottom:92px;right:24px;width:360px;max-height:540px;background:#0F2D1A;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.6);display:none;flex-direction:column;z-index:9998;overflow:hidden;border:1px solid #2d6b40}
+/* ── Chatbot ── */
+.chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(26,155,80,.35);border:none;z-index:9999;transition:.2s}
+.chat-fab:hover{background:var(--green-mid);transform:scale(1.05)}
+.chat-window{position:fixed;bottom:92px;right:24px;width:360px;max-height:540px;background:white;border-radius:16px;box-shadow:var(--shadow);display:none;flex-direction:column;z-index:9998;overflow:hidden;border:1.5px solid var(--border)}
 .chat-window.open{display:flex}
-.chat-header{background:#1A4D2E;color:white;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:2px solid #4AE54A}
-.chat-header-icon{width:36px;height:36px;background:#0F2D1A;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(74,229,74,.3);flex-shrink:0}
+.chat-header{background:var(--green);color:white;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:none}
+.chat-header-icon{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .chat-header-text{flex:1}
-.chat-header-text h3{font-size:13px;font-weight:700;line-height:1;font-family:monospace;color:#4AE54A;letter-spacing:1px}
-.chat-header-text p{font-size:10px;color:rgba(74,229,74,.55);margin-top:2px;font-family:monospace}
-.chat-close{background:none;border:none;color:rgba(74,229,74,.6);cursor:pointer;padding:4px;font-size:16px;line-height:1;font-family:monospace}
-.chat-close:hover{color:#4AE54A}
-.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:300px;background:#0F2D1A}
-.chat-messages::-webkit-scrollbar{width:3px}
-.chat-messages::-webkit-scrollbar-track{background:#0F2D1A}
-.chat-messages::-webkit-scrollbar-thumb{background:#2d6b40}
-.chat-bubble{max-width:85%;padding:9px 13px;font-size:13px;line-height:1.5;border-radius:2px}
-.chat-bubble.bot{background:#1A4D2E;color:rgba(74,229,74,.9);align-self:flex-start;border-left:2px solid #4AE54A}
-.chat-bubble.user{background:#1A4D2E;color:white;align-self:flex-end;border-right:2px solid #4AE54A}
-.chat-dots{display:flex;align-items:center;gap:5px;padding:9px 13px;background:#1A4D2E;border-left:2px solid #4AE54A;border-radius:2px;max-width:85%;align-self:flex-start}
-.chat-dot{width:5px;height:5px;background:#4AE54A;border-radius:50%;animation:chatBlink 1.2s infinite}
+.chat-header-text h3{font-size:13px;font-weight:700;line-height:1;font-family:'DM Sans',sans-serif;color:white}
+.chat-header-text p{font-size:11px;color:rgba(255,255,255,.75);margin-top:2px;font-family:'DM Sans',sans-serif}
+.chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;font-size:18px;line-height:1;font-family:'DM Sans',sans-serif}
+.chat-close:hover{color:white}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:300px;background:var(--bg)}
+.chat-messages::-webkit-scrollbar{width:4px}
+.chat-messages::-webkit-scrollbar-track{background:var(--bg)}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.chat-bubble{max-width:85%;padding:9px 13px;font-size:13px;line-height:1.5;border-radius:12px;font-family:'DM Sans',sans-serif}
+.chat-bubble.bot{background:white;color:var(--text);align-self:flex-start;border:1px solid var(--border)}
+.chat-bubble.user{background:var(--green-pale);color:var(--green);align-self:flex-end}
+.chat-dots{display:flex;align-items:center;gap:5px;padding:9px 13px;background:white;border:1px solid var(--border);border-radius:12px;max-width:85%;align-self:flex-start}
+.chat-dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:chatBlink 1.2s infinite}
 .chat-dot:nth-child(2){animation-delay:.2s}
 .chat-dot:nth-child(3){animation-delay:.4s}
-@keyframes chatBlink{0%,100%{opacity:.15}50%{opacity:1}}
-.chat-dot-label{font-size:11px;font-family:monospace;color:rgba(74,229,74,.55);margin-left:4px}
-.chat-chips{display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-top:1px solid #1A4D2E;background:#0F2D1A}
-.chat-chip{background:none;border:none;color:rgba(74,229,74,.6);font-size:12px;font-family:monospace;cursor:pointer;text-align:left;padding:3px 0;line-height:1.4}
-.chat-chip::before{content:'> ';color:#4AE54A;opacity:.5}
-.chat-chip:hover{color:#4AE54A}
-.chat-input-row{display:flex;gap:0;padding:10px 12px;border-top:1px solid #2d6b40;background:#1A4D2E;align-items:center}
-.chat-input{flex:1;border:none;border-bottom:1.5px solid #2d6b40;padding:6px 4px;font-family:monospace;font-size:13px;outline:none;background:transparent;color:#4AE54A}
-.chat-input::placeholder{color:rgba(74,229,74,.3)}
-.chat-input:focus{border-bottom-color:#4AE54A}
-.chat-send{background:transparent;color:#4AE54A;border:1px solid #4AE54A;border-radius:2px;padding:5px 10px;cursor:pointer;font-family:monospace;font-size:12px;font-weight:700;flex-shrink:0;transition:.15s;margin-left:10px;white-space:nowrap}
-.chat-send:hover{background:#4AE54A;color:#0F2D1A}
-.chat-brand{text-align:center;font-size:10px;font-family:monospace;color:rgba(74,229,74,.3);padding:5px 12px;background:#0F2D1A;border-top:1px solid #1A4D2E}
+@keyframes chatBlink{0%,100%{opacity:.2}50%{opacity:1}}
+.chat-dot-label{font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-mid);margin-left:4px}
+.chat-chips{display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-top:1px solid var(--border);background:var(--card)}
+.chat-chip{background:none;border:1px solid var(--border);border-radius:20px;color:var(--text-mid);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:left;padding:4px 12px;line-height:1.4;transition:.15s}
+.chat-chip:hover{border-color:var(--green);color:var(--green);background:var(--green-pale)}
+.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);background:white;align-items:center}
+.chat-input{flex:1;border:1.5px solid var(--border);border-radius:20px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--bg);color:var(--text)}
+.chat-input::placeholder{color:var(--text-mid)}
+.chat-input:focus{border-color:var(--green)}
+.chat-send{background:var(--green);color:white;border:none;border-radius:20px;padding:7px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;flex-shrink:0;transition:.15s;white-space:nowrap}
+.chat-send:hover{background:var(--green-mid)}
+.chat-brand{text-align:center;font-size:10px;font-family:'DM Sans',sans-serif;color:var(--text-mid);padding:5px 12px;background:var(--card);border-top:1px solid var(--border)}
 @media(max-width:500px){.chat-window{width:calc(100vw - 32px);right:16px}}
 </style>
 </head>
@@ -981,23 +980,25 @@ async function loadAlertes() {
   // ── Anomaly section at top ─────────────────────────────────────────────────
   if (anomalies.length) {
     html += `<div class="anomaly-section">
-      <div class="anomaly-section-hdr">⚠️ Anomalies Détectées</div>`;
-    const cropLabel3 = {olive:"🫒 Olivier",citrus:"🍊 Agrumes",wheat:"🌾 Blé"};
+      <div class="anomaly-section-hdr">${isAr ? 'شذوذات مكتشفة' : 'Anomalies Détectées'}</div>`;
+    const cropLabel3 = {olive:isAr?"زيتون":"Olivier",citrus:isAr?"حمضيات":"Agrumes",wheat:isAr?"قمح":"Blé"};
     anomalies.forEach(a => {
       const locale = isAr ? "ar-MA" : "fr-FR";
       const now = new Date();
       const ts  = new Date(a.timestamp);
       const diffH = Math.round((now - ts) / 3600000);
-      const relTime = diffH < 1 ? "il y a moins d'1h" : `il y a ${diffH}h`;
+      const relTime = isAr
+        ? (diffH < 1 ? "منذ أقل من ساعة" : `منذ ${diffH} ساعة`)
+        : (diffH < 1 ? "il y a moins d'1h" : `il y a ${diffH}h`);
       const sevChip = a.severity === "high"
-        ? `<span class="anomaly-badge-sev high">🔴 CRITIQUE</span>`
-        : `<span class="anomaly-badge-sev moderate">🟡 MODÉRÉE</span>`;
+        ? `<span class="anomaly-badge-sev high">${isAr?'حرج':'CRITIQUE'}</span>`
+        : `<span class="anomaly-badge-sev moderate">${isAr?'متوسط':'MODÉRÉE'}</span>`;
       const rangeStr = a.seasonal_range && a.seasonal_range[0] != null
         ? `${a.seasonal_range[0]}–${a.seasonal_range[1]}%`
         : "—";
       html += `<div class="anomaly-card">
         <div class="anomaly-card-hdr">
-          <div style="font-weight:700;font-size:14px">⚠️ ANOMALIE — ${cropLabel3[a.crop_type]||a.crop_type}</div>
+          <div style="font-weight:700;font-size:14px">${isAr?'شذوذ':'ANOMALIE'} — ${cropLabel3[a.crop_type]||a.crop_type}</div>
           ${sevChip}
         </div>
         <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${relTime}</div>
@@ -1015,12 +1016,12 @@ async function loadAlertes() {
     });
     html += `</div>`;
   } else {
-    html += `<div style="background:var(--green-pale);border-radius:var(--radius-sm);padding:10px 14px;color:var(--green);font-size:13px;margin-bottom:12px">✅ Aucune anomalie saisonnière détectée</div>`;
+    html += `<div style="background:var(--green-pale);border-radius:var(--radius-sm);padding:10px 14px;color:var(--green);font-size:13px;margin-bottom:12px">${isAr?'لا توجد شذوذات موسمية':'Aucune anomalie saisonnière détectée'}</div>`;
   }
 
   // ── Regular alerts ─────────────────────────────────────────────────────────
   if (!alerts.length) {
-    html += `<div class="card" style="text-align:center;padding:32px;color:var(--text-muted)">✅ ${isAr?'لا توجد تنبيهات نشطة':'Aucune alerte active'}</div>`;
+    html += `<div class="card" style="text-align:center;padding:32px;color:var(--text-muted)">${isAr?'لا توجد تنبيهات نشطة':'Aucune alerte active'}</div>`;
   } else {
     alerts.forEach(a => {
       const sn = sensors.find(s => s.id === a.sensor_id);
@@ -1316,6 +1317,9 @@ function setLang(l) {
     el.textContent = isAr ? (el.dataset.ar || el.textContent) : (el.dataset.fr || el.textContent);
   });
 
+  // Reset IA shell so it rebuilds in the new language
+  iaShellBuilt = false;
+
   // Re-render active tab
   const active = document.querySelector(".section.active");
   if (active) loadTab(active.id.replace("tab-",""));
@@ -1366,10 +1370,15 @@ const iaCharts = {};
 let iaShellBuilt = false;
 let iaRefreshTimer = null;
 
+const CROP_ICONS = {
+  olive: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px"><ellipse cx="13" cy="14" rx="4" ry="6" fill="#6B8E23"/><ellipse cx="13" cy="14" rx="4" ry="6" fill="#6B8E23" transform="rotate(-15 13 14)"/><path d="M13 8 Q11 5 9 2" stroke="#4a6741" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M9 2 Q13 4 13 8" stroke="#4a6741" stroke-width="1" fill="none"/></svg>`,
+  citrus: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px"><circle cx="13" cy="15" r="8" fill="#FF8C00"/><path d="M13 7 Q10 3 13 1 Q16 3 13 7" fill="#2d8a1f"/><line x1="13" y1="7" x2="13" y2="11" stroke="#cc7000" stroke-width="0.8"/></svg>`,
+  wheat: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px"><line x1="13" y1="24" x2="13" y2="4" stroke="#C9A82C" stroke-width="1.5"/><ellipse cx="13" cy="5" rx="2" ry="3" fill="#DAA520"/><ellipse cx="10" cy="9" rx="1.8" ry="3" fill="#DAA520" transform="rotate(-25 10 9)"/><ellipse cx="16" cy="9" rx="1.8" ry="3" fill="#DAA520" transform="rotate(25 16 9)"/><ellipse cx="10" cy="14" rx="1.8" ry="3" fill="#DAA520" transform="rotate(-25 10 14)"/><ellipse cx="16" cy="14" rx="1.8" ry="3" fill="#DAA520" transform="rotate(25 16 14)"/></svg>`,
+};
 const IA_CROPS = [
-  {key:"olive",  label:"Olivier", emoji:"🫒", sensor_id:"ID010001"},
-  {key:"citrus", label:"Agrumes", emoji:"🍊", sensor_id:"ID010002"},
-  {key:"wheat",  label:"Blé dur", emoji:"🌾", sensor_id:"ID010003"},
+  {key:"olive",  label:"Olivier", labelAr:"زيتون",   sensor_id:"ID010001"},
+  {key:"citrus", label:"Agrumes", labelAr:"حمضيات",  sensor_id:"ID010002"},
+  {key:"wheat",  label:"Blé dur", labelAr:"قمح دوروم", sensor_id:"ID010003"},
 ];
 
 async function loadIA() {
@@ -1400,63 +1409,64 @@ async function loadIA() {
 }
 
 function buildIAShell() {
+  const ar = lang === 'ar';
   return `
     <div class="card" style="margin-bottom:14px;border-left:4px solid var(--green)">
-      <div class="card-title">Moteur IA IrriSmart</div>
-      <div class="card-sub">RandomForest entraîné sur 36 000 échantillons FAO-56 — Olivier · Agrumes · Blé</div>
+      <div class="card-title">${ar ? 'محرك الذكاء الاصطناعي IrriSmart' : 'Moteur IA IrriSmart'}</div>
+      <div class="card-sub">${ar ? 'نموذج RandomForest مدرب على 36 000 عينة FAO-56 — زيتون · حمضيات · قمح' : 'RandomForest entraîné sur 36 000 échantillons FAO-56 — Olivier · Agrumes · Blé'}</div>
     </div>
 
     ${IA_CROPS.map(c=>`
     <div class="ia-crop-card" id="ia-card-${c.key}">
       <div class="ia-crop-card-header">
-        <div class="ia-crop-title">${c.emoji} ${c.label}</div>
-        <button class="btn-outline" onclick="refreshCropCard('${c.key}','${c.sensor_id}')">Analyser</button>
+        <div class="ia-crop-title">${CROP_ICONS[c.key]}${ar ? c.labelAr : c.label}</div>
+        <button class="btn-outline" onclick="refreshCropCard('${c.key}','${c.sensor_id}')">${ar ? 'تحليل' : 'Analyser'}</button>
       </div>
-      <div id="ia-body-${c.key}"><div class="loading"><div class="spinner"></div>Chargement…</div></div>
+      <div id="ia-body-${c.key}"><div class="loading"><div class="spinner"></div>${ar ? 'جارٍ التحميل…' : 'Chargement…'}</div></div>
     </div>`).join("")}
 
     <button onclick="refreshAllCropCards()" style="width:100%;padding:12px;border-radius:var(--radius);border:1.5px solid var(--green);background:var(--green-pale);color:var(--green);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:14px">
-      💧 Lancer analyse IA complète
+      ${ar ? 'تشغيل التحليل الكامل للذكاء الاصطناعي' : 'Lancer analyse IA complète'}
     </button>
 
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title" style="margin-bottom:2px">Surveillance Saisonnière — Analyse Statistique</div>
-      <div class="card-sub" style="margin-bottom:10px">Comparaison avec les baselines INRA Tadla</div>
+      <div class="card-title" style="margin-bottom:2px">${ar ? 'المراقبة الموسمية — تحليل إحصائي' : 'Surveillance Saisonnière — Analyse Statistique'}</div>
+      <div class="card-sub" style="margin-bottom:10px">${ar ? 'مقارنة مع بيانات INRA Tadla' : 'Comparaison avec les baselines INRA Tadla'}</div>
       <div id="ia-anomaly-strip"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title" style="margin-bottom:2px">Historique Décisions IA</div>
-      <div class="card-sub" style="margin-bottom:10px">10 dernières décisions — plus récentes en premier</div>
+      <div class="card-title" style="margin-bottom:2px">${ar ? 'سجل قرارات الذكاء الاصطناعي' : 'Historique Décisions IA'}</div>
+      <div class="card-sub" style="margin-bottom:10px">${ar ? 'آخر 10 قرارات — الأحدث أولاً' : '10 dernières décisions — plus récentes en premier'}</div>
       <div id="ia-history-table"><div class="loading"><div class="spinner"></div></div></div>
     </div>
 
-    <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Tableaux de bord temps réel</div>
+    <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">${ar ? 'لوحات المعلومات الفورية' : 'Tableaux de bord temps réel'}</div>
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Humidité sol — 24h</div>
+          <div class="chart-card-title">${ar ? 'رطوبة التربة — 24 ساعة' : 'Humidité sol — 24h'}</div>
           <button class="chart-refresh" onclick="loadMoistureChart()">↻</button>
         </div>
         <canvas id="chart-moisture" height="180"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Décisions IA — 7 jours</div>
+          <div class="chart-card-title">${ar ? 'قرارات الذكاء الاصطناعي — 7 أيام' : 'Décisions IA — 7 jours'}</div>
           <button class="chart-refresh" onclick="loadDecisionChart()">↻</button>
         </div>
         <canvas id="chart-decisions" height="180"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">ETo vs Humidité sol</div>
+          <div class="chart-card-title">${ar ? 'التبخر مقابل رطوبة التربة' : 'ETo vs Humidité sol'}</div>
           <button class="chart-refresh" onclick="loadScatterChart()">↻</button>
         </div>
         <canvas id="chart-scatter" height="180"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">Distribution confiance IA</div>
+          <div class="chart-card-title">${ar ? 'توزيع الثقة' : 'Distribution confiance IA'}</div>
           <button class="chart-refresh" onclick="loadConfidenceChart()">↻</button>
         </div>
         <canvas id="chart-confidence" height="180"></canvas>
@@ -1517,17 +1527,21 @@ async function refreshCropCard(cropKey, sensorId, moistureOverride, tempOverride
     if (card_el) { card_el.className = `ia-crop-card ${d.decision}`; }
 
     const confClass = d.confidence > 0.8 ? "" : d.confidence > 0.6 ? "medium" : "low";
+    const ar = lang === 'ar';
+    const actionLabel = ar
+      ? (d.decision === 'irrigate' ? 'ري' : 'انتظر')
+      : d.action;
     body_el.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <span class="ia-decision-pill ${d.decision}">${d.icon} ${d.action}</span>
+        <span class="ia-decision-pill ${d.decision}">${actionLabel}</span>
         <span style="font-size:13px;color:var(--text-muted)">${d.stage_name}</span>
       </div>
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Confiance: <strong style="color:var(--text)">${d.confidence_pct}%</strong></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">${ar?'الثقة':'Confiance'}: <strong style="color:var(--text)">${d.confidence_pct}%</strong></div>
       <div class="ia-conf-bar"><div class="ia-conf-fill ${confClass}" style="width:${d.confidence_pct}%"></div></div>
       <div class="ia-stat-row">
-        <div class="ia-stat-item"><div class="isl">Humidité sol</div><div class="isv">${Math.round(moisture)}%</div></div>
-        <div class="ia-stat-item"><div class="isl">Besoin eau</div><div class="isv">${d.water_demand_mm} mm/j</div></div>
-        <div class="ia-stat-item"><div class="isl">Température</div><div class="isv">${Math.round(temp ?? 25)}°C</div></div>
+        <div class="ia-stat-item"><div class="isl">${ar?'رطوبة التربة':'Humidité sol'}</div><div class="isv">${Math.round(moisture)}%</div></div>
+        <div class="ia-stat-item"><div class="isl">${ar?'الحاجة المائية':'Besoin eau'}</div><div class="isv">${d.water_demand_mm} mm/j</div></div>
+        <div class="ia-stat-item"><div class="isl">${ar?'درجة الحرارة':'Température'}</div><div class="isv">${Math.round(temp ?? 25)}°C</div></div>
       </div>
       <ul class="ia-reason-list" style="margin-top:10px">
         ${d.reasons.slice(0,3).map(r=>`<li>${r}</li>`).join("")}
@@ -1548,22 +1562,30 @@ async function loadAIHistory() {
       el.innerHTML = `<p style='color:var(--text-muted);font-size:13px;text-align:center;padding:12px'>Aucune décision enregistrée — lancez une analyse pour alimenter l'historique.</p>`;
       return;
     }
-    const cropLabel2 = {olive:"🫒 Olivier",citrus:"🍊 Agrumes",wheat:"🌾 Blé"};
+    const ar = lang === 'ar';
+    const cropLabel2 = {
+      olive: ar?"زيتون":"Olivier",
+      citrus: ar?"حمضيات":"Agrumes",
+      wheat: ar?"قمح":"Blé"
+    };
     el.innerHTML = `<table class="ia-hist-table">
       <thead><tr>
-        <th>Heure</th><th>Culture</th><th>Décision</th><th>Confiance</th><th>Humidité sol</th>
+        <th>${ar?'الوقت':'Heure'}</th><th>${ar?'المحصول':'Culture'}</th><th>${ar?'القرار':'Décision'}</th><th>${ar?'الثقة':'Confiance'}</th><th>${ar?'رطوبة التربة':'Humidité sol'}</th>
       </tr></thead>
       <tbody>
         ${entries.map(e => {
-          const dt = new Date(e.timestamp).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+          const locale = ar ? "ar-MA" : "fr-FR";
+          const dt = new Date(e.timestamp).toLocaleTimeString(locale,{hour:"2-digit",minute:"2-digit"});
           const rowClass = e.decision === "irrigate" ? "irrigate-row" : "wait-row";
-          const badge = e.decision === "irrigate" ? "💧 IRRIGUER" : "✅ ATTENDRE";
+          const badge = e.decision === "irrigate"
+            ? (ar ? "ري" : "IRRIGUER")
+            : (ar ? "انتظر" : "ATTENDRE");
           return `<tr class="${rowClass}">
             <td>${dt}</td>
             <td>${cropLabel2[e.crop]||e.crop}</td>
             <td>${badge}</td>
             <td>${Math.round(e.confidence*100)}%</td>
-            <td>${e.soil_moisture ? Math.round(e.soil_moisture)+"%" : "—"}</td>
+            <td>${e.soil_moisture != null ? Math.round(e.soil_moisture)+"%" : "—"}</td>
           </tr>`;
         }).join("")}
       </tbody>
@@ -1579,8 +1601,12 @@ async function loadAnomalyStrip() {
   try {
     const res = await fetch(`${API}/api/anomalies`);
     const anomalies = (await res.json()).data || [];
-    const cropEmoji = {olive:"🫒",citrus:"🍊",wheat:"🌾"};
-    const cropNames = {olive:"Olivier",citrus:"Agrumes",wheat:"Blé dur"};
+    const ar = lang === 'ar';
+    const cropNames = {
+      olive: ar?"زيتون":"Olivier",
+      citrus: ar?"حمضيات":"Agrumes",
+      wheat: ar?"قمح دوروم":"Blé dur"
+    };
     // Build map of latest anomaly per crop
     const anomMap = {};
     anomalies.forEach(a => { if (!anomMap[a.crop_type]) anomMap[a.crop_type] = a; });
@@ -1589,20 +1615,24 @@ async function loadAnomalyStrip() {
       const a = anomMap[crop];
       const hasAnom = !!a;
       const statusText = hasAnom
-        ? `⚠️ Anomalie (${a.z_score !== null ? a.z_score+"σ" : "hors plage"})`
-        : "✅ Normal";
+        ? (ar
+            ? `شذوذ (${a.z_score !== null ? a.z_score+"σ" : "خارج النطاق"})`
+            : `Anomalie (${a.z_score !== null ? a.z_score+"σ" : "hors plage"})`)
+        : (ar ? "طبيعي" : "Normal");
       const detailText = hasAnom
-        ? `En ${a.deviation_type === "below" ? "dessous" : "dessus"} de la plage saisonnière`
-        : "Humidité dans la plage saisonnière";
+        ? (ar
+            ? `${a.deviation_type === "below" ? "أقل" : "أعلى"} من النطاق الموسمي`
+            : `En ${a.deviation_type === "below" ? "dessous" : "dessus"} de la plage saisonnière`)
+        : (ar ? "الرطوبة ضمن النطاق الموسمي" : "Humidité dans la plage saisonnière");
       const detailId = `anom-detail-${crop}`;
       const detailBlock = hasAnom ? `
         <div class="anomaly-detail-card" id="${detailId}">
-          <div style="font-size:12px;font-weight:700;color:#B45309;margin-bottom:4px">Causes possibles</div>
+          <div style="font-size:12px;font-weight:700;color:#B45309;margin-bottom:4px">${ar?'الأسباب المحتملة':'Causes possibles'}</div>
           <ul class="anomaly-cause-list">${(a.possible_causes||[]).map(c=>`<li>${c}</li>`).join("")}</ul>
           <div class="anomaly-rec-box">${a.recommended_action}</div>
         </div>` : "";
       return `<div class="ia-anom-row ${hasAnom?'anomaly':'normal'}" onclick="toggleAnomalyDetail('${detailId}')">
-        <div class="ia-anom-crop">${cropEmoji[crop]} ${cropNames[crop]}</div>
+        <div class="ia-anom-crop">${CROP_ICONS[crop]}${cropNames[crop]}</div>
         <div class="ia-anom-status" style="color:${hasAnom?'#B45309':'var(--green)'}">${statusText}</div>
         <div class="ia-anom-detail">${detailText}</div>
       </div>${detailBlock}`;
