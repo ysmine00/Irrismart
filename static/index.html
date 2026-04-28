@@ -306,12 +306,10 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 .anomaly-detail-card.open{display:block}
 
 /* ── Chatbot trigger (farmer avatar) ── */
-#chat-toggle{position:fixed;bottom:28px;right:28px;width:72px;height:72px;border-radius:50%;cursor:pointer;z-index:9997;overflow:visible;background:transparent;border:none;padding:0;animation:farmerBob 3s ease-in-out infinite;transition:transform .2s ease}
-#chat-toggle:hover{animation:none;transform:scale(1.12) rotate(-5deg)}
-#farmer-img{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:center top;border:3px solid white;box-shadow:0 4px 16px rgba(0,0,0,0.2);display:block}
-.chat-badge{position:absolute;top:2px;right:2px;background:#e74c3c;color:white;font-size:11px;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:2px solid white}
-.chat-badge.hidden{display:none}
-@keyframes farmerBob{0%,100%{transform:translateY(0px) rotate(0deg)}25%{transform:translateY(-6px) rotate(2deg)}75%{transform:translateY(-3px) rotate(-1deg)}}
+#chat-toggle{position:fixed !important;bottom:28px !important;right:28px !important;top:unset !important;left:unset !important;width:68px !important;height:68px !important;z-index:99999 !important;cursor:pointer !important;border:none !important;background:transparent !important;padding:0 !important;margin:0 !important;border-radius:50% !important;overflow:visible !important;animation:farmerBob 3s ease-in-out infinite !important}
+#chat-toggle:hover{animation:none !important;transform:scale(1.1) !important}
+#chat-toggle img{width:68px !important;height:68px !important;border-radius:50% !important;object-fit:cover !important;object-position:center top !important;border:3px solid white !important;box-shadow:0 4px 20px rgba(0,0,0,.3) !important;display:block !important}
+@keyframes farmerBob{0%,100%{transform:translateY(0px)}50%{transform:translateY(-8px)}}
 /* ── Chatbot window ── */
 .chat-window{position:fixed;bottom:92px;right:24px;width:360px;max-height:540px;background:#fff;border:1.5px solid var(--border);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.12);display:none;flex-direction:column;z-index:9998;overflow:hidden}
 .chat-window.open{display:flex}
@@ -487,28 +485,6 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 <div class="bottom-pad"></div>
 </div><!-- end right-panel -->
 
-<!-- CHATBOT FARMER AVATAR -->
-<div id="chat-toggle" onclick="toggleChat()" title="Parler à IrriSmart" style="position:relative">
-  <img src="/static/farmer-avatar.png" alt="Assistant IrriSmart" id="farmer-img" onerror="this.style.display='none';this.parentElement.style.background='#2D6A4F';this.parentElement.innerHTML+='<svg viewBox=\'0 0 56 56\' style=\'width:100%;height:100%\'><polygon points=\'28,4 42,18 14,18\' fill=\'#E9A719\'/><rect x=\'12\' y=\'17\' width=\'32\' height=\'4\' rx=\'2\' fill=\'#D4A017\'/><circle cx=\'28\' cy=\'34\' r=\'16\' fill=\'white\'  opacity=\'.9\'/><circle cx=\'23\' cy=\'31\' r=\'2\' fill=\'#2D6A4F\'/><circle cx=\'33\' cy=\'31\' r=\'2\' fill=\'#2D6A4F\'/><path d=\'M22 38 Q28 43 34 38\' stroke=\'#2D6A4F\' stroke-width=\'1.5\' fill=\'none\'/></svg>'">
-  <span id="chat-badge" class="chat-badge hidden">1</span>
-</div>
-<div class="chat-window" id="chatWindow">
-  <div class="chat-header">
-    <img src="/static/farmer-avatar.png" style="width:32px;height:32px;border-radius:50%;margin-right:10px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">
-    <div>
-      <div style="font-weight:700;font-size:14px;color:white">Assistant IrriSmart</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.75)">● En ligne</div>
-    </div>
-    <button onclick="toggleChat()" style="margin-left:auto;background:none;border:none;color:white;cursor:pointer;font-size:18px;line-height:1">×</button>
-  </div>
-  <div class="chat-messages" id="chatMessages">
-    <div class="chat-bubble bot" id="chat-init-msg">Bonjour. Je suis votre conseiller agricole IrriSmart pour la région Beni Mellal-Khénifra. Posez vos questions en français, arabe ou darija.</div>
-  </div>
-  <div class="chat-chips" id="chatChips">
-    <button class="chat-chip" onclick="chipSend(this)" data-fr="Quand irriguer mon olivier ?" data-ar="متى أروي زيتوني؟">Quand irriguer mon olivier ?</button>
-    <button class="chat-chip" onclick="chipSend(this)" data-fr="Quel est le besoin en eau des agrumes ?" data-ar="ما هي احتياجات الماء للحمضيات؟">Quel est le besoin en eau des agrumes ?</button>
-    <button class="chat-chip" onclick="chipSend(this)" data-fr="Comment lire mon score de confiance ?" data-ar="كيف أقرأ درجة الثقة؟">Comment lire mon score de confiance ?</button>
-  </div>
   <div class="chat-input-row">
     <input class="chat-input" id="chatInput" placeholder="Votre question…" onkeydown="if(event.key==='Enter')sendChat()"/>
     <button class="chat-send" onclick="sendChat()">Envoyer</button>
@@ -1976,7 +1952,7 @@ async function exportSensorCSV() {
       [r.timestamp, r.soil_moisture??'', r.air_temperature??'',
        r.battery_voltage??'', r.rain_mm??'', r.ph_level??''].join(",")
     );
-    const blob = new Blob([header + "\n" + lines.join("\n")], {type:"text/csv"});
+    const blob = new Blob(['\uFEFF' + header + "\n" + lines.join("\n")], {type:"text/csv"});
     const url  = URL.createObjectURL(blob);
     const a    = Object.assign(document.createElement("a"), {
       href: url, download: `irrismart_${currentSensor.id}_${new Date().toISOString().slice(0,10)}.csv`
@@ -2075,5 +2051,34 @@ async function loadMoistureTrend7Day() {
 
 init();
 </script>
+
+<!-- FARMER AVATAR CHATBOT - placed right before </body> -->
+<div id="chat-toggle" onclick="toggleChat()" style="position:fixed !important;bottom:28px;right:28px;z-index:99999;width:68px;height:68px;cursor:pointer;border:none;background:transparent;padding:0">
+  <img src="/static/farmer-avatar.png" style="width:68px;height:68px;border-radius:50%;object-fit:cover;object-position:center top;border:3px solid white;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:block" onerror="this.style.display='none'">
+  <span id="chat-badge" class="chat-badge hidden">1</span>
+</div>
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <img src="/static/farmer-avatar.png" style="width:32px;height:32px;border-radius:50%;margin-right:10px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">
+    <div>
+      <div style="font-weight:700;font-size:14px;color:white">Assistant IrriSmart</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.75)">● En ligne</div>
+    </div>
+    <button onclick="toggleChat()" style="margin-left:auto;background:none;border:none;color:white;cursor:pointer;font-size:18px;line-height:1">×</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-bubble bot" id="chat-init-msg">Bonjour. Je suis votre conseiller agricole IrriSmart pour la région Beni Mellal-Khénifra. Posez vos questions en français, arabe ou darija.</div>
+  </div>
+  <div class="chat-chips" id="chatChips">
+    <button class="chat-chip" onclick="chipSend(this)" data-fr="Quand irriguer mon olivier ?" data-ar="متى أروي زيتوني؟">Quand irriguer mon olivier ?</button>
+    <button class="chat-chip" onclick="chipSend(this)" data-fr="Quel est le besoin en eau des agrumes ?" data-ar="ما هي احتياجات الماء للحمضيات؟">Quel est le besoin en eau des agrumes ?</button>
+    <button class="chat-chip" onclick="chipSend(this)" data-fr="Comment lire mon score de confiance ?" data-ar="كيف أقرأ درجة الثقة؟">Comment lire mon score de confiance ?</button>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" placeholder="Votre question…" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send" onclick="sendChat()">Envoyer</button>
+  </div>
+</div>
+
 </body>
 </html>
