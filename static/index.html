@@ -492,6 +492,7 @@ let currentSensor = null;
 let sensors = [];
 let chartInstances = {};
 let currentSimTab = "irrigate";
+let currentSimScenarios = null;
 let lang = "fr";
 
 const T = {
@@ -719,8 +720,25 @@ function renderSoilHealth(rec) {
 
 function renderSimulation(rec) {
   if (!rec.sim_irrigate) return "";
-  const si = rec.sim_irrigate, sw = rec.sim_wait;
   const isAr = lang === 'ar';
+  const cur = rec.moisture_pct, curH = rec.soil_health;
+  currentSimScenarios = {
+    cur, curH,
+    irrigate: {
+      estimated_moisture: Math.min(100, Math.round(cur + 12)),
+      moisture_impact: +12,
+      estimated_health: Math.min(100, curH + 5),
+      health_impact: +5,
+      description: "L'irrigation immédiate stabilise l'humidité pour les prochaines 24h."
+    },
+    wait: {
+      estimated_moisture: Math.max(0, Math.round(cur - 4)),
+      moisture_impact: -4,
+      estimated_health: Math.max(0, curH - 8),
+      health_impact: -8,
+      description: "Attendre préserve les ressources si la pluie est confirmée."
+    }
+  };
   return `<div class="card">
     <div class="card-title">${isAr?'محاكاة سريعة':'Simulation rapide'}</div>
     <div class="card-sub">${isAr?'تأثير متوقع خلال 24 ساعة':'Impact estimé d\'ici 24h'}</div>
@@ -729,22 +747,25 @@ function renderSimulation(rec) {
       <button class="sim-tab" id="sim-tab-wait" onclick="switchSim('wait')">${isAr?'إذا انتظرت 24 ساعة':'Si j\'attends 24h'}</button>
     </div>
     <div id="sim-body">
-      ${simBody(si, rec.moisture_pct, rec.soil_health)}
+      ${simBody(currentSimScenarios.irrigate, cur, curH)}
     </div>
   </div>`;
 }
 
-function simBody(s, curMoisture, curHealth) {
+function simBody(s, curMoisture, curHealth, isWait) {
   const isAr = lang === 'ar';
-  const desc = isAr ? s.description
-    .replace("L'irrigation immédiate stabilise l'humidité pour les prochaines 24h.", "الري الفوري يستقر الرطوبة للـ 24 ساعة القادمة.")
-    .replace("Attendre préserve les ressources si la pluie est confirmée.", "الانتظار يحافظ على الموارد إذا تأكد المطر.") 
-    : s.description;
+  const descFr = isWait
+    ? "Attendre préserve les ressources si la pluie est confirmée."
+    : "L'irrigation immédiate stabilise l'humidité pour les prochaines 24h.";
+  const descAr = isWait
+    ? "الانتظار يحافظ على الموارد إذا تأكد المطر."
+    : "الري الفوري يستقر الرطوبة للـ 24 ساعة القادمة.";
+  const deltaColor = isWait ? "color:#f59e0b" : "color:#22c55e";
   return `<div class="sim-results">
-    <div class="sim-result-card"><div class="sr-label">${isAr?'الرطوبة المتوقعة':'Humidité estimée'}</div><div class="sr-value">${s.estimated_moisture}%</div><div class="sr-delta">${isAr?'تأثير الرطوبة':'Impact humidité'}: ${s.moisture_impact >= 0 ? '+' : ''}${s.moisture_impact}%</div></div>
-    <div class="sim-result-card"><div class="sr-label">${isAr?'الصحة المتوقعة':'Santé estimée'}</div><div class="sr-value">${s.estimated_health}</div><div class="sr-delta">${isAr?'تأثير الصحة':'Impact santé'}: ${s.health_impact >= 0 ? '+' : ''}${s.health_impact}</div></div>
+    <div class="sim-result-card"><div class="sr-label">${isAr?'الرطوبة المتوقعة':'Humidité estimée'}</div><div class="sr-value">${s.estimated_moisture}%</div><div class="sr-delta" style="${deltaColor}">${isAr?'تأثير الرطوبة':'Impact humidité'}: ${s.moisture_impact >= 0 ? '+' : ''}${s.moisture_impact}%</div></div>
+    <div class="sim-result-card"><div class="sr-label">${isAr?'الصحة المتوقعة':'Santé estimée'}</div><div class="sr-value">${s.estimated_health}</div><div class="sr-delta" style="${deltaColor}">${isAr?'تأثير الصحة':'Impact santé'}: ${s.health_impact >= 0 ? '+' : ''}${s.health_impact}</div></div>
   </div>
-  <div class="sim-desc">${desc}</div>
+  <div class="sim-desc">${isAr ? descAr : descFr}</div>
   <div class="sim-current">${isAr?'المستوى الحالي':'Niveau actuel'}: ${curMoisture}% / ${curHealth}</div>`;
 }
 
@@ -752,6 +773,9 @@ function switchSim(which) {
   currentSimTab = which;
   document.getElementById("sim-tab-irr").classList.toggle("active", which==="irrigate");
   document.getElementById("sim-tab-wait").classList.toggle("active", which==="wait");
+  if (!currentSimScenarios) return;
+  const el = document.getElementById("sim-body");
+  if (el) el.innerHTML = simBody(currentSimScenarios[which], currentSimScenarios.cur, currentSimScenarios.curH, which==="wait");
 }
 
 // ── Capteurs tab ──────────────────────────────────────────────────────────────
