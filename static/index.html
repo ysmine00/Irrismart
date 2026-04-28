@@ -305,25 +305,22 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 .anomaly-detail-card{background:#FFFBEB;border-radius:var(--radius-sm);padding:12px;margin-top:8px;border:1px solid #FDE68A;display:none}
 .anomaly-detail-card.open{display:block}
 
-/* ── Chatbot ── */
-.chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(26,155,80,.35);border:none;z-index:9999;transition:.2s}
-.chat-fab:hover{background:var(--green-mid);transform:scale(1.05)}
-.chat-window{position:fixed;bottom:92px;right:24px;width:360px;max-height:540px;background:white;border-radius:16px;box-shadow:var(--shadow);display:none;flex-direction:column;z-index:9998;overflow:hidden;border:1.5px solid var(--border)}
+/* ── Chatbot trigger (farmer avatar) ── */
+.chat-trigger{position:fixed;bottom:24px;right:24px;width:56px;height:56px;cursor:pointer;z-index:9997;animation:bob 2s ease-in-out infinite;transition:transform .2s}
+.chat-trigger:hover{transform:scale(1.08);animation:none}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+/* ── Chatbot window ── */
+.chat-window{position:fixed;bottom:92px;right:24px;width:360px;max-height:540px;background:#fff;border:1.5px solid var(--border);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.12);display:none;flex-direction:column;z-index:9998;overflow:hidden}
 .chat-window.open{display:flex}
-.chat-header{background:var(--green);color:white;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:none}
-.chat-header-icon{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.chat-header-text{flex:1}
-.chat-header-text h3{font-size:13px;font-weight:700;line-height:1;font-family:'DM Sans',sans-serif;color:white}
-.chat-header-text p{font-size:11px;color:rgba(255,255,255,.75);margin-top:2px;font-family:'DM Sans',sans-serif}
-.chat-close{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:4px;font-size:18px;line-height:1;font-family:'DM Sans',sans-serif}
-.chat-close:hover{color:white}
+.chat-header{background:#2D6A4F;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0}
+.chat-header-title{color:white;font-weight:700;font-size:14px;font-family:'DM Sans',sans-serif}
 .chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:300px;background:var(--bg)}
 .chat-messages::-webkit-scrollbar{width:4px}
 .chat-messages::-webkit-scrollbar-track{background:var(--bg)}
 .chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
 .chat-bubble{max-width:85%;padding:9px 13px;font-size:13px;line-height:1.5;border-radius:12px;font-family:'DM Sans',sans-serif}
-.chat-bubble.bot{background:white;color:var(--text);align-self:flex-start;border:1px solid var(--border)}
-.chat-bubble.user{background:var(--green-pale);color:var(--green);align-self:flex-end}
+.chat-bubble.bot{background:white;border:1px solid var(--border);border-left:3px solid #2D6A4F;border-radius:12px;align-self:flex-start;color:var(--text)}
+.chat-bubble.user{background:#2D6A4F;color:white;border-radius:12px;align-self:flex-end}
 .chat-dots{display:flex;align-items:center;gap:5px;padding:9px 13px;background:white;border:1px solid var(--border);border-radius:12px;max-width:85%;align-self:flex-start}
 .chat-dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:chatBlink 1.2s infinite}
 .chat-dot:nth-child(2){animation-delay:.2s}
@@ -331,16 +328,21 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 @keyframes chatBlink{0%,100%{opacity:.2}50%{opacity:1}}
 .chat-dot-label{font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-mid);margin-left:4px}
 .chat-chips{display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-top:1px solid var(--border);background:var(--card)}
-.chat-chip{background:none;border:1px solid var(--border);border-radius:20px;color:var(--text-mid);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:left;padding:4px 12px;line-height:1.4;transition:.15s}
-.chat-chip:hover{border-color:var(--green);color:var(--green);background:var(--green-pale)}
+.chat-chip{background:var(--green-pale);color:var(--green);border:none;border-radius:20px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;text-align:left;line-height:1.4;transition:.15s}
+.chat-chip:hover{background:var(--green);color:white}
 .chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);background:white;align-items:center}
-.chat-input{flex:1;border:1.5px solid var(--border);border-radius:20px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--bg);color:var(--text)}
+.chat-input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;background:white;color:var(--text)}
 .chat-input::placeholder{color:var(--text-mid)}
-.chat-input:focus{border-color:var(--green)}
-.chat-send{background:var(--green);color:white;border:none;border-radius:20px;padding:7px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;flex-shrink:0;transition:.15s;white-space:nowrap}
+.chat-input:focus{border-color:#2D6A4F;outline:none}
+.chat-send{background:#2D6A4F;color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;flex-shrink:0;transition:.15s;white-space:nowrap}
 .chat-send:hover{background:var(--green-mid)}
-.chat-brand{text-align:center;font-size:10px;font-family:'DM Sans',sans-serif;color:var(--text-mid);padding:5px 12px;background:var(--card);border-top:1px solid var(--border)}
 @media(max-width:500px){.chat-window{width:calc(100vw - 32px);right:16px}}
+/* ── IA skeleton loading ── */
+.ia-skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;height:20px;margin:6px 0}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* ── IA toast ── */
+.ia-toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#2D6A4F;color:white;padding:10px 24px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.ia-toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -423,9 +425,12 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 
 <!-- CAPTEURS TAB -->
 <div class="section" id="tab-capteurs">
-  <div style="padding:0 12px 8px">
-    <div class="section-title" id="title-capteurs">Détails capteurs</div>
-    <div class="section-sub" id="sub-capteurs">Tendance sur les 14 derniers jours</div>
+  <div style="padding:0 12px 8px;display:flex;align-items:flex-start;justify-content:space-between">
+    <div>
+      <div class="section-title" id="title-capteurs">Détails capteurs</div>
+      <div class="section-sub" id="sub-capteurs">Tendance sur les 14 derniers jours</div>
+    </div>
+    <button onclick="exportSensorCSV()" style="margin-top:4px;padding:5px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:none;color:var(--text-mid);font-family:inherit;white-space:nowrap" id="export-csv-btn">Exporter CSV</button>
   </div>
   <div style="padding:0 12px" id="capteurs-content">
     <div class="loading"><div class="spinner"></div>Chargement…</div>
@@ -479,34 +484,24 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 <div class="bottom-pad"></div>
 </div><!-- end right-panel -->
 
-<!-- CHATBOT FAB -->
-<button class="chat-fab" onclick="toggleChat()" title="IRRISMART-01">
-  <svg viewBox="0 0 40 44" width="28" height="30" fill="none">
-    <line x1="20" y1="5" x2="20" y2="1" stroke="#1A4D2E" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="20" cy="1" r="2.5" fill="#1A4D2E"/>
-    <path d="M20 8L34 16V32L20 40L6 32V16Z" fill="#1A4D2E"/>
-    <rect x="11" y="18" width="7" height="5" rx="0.5" fill="#4AE54A"/>
-    <rect x="22" y="18" width="7" height="5" rx="0.5" fill="#4AE54A"/>
-    <rect x="14" y="28" width="12" height="2.5" rx="1" fill="#4AE54A" opacity="0.55"/>
+<!-- CHATBOT FARMER AVATAR -->
+<div class="chat-trigger" onclick="toggleChat()" title="Assistant IrriSmart">
+  <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="28,4 42,18 14,18" fill="#E9A719"/>
+    <rect x="12" y="17" width="32" height="4" rx="2" fill="#D4A017"/>
+    <circle cx="28" cy="34" r="16" fill="#2D6A4F"/>
+    <circle cx="23" cy="31" r="2" fill="white"/>
+    <circle cx="33" cy="31" r="2" fill="white"/>
+    <path d="M22 38 Q28 43 34 38" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
   </svg>
-</button>
+</div>
 <div class="chat-window" id="chatWindow">
   <div class="chat-header">
-    <div class="chat-header-icon">
-      <svg viewBox="0 0 40 44" width="22" height="24" fill="none">
-        <line x1="20" y1="5" x2="20" y2="1" stroke="#4AE54A" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="20" cy="1" r="2.5" fill="#4AE54A"/>
-        <path d="M20 8L34 16V32L20 40L6 32V16Z" fill="#4AE54A" opacity="0.25"/>
-        <rect x="11" y="18" width="7" height="5" rx="0.5" fill="#4AE54A"/>
-        <rect x="22" y="18" width="7" height="5" rx="0.5" fill="#4AE54A"/>
-        <rect x="14" y="28" width="12" height="2.5" rx="1" fill="#4AE54A" opacity="0.55"/>
-      </svg>
-    </div>
-    <div class="chat-header-text"><h3>IRRISMART-01</h3><p>Système de conseil agricole</p></div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
+    <span class="chat-header-title">Assistant IrriSmart</span>
+    <button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;font-size:18px;line-height:1">×</button>
   </div>
   <div class="chat-messages" id="chatMessages">
-    <div class="chat-bubble bot" id="chat-init-msg">Initialisation système... Bonjour. Je suis IRRISMART-01, votre conseiller agricole pour la région Beni Mellal-Khénifra. Posez vos questions sur l&#39;irrigation, les cultures ou les alertes — en français ou en arabe.</div>
+    <div class="chat-bubble bot" id="chat-init-msg">Bonjour. Je suis votre conseiller agricole IrriSmart pour la région Beni Mellal-Khénifra. Posez vos questions en français, arabe ou darija.</div>
   </div>
   <div class="chat-chips" id="chatChips">
     <button class="chat-chip" onclick="chipSend(this)" data-fr="Quand irriguer mon olivier ?" data-ar="متى أروي زيتوني؟">Quand irriguer mon olivier ?</button>
@@ -515,9 +510,8 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
   </div>
   <div class="chat-input-row">
     <input class="chat-input" id="chatInput" placeholder="Votre question…" onkeydown="if(event.key==='Enter')sendChat()"/>
-    <button class="chat-send" onclick="sendChat()">[ → ]</button>
+    <button class="chat-send" onclick="sendChat()">Envoyer</button>
   </div>
-  <div class="chat-brand">IRRISMART-01 v2.0</div>
 </div>
 
 <script>
@@ -548,7 +542,7 @@ const T = {
     "Faible":"Faible","Moyen":"Moyen","Élevé":"Élevé","Healthy":"Healthy",
   },
   ar: {
-    "IRRIGATE":"ري","WAIT":"انتظر","MONITOR":"مراقبة","NO_ACTION":"لا إجراء",
+    "IRRIGATE":"ري","WAIT":"انتظار","MONITOR":"مراقبة","NO_ACTION":"لا إجراء",
     "dashboard":"لوحة التحكم","capteurs":"المستشعرات","alertes":"التنبيهات","rapports":"التقارير","carte":"الخريطة",
     "decision_title":"توصية اليوم","decision_sub":"هل يجب الري اليوم؟ وكم المدة؟",
     "confiance":"ثقة البيانات","fiabilite":"موثوقية المستشعرات",
@@ -831,13 +825,58 @@ async function loadCapteurs() {
   const trendDown = isAr ? '↘ في انخفاض' : '↘ En baisse';
   const normalLabel = isAr ? 'طبيعي' : 'Normal';
 
+  // Freshness formatting
+  const freshInfo = rec ? formatFreshness(rec.freshness_min) : {text:'—',color:'var(--text-muted)'};
+
+  // Status indicator based on freshness
+  const freshnessMin = rec ? rec.freshness_min : 9999;
+  const statusColor = freshnessMin < 5 ? 'var(--green)' : freshnessMin < 120 ? 'var(--amber)' : 'var(--red)';
+  const statusLabel = isAr
+    ? (freshnessMin < 5 ? 'متصل' : freshnessMin < 120 ? 'بيانات حديثة' : 'غير متصل')
+    : (freshnessMin < 5 ? 'En ligne' : freshnessMin < 120 ? 'Données récentes' : 'Hors ligne');
+
+  // Last reading timestamp for countdown
+  const lastTs = hist.length ? new Date(hist[hist.length-1].timestamp).getTime() / 1000 : Date.now()/1000;
+
+  // Sensor info card data
+  const latStr = currentSensor.latitude ? currentSensor.latitude.toFixed(4)+'°N' : '—';
+  const lonStr = currentSensor.longitude ? Math.abs(currentSensor.longitude).toFixed(4)+'°O' : '—';
+
+  // Latest pH for subtitle
+  const latestPh = phLevel.filter(v=>v!=null).at(-1);
+  const phStatus = latestPh == null ? null : latestPh < 6.0 ? {label:'Acide',color:'var(--amber)'} : latestPh > 7.5 ? {label:'Alcalin',color:'var(--amber)'} : {label:'Optimal',color:'var(--green)'};
+
   el.innerHTML = `
+    <!-- Sensor info card -->
+    <div class="card" style="margin-bottom:12px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${statusColor};flex-shrink:0"></div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${currentSensor.name}</div>
+        <span style="font-size:11px;color:${statusColor};font-weight:600">${statusLabel}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px">
+        <div><span style="color:var(--text-muted)">${isAr?'المعرف':'Identifiant'}: </span><span style="color:var(--text);font-weight:600">${currentSensor.id}</span></div>
+        <div><span style="color:var(--text-muted)">${isAr?'المساحة':'Surface parcelle'}: </span><span style="color:var(--text);font-weight:600">${currentSensor.area_ha} ha</span></div>
+        <div><span style="color:var(--text-muted)">${isAr?'الطراز':'Modèle'}: </span><span style="color:var(--text)">Capacitive Sol v1.2</span></div>
+        <div><span style="color:var(--text-muted)">${isAr?'الإحداثيات':'Coordonnées'}: </span><span style="color:var(--text)">${latStr}, ${lonStr}</span></div>
+        <div><span style="color:var(--text-muted)">${isAr?'التركيب':'Installation'}: </span><span style="color:var(--text)">01 Avr 2026</span></div>
+        <div><span style="color:var(--text-muted)">${isAr?'عمق المسبار':'Profondeur sonde'}: </span><span style="color:var(--text)">30 cm</span></div>
+      </div>
+    </div>
+
+    <!-- Countdown -->
+    <div id="capteurs-countdown" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;background:var(--card);border-radius:var(--radius-sm);border:1px solid var(--border)">
+      <div style="font-size:12px;color:var(--text-muted);flex-shrink:0">${isAr?'القراءة القادمة':'Prochain relevé'} :</div>
+      <div style="font-size:12px;font-weight:700;color:var(--green);min-width:36px" id="countdown-text">—</div>
+      <div style="flex:1;height:3px;background:var(--border);border-radius:99px;overflow:hidden"><div id="countdown-bar" style="height:100%;background:var(--green);border-radius:99px;transition:width 1s linear;width:100%"></div></div>
+    </div>
+
     <!-- Meta -->
     <div class="meta-grid">
       <div class="meta-card"><div class="label">${isAr?'ثقة البيانات':'Confiance données'}</div><div class="value">${rec ? rec.data_confidence : 76}%</div></div>
       <div class="meta-card"><div class="label">${isAr?'موثوقية المستشعرات':'Fiabilité capteurs'}</div><div class="value">${rec ? (isAr ? (rec.sensor_reliability==='Fiable'?'موثوق':'تحت المراقبة') : rec.sensor_reliability) : 'À surveiller'}</div></div>
       <div class="meta-card"><div class="label">${isAr?'اتساق الاتجاهات':'Cohérence tendances'}</div><div class="value">${rec ? (isAr?'مستقر':rec.trend_coherence) : 'Stable'}</div></div>
-      <div class="meta-card"><div class="label">${isAr?'حداثة البيانات':'Fraîcheur'}</div><div class="value">${rec ? rec.freshness_min : '--'} ${isAr?'د':'min'}</div></div>
+      <div class="meta-card"><div class="label">${isAr?'حداثة البيانات':'Fraîcheur'}</div><div class="value" style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:${freshInfo.color};flex-shrink:0;display:inline-block"></span><span style="color:${freshInfo.color};font-size:13px">${freshInfo.text}</span></div></div>
     </div>
 
     <!-- Moisture chart -->
@@ -897,6 +936,7 @@ async function loadCapteurs() {
         <span class="trend-badge ${Math.abs(trendPh)<0.1?'trend-up':'trend-down'}">${Math.abs(trendPh)<0.1?'→ Stable':'→ Var.'} ${trendPh>0?'+':''}${trendPh}</span>
       </div>
       <div class="chart-sub">${isAr?'النطاق الزراعي المثالي: 6.0 – 7.5 •':'Plage agricole optimale : 6,0 – 7,5 •'} ${normalLabel}</div>
+      ${latestPh != null ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${isAr?'للمحصول':'Plage optimale pour'} ${cropLabel(currentSensor.crop_type)}: 6.0–7.5 · ${isAr?'القيمة الحالية':'Valeur actuelle'}: ${latestPh.toFixed(1)} · ${isAr?'الحالة':'Statut'}: <span style="color:${phStatus.color};font-weight:600">${isAr?(phStatus.label==='Optimal'?'مثالي':phStatus.label==='Acide'?'حامضي':'قلوي'):phStatus.label}</span></div>` : ''}
       <div class="chart-wrap"><canvas id="chart-ph"></canvas></div>
     </div>
 
@@ -955,6 +995,20 @@ async function loadCapteurs() {
     options: {...cDefaults, scales:{...cDefaults.scales,
       y:{...cDefaults.scales.y, min:4, max:9,
          ticks:{...cDefaults.scales.y.ticks, stepSize:0.5}}}}});
+
+  // Start countdown timer for next reading
+  if (window._capteursCountdown) clearInterval(window._capteursCountdown);
+  window._capteursCountdown = setInterval(() => {
+    const now = Date.now() / 1000;
+    const elapsed = now - lastTs;
+    const remaining = Math.max(0, 60 - (elapsed % 60));
+    const pct = (remaining / 60) * 100;
+    const cText = document.getElementById("countdown-text");
+    const cBar  = document.getElementById("countdown-bar");
+    if (cText) cText.textContent = Math.ceil(remaining) + "s";
+    if (cBar)  cBar.style.width = pct + "%";
+    if (remaining < 1) loadCapteurs();
+  }, 1000);
 }
 
 // ── Alertes tab ───────────────────────────────────────────────────────────────
@@ -1028,9 +1082,15 @@ async function loadAlertes() {
       const locale = isAr ? "ar-MA" : "fr-FR";
       const dateStr = new Date(a.created_at).toLocaleDateString(locale,{day:"numeric",month:"short",year:"numeric"})
                     + (isAr?" ":" à ") + new Date(a.created_at).toLocaleTimeString(locale,{hour:"2-digit",minute:"2-digit"});
-      html += `<div class="alert-card ${a.severity||'info'}">
+      const sev = a.severity || 'info';
+      const sevSvg = sev === 'critical'
+        ? `<svg width="10" height="10" style="flex-shrink:0"><circle cx="5" cy="5" r="5" fill="#E05252"/></svg>`
+        : sev === 'warning'
+        ? `<svg width="14" height="14" viewBox="0 0 14 14" style="flex-shrink:0"><polygon points="7,1 13,13 1,13" fill="none" stroke="#E9A719" stroke-width="1.5"/><line x1="7" y1="5" x2="7" y2="9" stroke="#E9A719" stroke-width="1.5"/></svg>`
+        : `<svg width="10" height="10" style="flex-shrink:0"><circle cx="5" cy="5" r="5" fill="#1A9B50"/></svg>`;
+      html += `<div class="alert-card ${sev}">
         <div class="alert-top">
-          <span class="alert-type-badge ${a.severity||'info'}">ℹ ${isAr?'معلومة':'Info'}</span>
+          <span class="alert-type-badge ${sev}" style="display:flex;align-items:center;gap:5px">${sevSvg} ${isAr?'معلومة':'Info'}</span>
           <span class="alert-date">${dateStr}</span>
         </div>
         <div class="alert-title">${alertTitle(a.type)}</div>
@@ -1200,30 +1260,48 @@ async function loadCarte() {
   const farmBounds = [[32.330,-6.360],[32.344,-6.344]];
   L.rectangle(farmBounds, {color:"#1A9B50", weight:2, fillOpacity:0.05}).addTo(mapInstance);
 
-  // Sensor markers
+  // Field polygon offsets relative to each sensor's position
+  const PLOT_OFFSETS = {
+    olive:  [[ 0.002, -0.003], [ 0.002,  0.001], [-0.001,  0.001], [-0.001, -0.003]],
+    citrus: [[ 0.001,  0.002], [ 0.001,  0.005], [-0.002,  0.005], [-0.002,  0.002]],
+    wheat:  [[-0.003, -0.001], [-0.003,  0.003], [-0.006,  0.003], [-0.006, -0.001]],
+  };
+
+  // Sensor polygons + markers
   sensors.forEach(s => {
     const rec = recMap[s.id];
     const moisture = rec ? rec.moisture_pct : 40;
     const color = moisture < 20 ? "#E05252" : moisture < 30 ? "#E9A719" : "#1A9B50";
     const action = rec ? t(rec.action) : t("WAIT");
+    const temp = s.latest_reading?.air_temperature ?? 22;
 
+    const popupHtml = `
+      <div style="font-family:DM Sans,sans-serif;min-width:160px">
+        <div style="font-weight:700;margin-bottom:6px">${s.name}</div>
+        <div style="font-size:12px;color:#666;margin-bottom:4px">${cropLabel(s.crop_type)} • ${s.area_ha} ha</div>
+        <div style="font-size:14px;font-weight:700;color:${color}">${Math.round(moisture*10)/10}% ${isAr?'رطوبة':'humidité'}</div>
+        <div style="font-size:12px;color:#666;margin:2px 0">${temp}°C</div>
+        <div style="margin-top:6px;background:${color}22;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:600;color:${color};display:inline-block">${action}</div>
+      </div>`;
+
+    // Draw field polygon
+    const offsets = PLOT_OFFSETS[s.crop_type] || [];
+    if (offsets.length && s.latitude && s.longitude) {
+      const polyPoints = offsets.map(([dlat, dlon]) => [s.latitude + dlat, s.longitude + dlon]);
+      L.polygon(polyPoints, {
+        fillColor: color, fillOpacity: 0.25,
+        color: color, weight: 2,
+      }).addTo(mapInstance).bindPopup(popupHtml);
+    }
+
+    // Center marker
     const icon = L.divIcon({
       html: `<div style="background:${color};width:36px;height:36px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700">${Math.round(moisture)}%</div>`,
-      className:"",
-      iconSize:[36,36],
-      iconAnchor:[18,18]
+      className:"", iconSize:[36,36], iconAnchor:[18,18]
     });
-
-    L.marker([s.latitude, s.longitude], {icon})
-      .addTo(mapInstance)
-      .bindPopup(`
-        <div style="font-family:DM Sans,sans-serif;min-width:160px">
-          <div style="font-weight:700;margin-bottom:6px">${s.name}</div>
-          <div style="font-size:12px;color:#666;margin-bottom:4px">${cropLabel(s.crop_type)} • ${s.area_ha} ha</div>
-          <div style="font-size:14px;font-weight:700;color:${color}">${Math.round(moisture*10)/10}% humidité</div>
-          <div style="margin-top:6px;background:${color}22;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:600;color:${color};display:inline-block">${action}</div>
-        </div>
-      `);
+    if (s.latitude && s.longitude) {
+      L.marker([s.latitude, s.longitude], {icon}).addTo(mapInstance).bindPopup(popupHtml);
+    }
   });
 }
 
@@ -1286,6 +1364,7 @@ function setLang(l) {
     alertes:   isAr?"التنبيهات":"Alertes",
     rapports:  isAr?"تقارير خفيفة":"Rapports légers",
     carte:     isAr?"خريطة المزرعة":"Carte de la ferme",
+    ia:        isAr?"الذكاء الاصطناعي":"Intelligence Artificielle",
   };
   const subs = {
     dashboard: isAr?"هل يجب الري اليوم؟ وكم المدة؟":"Irriguer aujourd'hui, ou attendre ?",
@@ -1293,8 +1372,9 @@ function setLang(l) {
     alertes:   isAr?"قائمة مرتبة حسب الأولوية":"Liste priorisée des signaux terrain",
     rapports:  isAr?"ملخص سريع للمتابعة الأسبوعية":"Synthèse rapide pour suivi hebdomadaire",
     carte:     isAr?"موقع القطع والمستشعرات":"Localisation des parcelles et capteurs",
+    ia:        isAr?"محرك قرارات الذكاء الاصطناعي — تنبؤ وشذوذات فورية":"Moteur de décision IA — prédiction & anomalies en temps réel",
   };
-  ["dashboard","capteurs","alertes","rapports"].forEach(s => {
+  ["dashboard","capteurs","alertes","rapports","carte","ia"].forEach(s => {
     const title = document.getElementById("title-"+s);
     const sub   = document.getElementById("sub-"+s);
     if (title) title.textContent = titles[s];
@@ -1304,15 +1384,19 @@ function setLang(l) {
   // Chatbot input & chips
   const chatInput = document.getElementById("chatInput");
   if (chatInput) {
-    chatInput.placeholder = isAr ? "سؤالك..." : "Votre question…";
+    chatInput.placeholder = isAr ? "اكتب سؤالك هنا..." : "Votre question…";
     chatInput.dir = isAr ? "rtl" : "ltr";
   }
   const initMsg = document.getElementById("chat-init-msg");
   if (initMsg) {
     initMsg.textContent = isAr
-      ? "تهيئة النظام... مرحباً. أنا IRRISMART-01، مستشارك الزراعي لمنطقة بني ملال-خنيفرة. اطرح أسئلتك حول الري والمحاصيل أو التنبيهات — بالعربية أو بالفرنسية."
-      : "Initialisation système... Bonjour. Je suis IRRISMART-01, votre conseiller agricole pour la région Beni Mellal-Khénifra. Posez vos questions sur l'irrigation, les cultures ou les alertes — en français ou en arabe.";
+      ? "مرحباً. أنا مستشارك الزراعي IrriSmart لمنطقة بني ملال-خنيفرة. اطرح أسئلتك بالعربية أو الفرنسية أو الدارجة."
+      : "Bonjour. Je suis votre conseiller agricole IrriSmart pour la région Beni Mellal-Khénifra. Posez vos questions en français, arabe ou darija.";
   }
+  const chatWindow = document.getElementById("chatWindow");
+  if (chatWindow) chatWindow.setAttribute("dir", isAr ? "rtl" : "ltr");
+  const exportBtn = document.getElementById("export-csv-btn");
+  if (exportBtn) exportBtn.textContent = isAr ? "تصدير CSV" : "Exporter CSV";
   document.querySelectorAll(".chat-chip").forEach(el => {
     el.textContent = isAr ? (el.dataset.ar || el.textContent) : (el.dataset.fr || el.textContent);
   });
@@ -1376,9 +1460,9 @@ const CROP_ICONS = {
   wheat: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px"><line x1="13" y1="24" x2="13" y2="4" stroke="#C9A82C" stroke-width="1.5"/><ellipse cx="13" cy="5" rx="2" ry="3" fill="#DAA520"/><ellipse cx="10" cy="9" rx="1.8" ry="3" fill="#DAA520" transform="rotate(-25 10 9)"/><ellipse cx="16" cy="9" rx="1.8" ry="3" fill="#DAA520" transform="rotate(25 16 9)"/><ellipse cx="10" cy="14" rx="1.8" ry="3" fill="#DAA520" transform="rotate(-25 10 14)"/><ellipse cx="16" cy="14" rx="1.8" ry="3" fill="#DAA520" transform="rotate(25 16 14)"/></svg>`,
 };
 const IA_CROPS = [
-  {key:"olive",  label:"Olivier", labelAr:"زيتون",   sensor_id:"ID010001"},
-  {key:"citrus", label:"Agrumes", labelAr:"حمضيات",  sensor_id:"ID010002"},
-  {key:"wheat",  label:"Blé dur", labelAr:"قمح دوروم", sensor_id:"ID010003"},
+  {key:"olive",  label:"🫒 Olivier",  labelAr:"زيتون",    sensor_id:"ID010001"},
+  {key:"citrus", label:"🍊 Agrumes",  labelAr:"حمضيات",   sensor_id:"ID010002"},
+  {key:"wheat",  label:"🌾 Blé dur",  labelAr:"قمح دوروم", sensor_id:"ID010003"},
 ];
 
 async function loadIA() {
@@ -1390,8 +1474,7 @@ async function loadIA() {
     setTimeout(() => {
       loadMoistureChart();
       loadDecisionChart();
-      loadScatterChart();
-      loadConfidenceChart();
+      loadMoistureTrend7Day();
     }, 120);
   }
 
@@ -1420,8 +1503,8 @@ function buildIAShell() {
       <div id="ia-body-${c.key}"><div class="loading"><div class="spinner"></div>${ar ? 'جارٍ التحميل…' : 'Chargement…'}</div></div>
     </div>`).join("")}
 
-    <button onclick="refreshAllCropCards()" style="width:100%;padding:12px;border-radius:var(--radius);border:1.5px solid var(--green);background:var(--green-pale);color:var(--green);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:14px">
-      ${ar ? 'تشغيل التحليل الكامل للذكاء الاصطناعي' : 'Lancer analyse IA complète'}
+    <button onclick="runFullAnalysis()" style="width:100%;padding:12px;border-radius:var(--radius);border:1.5px solid var(--green);background:var(--green-pale);color:var(--green);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:14px">
+      ${ar ? 'تشغيل التحليل الكامل' : 'Lancer analyse IA complète'}
     </button>
 
     <div class="card" style="margin-bottom:14px">
@@ -1440,7 +1523,7 @@ function buildIAShell() {
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">${ar ? 'رطوبة التربة — 24 ساعة' : 'Humidité sol — 24h'}</div>
+          <div class="chart-card-title">${ar ? 'رطوبة التربة / 24 ساعة' : 'Humidité sol / 24h'}</div>
           <button class="chart-refresh" onclick="loadMoistureChart()">↻</button>
         </div>
         <canvas id="chart-moisture" height="180"></canvas>
@@ -1452,20 +1535,13 @@ function buildIAShell() {
         </div>
         <canvas id="chart-decisions" height="180"></canvas>
       </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">${ar ? 'التبخر مقابل رطوبة التربة' : 'ETo vs Humidité sol'}</div>
-          <button class="chart-refresh" onclick="loadScatterChart()">↻</button>
-        </div>
-        <canvas id="chart-scatter" height="180"></canvas>
+    </div>
+    <div class="chart-card" style="margin-bottom:14px">
+      <div class="chart-card-header">
+        <div class="chart-card-title">${ar ? 'تطور رطوبة التربة — آخر 7 أيام' : 'Évolution de l\'humidité du sol — 7 derniers jours'}</div>
+        <button class="chart-refresh" onclick="loadMoistureTrend7Day()">↻</button>
       </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">${ar ? 'توزيع الثقة' : 'Distribution confiance IA'}</div>
-          <button class="chart-refresh" onclick="loadConfidenceChart()">↻</button>
-        </div>
-        <canvas id="chart-confidence" height="180"></canvas>
-      </div>
+      <canvas id="chart-moisture-7d" height="200"></canvas>
     </div>
   `;
 }
@@ -1529,7 +1605,7 @@ async function refreshCropCard(cropKey, sensorId, moistureOverride, tempOverride
     const confClass = d.confidence > 0.8 ? "" : d.confidence > 0.6 ? "medium" : "low";
     const ar = lang === 'ar';
     const actionLabel = ar
-      ? (d.decision === 'irrigate' ? 'ري' : 'انتظر')
+      ? (d.decision === 'irrigate' ? 'ري' : 'انتظار')
       : d.action;
 
     // Build forecast strip
@@ -1604,7 +1680,7 @@ async function loadAIHistory() {
           const rowClass = e.decision === "irrigate" ? "irrigate-row" : "wait-row";
           const badge = e.decision === "irrigate"
             ? (ar ? "ري" : "IRRIGUER")
-            : (ar ? "انتظر" : "ATTENDRE");
+            : (ar ? "انتظار" : "ATTENDRE");
           return `<tr class="${rowClass}">
             <td>${dt}</td>
             <td>${cropLabel2[e.crop]||e.crop}</td>
@@ -1656,9 +1732,14 @@ async function loadAnomalyStrip() {
           <ul class="anomaly-cause-list">${(a.possible_causes||[]).map(c=>`<li>${c}</li>`).join("")}</ul>
           <div class="anomaly-rec-box">${a.recommended_action}</div>
         </div>` : "";
+      const anomSvg = hasAnom
+        ? (a && a.severity === 'high'
+          ? `<svg width="10" height="10" style="flex-shrink:0"><circle cx="5" cy="5" r="5" fill="#E05252"/></svg>`
+          : `<svg width="14" height="14" viewBox="0 0 14 14" style="flex-shrink:0"><polygon points="7,1 13,13 1,13" fill="none" stroke="#E9A719" stroke-width="1.5"/><line x1="7" y1="5" x2="7" y2="9" stroke="#E9A719" stroke-width="1.5"/></svg>`)
+        : `<svg width="10" height="10" style="flex-shrink:0"><circle cx="5" cy="5" r="5" fill="#1A9B50"/></svg>`;
       return `<div class="ia-anom-row ${hasAnom?'anomaly':'normal'}" onclick="toggleAnomalyDetail('${detailId}')">
         <div class="ia-anom-crop">${cropNames[crop]}</div>
-        <div class="ia-anom-status" style="color:${hasAnom?'#B45309':'var(--green)'}">${statusText}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex:1">${anomSvg}<div class="ia-anom-status" style="color:${hasAnom?'#B45309':'var(--green)'}">${statusText}</div></div>
         <div class="ia-anom-detail">${detailText}</div>
       </div>${detailBlock}`;
     }).join("");
@@ -1850,6 +1931,124 @@ function showToast(msg) {
   t.style.opacity = "1";
   clearTimeout(t._t);
   t._t = setTimeout(() => { t.style.opacity = "0"; }, 3000);
+}
+
+// ── Helper: format freshness (FIX 11) ────────────────────────────────────────
+function formatFreshness(minutes) {
+  if (minutes < 5)    return { text: "En ligne",          color: "var(--green)" };
+  if (minutes < 60)   return { text: `il y a ${Math.round(minutes)} min`, color: "var(--green)" };
+  if (minutes < 1440) return { text: `il y a ${Math.round(minutes/60)}h`, color: "var(--amber)" };
+  return               { text: `il y a ${Math.round(minutes/1440)} jours`, color: "var(--red)" };
+}
+
+// ── Export CSV (FIX 12C) ──────────────────────────────────────────────────────
+async function exportSensorCSV() {
+  if (!currentSensor) return;
+  const btn = document.getElementById("export-csv-btn");
+  if (btn) btn.textContent = "…";
+  try {
+    const res = await fetch(`${API}/api/sensors/${currentSensor.id}/history?limit=20000`);
+    const rows = (await res.json()).data || [];
+    const header = "timestamp,soil_moisture_pct,temperature_c,battery_level,rain_mm,ph_level";
+    const lines  = rows.map(r =>
+      [r.timestamp, r.soil_moisture??'', r.air_temperature??'',
+       r.battery_voltage??'', r.rain_mm??'', r.ph_level??''].join(",")
+    );
+    const blob = new Blob([header + "\n" + lines.join("\n")], {type:"text/csv"});
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement("a"), {
+      href: url, download: `irrismart_${currentSensor.id}_${new Date().toISOString().slice(0,10)}.csv`
+    });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e) { console.warn("CSV export failed:", e); }
+  if (btn) btn.textContent = lang==='ar'?'تصدير CSV':'Exporter CSV';
+}
+
+// ── IA: run full analysis with skeleton + toast (FIX 8) ───────────────────────
+async function runFullAnalysis() {
+  IA_CROPS.forEach(c => {
+    const body = document.getElementById(`ia-body-${c.key}`);
+    if (body) body.innerHTML = `
+      <div class="ia-skeleton" style="height:28px;width:60%"></div>
+      <div class="ia-skeleton" style="height:8px"></div>
+      <div class="ia-skeleton" style="height:56px"></div>
+      <div class="ia-skeleton" style="height:18px;width:70%"></div>`;
+  });
+  let sensorLatest = {};
+  try {
+    const r = await fetch(`${API}/api/sensors/latest`);
+    sensorLatest = (await r.json()).data || {};
+  } catch(e) {}
+  await Promise.all(IA_CROPS.map(c => {
+    const moisture = sensorLatest[c.key]?.soil_moisture_pct ?? 35;
+    const temp     = sensorLatest[c.key]?.temperature_c    ?? 25;
+    return refreshCropCard(c.key, c.sensor_id, moisture, temp);
+  }));
+  showIAToast(lang==='ar' ? 'تحليل كامل — 3 محاصيل تم تحليلها' : 'Analyse complète — 3 cultures analysées');
+}
+
+function showIAToast(msg) {
+  let toast = document.getElementById("ia-toast-el");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "ia-toast-el";
+    toast.className = "ia-toast";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+// ── 7-day moisture trend chart (FIX 7) ───────────────────────────────────────
+async function loadMoistureTrend7Day() {
+  destroyChart("moisture7d");
+  try {
+    const [oliveRes, citrusRes, wheatRes] = await Promise.all([
+      fetch(`${API}/api/sensors/ID010001/history?limit=336`),
+      fetch(`${API}/api/sensors/ID010002/history?limit=336`),
+      fetch(`${API}/api/sensors/ID010003/history?limit=336`),
+    ]);
+    const oliveData  = (await oliveRes.json()).data  || [];
+    const citrusData = (await citrusRes.json()).data || [];
+    const wheatData  = (await wheatRes.json()).data  || [];
+    const ctx = document.getElementById("chart-moisture-7d");
+    if (!ctx) return;
+    const ar = lang === 'ar';
+    const toPoints = arr => arr.map(r => ({x: new Date(r.timestamp), y: round1(r.soil_moisture)}));
+    const allTimes = [...oliveData,...citrusData,...wheatData].map(r=>new Date(r.timestamp));
+    const minT = allTimes.length ? new Date(Math.min(...allTimes)) : new Date(Date.now()-7*86400000);
+    const maxT = allTimes.length ? new Date(Math.max(...allTimes)) : new Date();
+    const tLine = (val, color, lbl) => ({
+      label:lbl, data:[{x:minT,y:val},{x:maxT,y:val}],
+      borderColor:color, borderWidth:1.5, borderDash:[6,4],
+      pointRadius:0, backgroundColor:"transparent",
+    });
+    const datasets = [
+      {label:ar?"زيتون":"Olivier",  data:toPoints(oliveData),  borderColor:"#2D6A4F", backgroundColor:"transparent", borderWidth:2, tension:.4, pointRadius:0},
+      {label:ar?"حمضيات":"Agrumes", data:toPoints(citrusData), borderColor:"#E9A719", backgroundColor:"transparent", borderWidth:2, tension:.4, pointRadius:0},
+      {label:ar?"قمح":"Blé dur",   data:toPoints(wheatData),  borderColor:"#D4A017", backgroundColor:"transparent", borderWidth:2, tension:.4, pointRadius:0},
+      tLine(28,"#2D6A4F","Seuil olivier"),
+      tLine(45,"#E9A719","Seuil agrumes"),
+      tLine(40,"#D4A017","Seuil blé"),
+    ];
+    iaCharts["moisture7d"] = new Chart(ctx, {
+      type:"line", data:{datasets},
+      options:{
+        responsive:true, animation:{duration:600},
+        scales:{
+          x:{type:"time",time:{unit:"day"},ticks:{maxTicksLimit:7},grid:{display:false}},
+          y:{min:0,max:80,ticks:{callback:v=>v+"%"}},
+        },
+        plugins:{
+          legend:{position:"bottom",labels:{font:{size:11},filter:(item)=>item.datasetIndex<3}},
+          tooltip:{callbacks:{label:c=>c.dataset.label+": "+c.parsed.y+"%"}},
+        },
+      }
+    });
+  } catch(e) { console.warn("Moisture 7d chart:", e); }
 }
 
 init();
