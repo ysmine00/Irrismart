@@ -1050,6 +1050,22 @@ def test_alert():
     })
 
 
+# ── Water savings ────────────────────────────────────────────────────────────
+@api.route("/water-savings")
+def water_savings():
+    recs   = Recommendation.query.all()
+    wait_n = sum(1 for r in recs if r.action in ("WAIT", "NO_ACTION", "MONITOR"))
+    irr_n  = sum(1 for r in recs if r.action == "IRRIGATE")
+    total  = max(1, wait_n + irr_n)
+    # 5 L/min × 45 min = 225 L per avoided irrigation session
+    liters_saved = wait_n * 225
+    return ok({
+        "liters_saved":   liters_saved,
+        "sessions_saved": wait_n,
+        "pct_reduction":  round(100 * wait_n / total, 1),
+    })
+
+
 # ── Chart data endpoints ───────────────────────────────────────────────────────
 @api.route("/charts/moisture_history")
 def chart_moisture_history():

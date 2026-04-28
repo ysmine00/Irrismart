@@ -127,12 +127,16 @@ def _seed_if_empty():
     print("[Seed] 7 days of hourly history seeded")
 
 def _backfill_history():
-    """On an existing DB with few readings, insert 7 days of backdated history."""
+    """Insert 7 days of backdated history unless old readings already exist."""
     from app.models import Sensor, Reading
-    if Reading.query.count() >= 200:
-        return
+    from datetime import datetime, timedelta
     sensors = Sensor.query.all()
     if not sensors:
+        return
+    # Skip only when readings already span at least 6 days (handles fresh DBs
+    # where count >= 200 but all timestamps cluster on the same day)
+    cutoff = datetime.utcnow() - timedelta(days=6)
+    if Reading.query.filter(Reading.timestamp <= cutoff).count() >= 10:
         return
     _insert_history_hours(sensors, hours=168)
     db.session.commit()
