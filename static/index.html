@@ -697,25 +697,18 @@ async function loadDashboard() {
     <!-- Flux -->
 
     <!-- Mini live charts -->
-    <div class="chart-grid" style="margin-top:14px">
+    <!-- Mini live charts -->
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">${lang==='ar'?'الرطوبة — 24 ساعة':'Humidité sol — 24h'}</div>
+          <div class="chart-card-title">${lang==='ar'?'الرطوبة / 24 ساعة':'Humidité sol / 24h'}</div>
           <button class="chart-refresh" onclick="loadDashMoistureChart()">↻</button>
         </div>
         <canvas id="dash-chart-moisture" height="160"></canvas>
       </div>
-      <div class="chart-card">
-        <div class="chart-card-header">
-          <div class="chart-card-title">${lang==='ar'?'ثقة قرارات IA':'Confiance IA'}</div>
-          <button class="chart-refresh" onclick="loadDashConfidenceChart()">↻</button>
-        </div>
-        <canvas id="dash-chart-confidence" height="160"></canvas>
-      </div>
     </div>
   `;
 
-  setTimeout(() => { loadDashMoistureChart(); loadDashConfidenceChart(); }, 80);
+  setTimeout(() => { loadDashMoistureChart(); }, 80);
 }
 
 function translateReason(reason) {
@@ -1252,8 +1245,14 @@ async function loadCarte() {
   // Init or reset map
   if (mapInstance) { mapInstance.remove(); mapInstance = null; }
   mapInstance = L.map("map").setView([32.337, -6.352], 14);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap"
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri — Esri, USGS, NOAA',
+    maxZoom: 19
+  }).addTo(mapInstance);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '',
+    maxZoom: 19,
+    opacity: 0.8
   }).addTo(mapInstance);
 
   // Farm boundary
@@ -1454,15 +1453,22 @@ const iaCharts = {};
 let iaShellBuilt = false;
 let iaRefreshTimer = null;
 
-const CROP_ICONS = {
-  olive: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px"><ellipse cx="13" cy="14" rx="4" ry="6" fill="#6B8E23"/><ellipse cx="13" cy="14" rx="4" ry="6" fill="#6B8E23" transform="rotate(-15 13 14)"/><path d="M13 8 Q11 5 9 2" stroke="#4a6741" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M9 2 Q13 4 13 8" stroke="#4a6741" stroke-width="1" fill="none"/></svg>`,
-  citrus: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px"><circle cx="13" cy="15" r="8" fill="#FF8C00"/><path d="M13 7 Q10 3 13 1 Q16 3 13 7" fill="#2d8a1f"/><line x1="13" y1="7" x2="13" y2="11" stroke="#cc7000" stroke-width="0.8"/></svg>`,
-  wheat: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" style="display:inline-block;vertical-align:middle;margin-right:6px"><line x1="13" y1="24" x2="13" y2="4" stroke="#C9A82C" stroke-width="1.5"/><ellipse cx="13" cy="5" rx="2" ry="3" fill="#DAA520"/><ellipse cx="10" cy="9" rx="1.8" ry="3" fill="#DAA520" transform="rotate(-25 10 9)"/><ellipse cx="16" cy="9" rx="1.8" ry="3" fill="#DAA520" transform="rotate(25 16 9)"/><ellipse cx="10" cy="14" rx="1.8" ry="3" fill="#DAA520" transform="rotate(-25 10 14)"/><ellipse cx="16" cy="14" rx="1.8" ry="3" fill="#DAA520" transform="rotate(25 16 14)"/></svg>`,
-};
 const IA_CROPS = [
-  {key:"olive",  label:"🫒 Olivier",  labelAr:"زيتون",    sensor_id:"ID010001"},
-  {key:"citrus", label:"🍊 Agrumes",  labelAr:"حمضيات",   sensor_id:"ID010002"},
-  {key:"wheat",  label:"🌾 Blé dur",  labelAr:"قمح دوروم", sensor_id:"ID010003"},
+  {
+    key: "olive", label: "Olivier", labelAr: "زيتون", sensor_id: "ID010001",
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:6px"><ellipse cx="11" cy="13" rx="5" ry="7" fill="#2D6A4F" opacity="0.85"/><path d="M11 6 C11 6 7 3 5 1" stroke="#2D6A4F" stroke-width="1.5" stroke-linecap="round"/><path d="M11 6 C11 6 15 3 17 1" stroke="#40916C" stroke-width="1.2" stroke-linecap="round"/><path d="M11 2 L11 13" stroke="#1B4332" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+    iconSm: `<svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:4px"><ellipse cx="11" cy="13" rx="5" ry="7" fill="#2D6A4F" opacity="0.85"/><path d="M11 6 C11 6 7 3 5 1" stroke="#2D6A4F" stroke-width="1.5" stroke-linecap="round"/><path d="M11 6 C11 6 15 3 17 1" stroke="#40916C" stroke-width="1.2" stroke-linecap="round"/><path d="M11 2 L11 13" stroke="#1B4332" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+  },
+  {
+    key: "citrus", label: "Agrumes", labelAr: "حمضيات", sensor_id: "ID010002",
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:6px"><circle cx="11" cy="13" r="7" fill="#F4A623" opacity="0.9"/><path d="M11 6 C13 4 16 3 17 1" stroke="#2D6A4F" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="16" cy="2" rx="2.5" ry="1.5" fill="#40916C" opacity="0.8" transform="rotate(-20 16 2)"/><path d="M8 10 Q11 8 14 10" stroke="white" stroke-width="0.8" opacity="0.5" stroke-linecap="round"/></svg>`,
+    iconSm: `<svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:4px"><circle cx="11" cy="13" r="7" fill="#F4A623" opacity="0.9"/><path d="M11 6 C13 4 16 3 17 1" stroke="#2D6A4F" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="16" cy="2" rx="2.5" ry="1.5" fill="#40916C" opacity="0.8" transform="rotate(-20 16 2)"/><path d="M8 10 Q11 8 14 10" stroke="white" stroke-width="0.8" opacity="0.5" stroke-linecap="round"/></svg>`,
+  },
+  {
+    key: "wheat", label: "Blé dur", labelAr: "قمح دوروم", sensor_id: "ID010003",
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:6px"><line x1="11" y1="20" x2="11" y2="2" stroke="#D4A017" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="8" cy="5" rx="2.5" ry="4" fill="#E9A719" opacity="0.9" transform="rotate(-15 8 5)"/><ellipse cx="14" cy="5" rx="2.5" ry="4" fill="#E9A719" opacity="0.9" transform="rotate(15 14 5)"/><ellipse cx="7" cy="10" rx="2" ry="3.5" fill="#D4A017" opacity="0.8" transform="rotate(-10 7 10)"/><ellipse cx="15" cy="10" rx="2" ry="3.5" fill="#D4A017" opacity="0.8" transform="rotate(10 15 10)"/><line x1="7" y1="15" x2="11" y2="13" stroke="#D4A017" stroke-width="1" stroke-linecap="round"/><line x1="15" y1="15" x2="11" y2="13" stroke="#D4A017" stroke-width="1" stroke-linecap="round"/></svg>`,
+    iconSm: `<svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:4px"><line x1="11" y1="20" x2="11" y2="2" stroke="#D4A017" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="8" cy="5" rx="2.5" ry="4" fill="#E9A719" opacity="0.9" transform="rotate(-15 8 5)"/><ellipse cx="14" cy="5" rx="2.5" ry="4" fill="#E9A719" opacity="0.9" transform="rotate(15 14 5)"/><ellipse cx="7" cy="10" rx="2" ry="3.5" fill="#D4A017" opacity="0.8" transform="rotate(-10 7 10)"/><ellipse cx="15" cy="10" rx="2" ry="3.5" fill="#D4A017" opacity="0.8" transform="rotate(10 15 10)"/><line x1="7" y1="15" x2="11" y2="13" stroke="#D4A017" stroke-width="1" stroke-linecap="round"/><line x1="15" y1="15" x2="11" y2="13" stroke="#D4A017" stroke-width="1" stroke-linecap="round"/></svg>`,
+  },
 ];
 
 async function loadIA() {
@@ -1497,7 +1503,7 @@ function buildIAShell() {
     ${IA_CROPS.map(c=>`
     <div class="ia-crop-card" id="ia-card-${c.key}">
       <div class="ia-crop-card-header">
-        <div class="ia-crop-title">${ar ? c.labelAr : c.label}</div>
+        <div class="ia-crop-title" style="display:flex;align-items:center">${c.icon}${ar ? c.labelAr : c.label}</div>
         <button class="btn-outline" onclick="refreshCropCard('${c.key}','${c.sensor_id}')">${ar ? 'تحليل' : 'Analyser'}</button>
       </div>
       <div id="ia-body-${c.key}"><div class="loading"><div class="spinner"></div>${ar ? 'جارٍ التحميل…' : 'Chargement…'}</div></div>
@@ -1530,7 +1536,7 @@ function buildIAShell() {
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
-          <div class="chart-card-title">${ar ? 'قرارات الذكاء الاصطناعي — 7 أيام' : 'Décisions IA — 7 jours'}</div>
+          <div class="chart-card-title">${ar ? 'قرارات الذكاء الاصطناعي / 7 أيام' : 'Décisions IA / 7 jours'}</div>
           <button class="chart-refresh" onclick="loadDecisionChart()">↻</button>
         </div>
         <canvas id="chart-decisions" height="180"></canvas>
@@ -1538,7 +1544,7 @@ function buildIAShell() {
     </div>
     <div class="chart-card" style="margin-bottom:14px">
       <div class="chart-card-header">
-        <div class="chart-card-title">${ar ? 'تطور رطوبة التربة — آخر 7 أيام' : 'Évolution de l\'humidité du sol — 7 derniers jours'}</div>
+        <div class="chart-card-title">${ar ? 'تطور رطوبة التربة / آخر 7 أيام' : 'Évolution de l\'humidité du sol / 7 derniers jours'}</div>
         <button class="chart-refresh" onclick="loadMoistureTrend7Day()">↻</button>
       </div>
       <canvas id="chart-moisture-7d" height="200"></canvas>
@@ -1620,10 +1626,14 @@ async function refreshCropCard(cropKey, sensorId, moistureOverride, tempOverride
           <div style="font-size:10px;font-weight:700">${statusLabel(f.status)}</div>
         </div>`
       ).join('');
-      const allOk = fcast.forecast.every(f => f.status === 'ok');
-      const footer = allOk
-        ? `<div style="font-size:11px;color:var(--green);margin-top:6px">${ar ? 'احتياطي الماء مستقر على 72 ساعة' : 'Réserve hydrique stable sur 72h'}</div>`
-        : `<div style="font-size:11px;color:var(--red);margin-top:6px">${ar ? 'بدون ري: العتبة الحرجة خلال ~' + fcast.days_until_critical + ' يوم' : 'Sans irrigation : seuil critique dans ~' + fcast.days_until_critical + ' jours'}</div>`;
+      let footer;
+      if (fcast.urgency === 'irrigate_immediately') {
+        footer = `<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:6px">${ar ? 'العتبة الحرجة بلغت — ري فوري مطلوب' : 'Seuil critique déjà atteint — irrigation immédiate recommandée'}</div>`;
+      } else if (fcast.days_until_critical > 0) {
+        footer = `<div style="font-size:11px;color:var(--red);margin-top:6px">${ar ? 'بدون ري: العتبة الحرجة خلال ~' + fcast.days_until_critical + ' يوم' : 'Sans irrigation : seuil critique dans ~' + fcast.days_until_critical + ' jours'}</div>`;
+      } else {
+        footer = `<div style="font-size:11px;color:var(--green);margin-top:6px">${ar ? 'احتياطي الماء مستقر على 72 ساعة' : 'Réserve hydrique stable sur 72h'}</div>`;
+      }
       forecastHtml = `
         <div style="margin:10px 0 6px;padding:8px 10px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border)">
           <div style="display:flex;gap:4px">${cols}</div>
@@ -1669,6 +1679,7 @@ async function loadAIHistory() {
       citrus: ar?"حمضيات":"Agrumes",
       wheat: ar?"قمح":"Blé"
     };
+    const cropIconsSm2 = Object.fromEntries(IA_CROPS.map(c => [c.key, c.iconSm]));
     el.innerHTML = `<table class="ia-hist-table">
       <thead><tr>
         <th>${ar?'الوقت':'Heure'}</th><th>${ar?'المحصول':'Culture'}</th><th>${ar?'القرار':'Décision'}</th><th>${ar?'الثقة':'Confiance'}</th><th>${ar?'رطوبة التربة':'Humidité sol'}</th>
@@ -1683,7 +1694,7 @@ async function loadAIHistory() {
             : (ar ? "انتظار" : "ATTENDRE");
           return `<tr class="${rowClass}">
             <td>${dt}</td>
-            <td>${cropLabel2[e.crop]||e.crop}</td>
+            <td style="white-space:nowrap">${cropIconsSm2[e.crop]||''}${cropLabel2[e.crop]||e.crop}</td>
             <td>${badge}</td>
             <td>${Math.round(e.confidence*100)}%</td>
             <td>${e.soil_moisture != null ? Math.round(e.soil_moisture)+"%" : "—"}</td>
@@ -1712,6 +1723,7 @@ async function loadAnomalyStrip() {
     const anomMap = {};
     anomalies.forEach(a => { if (!anomMap[a.crop_type]) anomMap[a.crop_type] = a; });
 
+    const cropIconsSm = Object.fromEntries(IA_CROPS.map(c => [c.key, c.iconSm]));
     el.innerHTML = ["olive","citrus","wheat"].map(crop => {
       const a = anomMap[crop];
       const hasAnom = !!a;
@@ -1738,7 +1750,7 @@ async function loadAnomalyStrip() {
           : `<svg width="14" height="14" viewBox="0 0 14 14" style="flex-shrink:0"><polygon points="7,1 13,13 1,13" fill="none" stroke="#E9A719" stroke-width="1.5"/><line x1="7" y1="5" x2="7" y2="9" stroke="#E9A719" stroke-width="1.5"/></svg>`)
         : `<svg width="10" height="10" style="flex-shrink:0"><circle cx="5" cy="5" r="5" fill="#1A9B50"/></svg>`;
       return `<div class="ia-anom-row ${hasAnom?'anomaly':'normal'}" onclick="toggleAnomalyDetail('${detailId}')">
-        <div class="ia-anom-crop">${cropNames[crop]}</div>
+        <div class="ia-anom-crop" style="display:flex;align-items:center">${cropIconsSm[crop]||''}${cropNames[crop]}</div>
         <div style="display:flex;align-items:center;gap:6px;flex:1">${anomSvg}<div class="ia-anom-status" style="color:${hasAnom?'#B45309':'var(--green)'}">${statusText}</div></div>
         <div class="ia-anom-detail">${detailText}</div>
       </div>${detailBlock}`;
