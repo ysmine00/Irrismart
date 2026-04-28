@@ -10,3 +10,4 @@ venv/
 *.db
 /gateway.ino
 *.tex
+!IrriSmart_Final_Report_v2.tex

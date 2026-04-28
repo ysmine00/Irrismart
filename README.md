@@ -1,83 +1,121 @@
 # IrriSmart
 
-Irrigation advisory system for smallholder farms in the Beni Mellal-Khénifra region of Morocco. Built as a CS capstone project.
+Système de conseil en irrigation intelligent pour les agriculteurs de Béni Mellal-Khénifra, Maroc.
 
-Live: https://irrismart.up.railway.app
-
----
-
-## What it does
-
-Farmers in the Tadla region mostly irrigate on fixed schedules, same day every week, regardless of actual soil conditions or weather. This wastes a significant amount of water and stresses crops. IrriSmart puts a soil moisture sensor in each plot and tells the farmer daily whether to irrigate, wait, or just keep an eye on things.
-
-The system handles three crop types: olive, citrus, and wheat. Each has different moisture thresholds based on INRA Tadla and FAO guidelines.
+**Démo live :** https://irrismart.up.railway.app
 
 ---
 
-## How it works
+## Description
 
-Capacitive soil sensors (Makerfabs LoRa Soil Sensor V3) sit in the ground and wake up every hour to take a reading. They send it over LoRa (433 MHz) to a gateway (Heltec WiFi LoRa 32 V3) sitting in the farm building. The gateway forwards it to the backend over WiFi. The backend checks the moisture against crop thresholds, pulls a weather forecast from Open-Meteo, and decides what to recommend. If moisture is critical, the farmer gets an SMS.
-
-The dashboard is in French and Arabic with RTL support: most farmers in the region are more comfortable in one of those two.
+IrriSmart est un système IoT et IA de précision pour petits exploitants agricoles de la région de Béni Mellal-Khénifra (plaine du Tadla). Il combine capteurs capacitifs de sol en temps réel, moteur RandomForest (94.4–95.0% accuracy), détection d'anomalies IsolationForest, analyse statistique saisonnière (z-score vs baselines INRA Tadla), intégration météo Open-Meteo, et tableau de bord bilingue FR/AR avec assistant conversationnel en darija marocaine.
 
 ---
 
-## Stack
+## Stack technique
 
-- Backend: Flask + SQLAlchemy, PostgreSQL, deployed on Railway
-- Weather: Open-Meteo (free, no API key)
-- Alerts: Twilio SMS
-- Frontend: Vanilla HTML/CSS/JS, Chart.js for charts, Leaflet for the map
-- Hardware: Makerfabs LoRa Soil Sensor V3 (×3), Heltec WiFi LoRa 32 V3 (×1)
-
----
-
-## Sensor format
-
-The Makerfabs sensor sends ASCII over LoRa:
-
-```
-ID010001 REPLY: SOIL INDEX:0 H:48.85 T:30.50 ADC:896 BAT:1016
-```
-
-ADC value is inversely proportional to moisture, higher ADC means drier soil. The backend converts it to a percentage using wet/dry calibration values.
+| Composant | Technologie |
+|-----------|-------------|
+| Backend | Python 3.11, Flask 3.0.0 |
+| Base de données | PostgreSQL (Railway) |
+| ML / IA | scikit-learn 1.3.2 (RandomForest, IsolationForest) |
+| Frontend | HTML5, CSS3, Vanilla JS, Chart.js, Leaflet.js |
+| IoT Gateway | Heltec WiFi LoRa 32 V3 |
+| Capteurs | Capacitive Soil Moisture v1.2 |
+| Déploiement | Railway.app |
+| Météo | Open-Meteo API (32.34°N, -6.35°E) |
+| SMS / WhatsApp | Twilio |
+| Assistant IA | Claude Haiku (claude-haiku-4-5-20251001) |
 
 ---
 
-## Moisture thresholds
+## Cultures et seuils (INRA Tadla + FAO-56)
 
-| Crop | Irrigate below | Optimal range | Critical |
-|------|---------------|---------------|---------|
-| Olive | 25% | 35–50% | < 15% |
-| Citrus | 30% | 45–60% | < 20% |
-| Wheat | 20% | 30–45% | < 10% |
-
----
-
-## API
-
-| Method | Endpoint | What it does |
-|--------|----------|-------------|
-| POST | `/api/data` | Receive reading from gateway |
-| GET | `/api/sensors` | List sensors |
-| GET | `/api/recommendation` | Get today's irrigation decision |
-| GET | `/api/weather` | Cached weather forecast |
-| GET | `/api/alerts` | Active alerts |
-| GET | `/api/reports/weekly` | Weekly summary |
+| Culture | ID Capteur | Parcelle | Seuil critique | Optimal | Surface |
+|---------|-----------|----------|----------------|---------|---------|
+| Olivier | ID010001 | Parcelle Oliviers Nord | 15% | 35–50% | 2.4 ha |
+| Agrumes | ID010002 | Parcelle Agrumes Centre | 20% | 45–60% | 1.9 ha |
+| Blé dur | ID010003 | Parcelle Blé Sud | 10% | 30–45% | 3.2 ha |
 
 ---
 
-## Running locally
+## Performances ML (test set 2 400 échantillons/culture)
 
-Needs Python 3.11+ and PostgreSQL.
+| Culture | Accuracy | F1 | Recall | CV F1 | ROC AUC |
+|---------|----------|----|--------|-------|---------|
+| Olivier | 94.71% | 0.9423 | 93.51% | 0.9418 | 0.9503 |
+| Agrumes | 94.42% | 0.9462 | 94.62% | 0.9494 | 0.9482 |
+| Blé dur | 95.00% | 0.9390 | 92.76% | 0.9346 | 0.9514 |
+
+---
+
+## Installation locale
 
 ```bash
 git clone https://github.com/ysmine00/Irrismart.git
 cd Irrismart
 pip install -r requirements.txt
-cp .env.example .env
-# edit .env with your database URL and Twilio credentials
+cp .env.example .env   # remplir DATABASE_URL, ANTHROPIC_API_KEY, TWILIO_*
 python run.py
 ```
 
-Database initializes and seeds itself on first run with demo sensor data.
+---
+
+## Principaux endpoints API
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | /api/sensors/latest | Dernières lectures par culture |
+| GET | /api/sensors/\<id\>/history | Historique capteur (paginé) |
+| POST | /api/data | Ingestion lecture (JSON ou paquet Makerfabs) |
+| POST | /api/predict | Inférence RF explicite |
+| GET | /api/recommendation | Recommandation temps réel toutes cultures |
+| GET | /api/forecast/\<id\> | Prévision humidité 72 h |
+| GET | /api/anomalies | Anomalies z-score saisonnières |
+| POST | /api/anomaly/detect | Inférence IsolationForest |
+| GET | /api/water-savings | Économies eau cumulées |
+| POST | /api/chat | Assistant bilingue (Claude Haiku) |
+| GET | /api/weather | Prévisions Open-Meteo 6 jours |
+| GET | /api/health | Health check |
+
+**Format paquet Makerfabs (LoRa) :**
+```
+ID010003 REPLY: SOIL INDEX:0 H:48.85 T:30.50 ADC:896 BAT:1016
+```
+
+---
+
+## Architecture IoT
+
+```
+[Capteurs capacitifs] → GPIO32/33/34
+        ↓ (ADC 12-bit, 3.3V)
+[Heltec WiFi LoRa 32 V3]  ← gateway.ino (191 lignes)
+        ↓ HTTP POST
+[Flask API / Railway]
+        ↓
+[PostgreSQL] + [RF Models] + [IsolationForest] + [Open-Meteo]
+        ↓
+[PWA Dashboard] + [Twilio SMS/WhatsApp] + [Claude Haiku]
+```
+
+**Mode production :** noeuds LoRa autonomes → 433 MHz, SF10, BW=125 kHz → gateway → cloud
+
+---
+
+## Références scientifiques
+
+- Allen et al. (1998). FAO Irrigation and Drainage Paper No. 56
+- Breiman, L. (2001). Random Forests. Machine Learning, 45(1), 5–32
+- Liu et al. (2008). Isolation Forest. ICDM 2008
+- Augustin et al. (2016). A study of LoRa. Sensors, 16(9), 1466
+- Et-taibi et al. (2024). Smart irrigation IoT. Results in Engineering, 22, 102283
+- INRA Tadla — Seuils hydriques Béni Mellal-Khénifra
+
+---
+
+## Auteure
+
+**Yasmine Kouch** — Al Akhawayn University in Ifrane  
+Capstone Design, Spring 2026  
+Superviseur : Dr. Amine Abouaomar
