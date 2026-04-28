@@ -143,7 +143,7 @@ for Smallholder Farmers in the Tadla Region of Morocco}\\[0.4cm]
 \end{tabular}
 
 \vfill
-\includegraphics[width=3.5cm]{aui_logo.png}% place aui_logo.png in same folder or remove this line
+% \includegraphics[width=3.5cm]{aui_logo.png}
 \end{titlepage}
 
 % ══════════════════════════════════════════════════════════════════════════════
@@ -180,7 +180,7 @@ The use of artificial intelligence coding assistants (specifically Claude Code b
 
 I, Yasmine Kouch, hereby declare that this Capstone Design Final Report, submitted to the School of Science and Engineering at Al Akhawayn University in Ifrane, represents my own original work carried out under the supervision of Dr.\ Amine Abouaomar during the Spring 2026 semester.
 
-The IrriSmart system—encompassing its data generation methodology, machine learning pipeline, anomaly detection architecture, REST API design, and web dashboard—was conceived, designed, implemented, and validated by the author. All agronomic thresholds are grounded in FAO-56 guidelines and INRA Tadla field data. The deployed system at \url{https://irrismart.up.railway.app} represents a fully functional prototype ready for field validation.
+The IrriSmart system---encompassing its data generation methodology, machine learning pipeline, anomaly detection architecture, REST API design, and web dashboard---was conceived, designed, implemented, and validated by the author. All agronomic thresholds are grounded in FAO-56 guidelines and INRA Tadla field data. The deployed system at \url{https://irrismart.up.railway.app} represents a fully functional prototype ready for field validation.
 
 I acknowledge the support of Dr.\ Abouaomar throughout the development process and the intellectual contributions of the researchers cited herein.
 
@@ -203,7 +203,7 @@ Thanks are due to the Institut National de la Recherche Agronomique (INRA) stati
 
 The author acknowledges the open-source communities behind Flask, scikit-learn, Chart.js, and Leaflet.js, whose tools made the full-stack implementation achievable within a single academic semester. The Open-Meteo project provided free and reliable meteorological forecast data without API key restriction, a critical enabler for a low-cost deployment.
 
-Finally, the author acknowledges the farmers of the Tadla plain, whose practical constraints—limited connectivity, Arabic-first communication, and sensitivity to water costs—informed every design decision in this system.
+Finally, the author acknowledges the farmers of the Tadla plain, whose practical constraints---limited connectivity, Arabic-first communication, and sensitivity to water costs---informed every design decision in this system.
 
 % ══════════════════════════════════════════════════════════════════════════════
 %  FRONT MATTER
@@ -261,13 +261,13 @@ Finally, the author acknowledges the farmers of the Tadla plain, whose practical
 \addcontentsline{toc}{chapter}{Abstract}
 \thispagestyle{fancy}
 
-Morocco's agricultural sector faces an acute water crisis: seven consecutive drought years have reduced national dam capacity by 45\% and forced a 30\% cut in irrigation allocations, disproportionately affecting the Tadla plain (Béni Mellal-Khénifra), where 85\% of water consumption is agricultural and 105,500 irrigated hectares rely on the ORMVAT perimeter. Smallholder farmers in this region continue to rely on fixed-schedule irrigation without access to multi-variable, real-time decision support—a gap that IrriSmart addresses.
+Morocco's agricultural sector faces an acute water crisis: seven consecutive drought years have reduced national dam capacity by 45\% and forced a 30\% cut in irrigation allocations, disproportionately affecting the Tadla plain (Béni Mellal-Khénifra), where 85\% of water consumption is agricultural and 105,500 irrigated hectares rely on the ORMVAT perimeter. Smallholder farmers in this region continue to rely on fixed-schedule irrigation without access to multi-variable, real-time decision support---a gap that IrriSmart addresses.
 
 IrriSmart is a low-cost IoT and AI-powered precision irrigation advisory system designed for smallholder farmers growing olives, citrus, and durum wheat in the Tadla region. The system integrates capacitive soil moisture sensing transmitted via a Heltec WiFi LoRa 32 V3 gateway, a cloud-hosted Flask REST API deployed on Railway, a PostgreSQL database with eight relational tables, and a 30-endpoint API serving a bilingual French/Arabic progressive web application.
 
 The machine learning engine trains three crop-specific RandomForest classifiers (scikit-learn, 200 estimators, max depth 12) on a 36,000-sample physics-informed synthetic dataset derived from FAO-56 Penman-Monteith evapotranspiration models and INRA Tadla soil moisture baselines. On a held-out test set of 2,400 samples per crop, the models achieve test accuracies of 94.71\% (olive), 94.42\% (citrus), and 95.00\% (wheat), with ROC AUC scores of 0.9503, 0.9482, and 0.9514 respectively. A dual-layer anomaly detection subsystem combines an IsolationForest model (contamination=0.05) with a seasonal z-score engine referencing 36 monthly INRA Tadla baselines.
 
-As of April 28, 2026, the live deployment has deferred 180 irrigation sessions, saving an estimated 40,500 litres of water—a 17.7\% reduction relative to unoptimised scheduling. The bilingual dashboard with full RTL rendering and a Darija-aware conversational assistant powered by Claude Haiku bridges the digital literacy gap for Arabic-speaking smallholders.
+As of April 28, 2026, the live deployment has deferred 180 irrigation sessions, saving an estimated 40,500 litres of water---a 17.7\% reduction relative to unoptimised scheduling. The bilingual dashboard with full RTL rendering and a Darija-aware conversational assistant powered by Claude Haiku bridges the digital literacy gap for Arabic-speaking smallholders.
 
 \textbf{Keywords:} precision irrigation, IoT, Random Forest, FAO-56, Isolation Forest, Morocco, Tadla, LoRa, evapotranspiration, bilingual HCI.
 
@@ -292,13 +292,13 @@ Au 28 avril 2026, le déploiement en production a différé 180 sessions d'irrig
 \selectlanguage{english}
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 1 — INTRODUCTION
+%  CHAPTER 1 --- INTRODUCTION
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Introduction}
 
-Agriculture accounts for 85\% of water consumption in Morocco, yet the sector operates largely without real-time, data-driven decision support at the farm level. The Béni Mellal-Khénifra region—centred on the Tadla plain and served by the ORMVAT irrigation perimeter—represents one of Morocco's most productive agricultural zones: 105,500 irrigated hectares cultivating olives, citrus, and durum wheat. It is also among the most water-stressed, facing the combined pressure of seven consecutive drought years, declining dam reserves, and a structural dependence on traditional fixed-schedule irrigation.
+Agriculture accounts for 85\% of water consumption in Morocco, yet the sector operates largely without real-time, data-driven decision support at the farm level. The Béni Mellal-Khénifra region---centred on the Tadla plain and served by the ORMVAT irrigation perimeter---represents one of Morocco's most productive agricultural zones: 105,500 irrigated hectares cultivating olives, citrus, and durum wheat. It is also among the most water-stressed, facing the combined pressure of seven consecutive drought years, declining dam reserves, and a structural dependence on traditional fixed-schedule irrigation.
 
-The gap between available agricultural technology and the practical reality of Tadla smallholders is significant. Precision irrigation systems designed for large agribusinesses typically require costly hardware infrastructure, connectivity that does not exist in rural Morocco, and interfaces in languages or technical registers inaccessible to farmers whose primary language is Darija or Arabic. The result is that even where water data exists—from regional meteorological stations, INRA Tadla soil studies, and FAO crop models—it does not reach the decision point: the farmer standing at the irrigation valve.
+The gap between available agricultural technology and the practical reality of Tadla smallholders is significant. Precision irrigation systems designed for large agribusinesses typically require costly hardware infrastructure, connectivity that does not exist in rural Morocco, and interfaces in languages or technical registers inaccessible to farmers whose primary language is Darija or Arabic. The result is that even where water data exists---from regional meteorological stations, INRA Tadla soil studies, and FAO crop models---it does not reach the decision point: the farmer standing at the irrigation valve.
 
 IrriSmart is a response to this gap. The system is designed around three constraints that characterise the Tadla deployment context: (1) hardware costs must be low enough for smallholder adoption; (2) communication must work in French, Arabic, and Darija; (3) recommendations must be grounded in the specific agronomic parameters of the Béni Mellal-Khénifra region, not generic global models. Within these constraints, IrriSmart integrates capacitive soil moisture sensing, long-range LoRa radio transmission, cloud-based machine learning inference, meteorological integration, anomaly detection, and a bilingual progressive web application into a coherent decision-support system.
 
@@ -307,7 +307,7 @@ The system was developed over a period of 26 days (April 2--28, 2026), producing
 This report documents the full engineering process: problem context (Chapter~2), system specifications (Chapter~3), societal analysis (Chapters~4--6), scientific grounding (Chapter~7), technical design and implementation (Chapter~8), AI use disclosure (Chapter~9), validation (Chapter~10), and results (Chapter~11).
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 2 — PROBLEM STATEMENT
+%  CHAPTER 2 --- PROBLEM STATEMENT
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Problem Statement}
 
@@ -315,25 +315,25 @@ This report documents the full engineering process: problem context (Chapter~2),
 
 The Béni Mellal-Khénifra region is administered by the ORMVAT (Office Régional de Mise en Valeur Agricole du Tadla), which manages the largest irrigated perimeter in Morocco: 105,500 hectares supplied by the Bin El Ouidane and Aït Messaoud dams on the Oum Er-Rbia river system. Agricultural water use represents approximately 85\% of total regional consumption, with the primary cultures being olive (dominant in the hillside zones), citrus (concentrated in the central plain), and durum wheat (variété Karim, the principal cereal crop of the perimeter).
 
-Since 2017, Morocco has experienced seven consecutive drought years. National dam fill rates fell to 31.5\% in early 2025—against a 20-year average above 60\%—and ORMVAT reduced irrigation water allocations by approximately 30\% for the 2024--2025 agricultural season. The economic consequence for smallholders is compounded: reduced allocation per hectare, increased per-cubic-metre tariffs under deficit conditions, and yield losses from both under- and over-irrigation.
+Since 2017, Morocco has experienced seven consecutive drought years. National dam fill rates fell to 31.5\% in early 2025---against a 20-year average above 60\%---and ORMVAT reduced irrigation water allocations by approximately 30\% for the 2024--2025 agricultural season. The economic consequence for smallholders is compounded: reduced allocation per hectare, increased per-cubic-metre tariffs under deficit conditions, and yield losses from both under- and over-irrigation.
 
 \section{The Decision Gap}
 
-Despite the severity of the water constraint, irrigation scheduling in the Tadla plain remains predominantly calendar-based. Farmers irrigate on fixed intervals—typically weekly for olive and citrus, every 5 days for wheat during critical stages—without reference to real-time soil moisture status, crop evapotranspiration demand, or meteorological forecasts. This practice has two quantifiable costs:
+Despite the severity of the water constraint, irrigation scheduling in the Tadla plain remains predominantly calendar-based. Farmers irrigate on fixed intervals---typically weekly for olive and citrus, every 5 days for wheat during critical stages---without reference to real-time soil moisture status, crop evapotranspiration demand, or meteorological forecasts. This practice has two quantifiable costs:
 
 \begin{enumerate}
   \item \textbf{Over-irrigation:} Fixed schedules do not account for rainfall events or naturally high antecedent soil moisture. Irrigating when the soil already holds adequate moisture wastes water and can cause anaerobic stress in olive and citrus root zones.
-  \item \textbf{Under-irrigation at critical stages:} The critical growth stages for yield formation (Kc peak: wheat montaison at Kc=1.15, citrus fructification at Kc=0.85, olive grossissement at Kc=0.75) are precisely the periods when soil moisture deficits cause disproportionate yield loss. Fixed schedules that miss these windows—because they were designed for average conditions—systematically underperform.
+  \item \textbf{Under-irrigation at critical stages:} The critical growth stages for yield formation (Kc peak: wheat montaison at Kc=1.15, citrus fructification at Kc=0.85, olive grossissement at Kc=0.75) are precisely the periods when soil moisture deficits cause disproportionate yield loss. Fixed schedules that miss these windows---because they were designed for average conditions---systematically underperform.
 \end{enumerate}
 
 \section{The Information Gap}
 
-The agronomic knowledge required for precision irrigation exists. FAO Irrigation and Drainage Paper~56 provides crop coefficients and the Penman-Monteith ET$_0$ model for all three Tadla crops. INRA Tadla has published monthly soil moisture baselines for the Béni Mellal-Khénifra region. Open-Meteo provides free 7-day meteorological forecasts at 1 km resolution. The structural problem is not knowledge availability—it is the absence of a system that integrates these data sources, applies them in real time to sensor readings from specific plots, and delivers the result in a format accessible to Darija-speaking smallholders with limited digital literacy.
+The agronomic knowledge required for precision irrigation exists. FAO Irrigation and Drainage Paper~56 provides crop coefficients and the Penman-Monteith ET$_0$ model for all three Tadla crops. INRA Tadla has published monthly soil moisture baselines for the Béni Mellal-Khénifra region. Open-Meteo provides free 7-day meteorological forecasts at 1 km resolution. The structural problem is not knowledge availability---it is the absence of a system that integrates these data sources, applies them in real time to sensor readings from specific plots, and delivers the result in a format accessible to Darija-speaking smallholders with limited digital literacy.
 
 IrriSmart addresses this specific gap: not precision agriculture in the abstract, but a low-cost, Arabic-first, region-calibrated decision support system for the 105,500-hectare ORMVAT perimeter.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 3 — PROJECT SPECIFICATIONS
+%  CHAPTER 3 --- PROJECT SPECIFICATIONS
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Project Specifications}
 
@@ -369,7 +369,7 @@ IrriSmart addresses this specific gap: not precision agriculture in the abstract
 The primary deployment constraint is the absence of existing labelled field data for the three Tadla crops under monitored conditions. This necessitates a physics-informed synthetic data generation approach (Section~8.2), which is justified by the body of precision agriculture literature reviewed in Section~7.4. A secondary constraint is the limited bandwidth and intermittent connectivity of rural Moroccan WiFi, which drove the choice of LoRa for the sensor-to-gateway link and a lightweight single-page application architecture for the dashboard.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 4 — STEEPLE ANALYSIS
+%  CHAPTER 4 --- STEEPLE ANALYSIS
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{STEEPLE Analysis}
 
@@ -380,7 +380,7 @@ Smallholder farmers in the Tadla plain average 2--5 hectares per holding. The do
 The LoRa radio protocol (433 MHz, SF10, BW=125 kHz) provides a link budget sufficient for 2--15 km range in the flat Tadla plain, with 2-year battery autonomy on 18650 cells at 15-minute transmission intervals. The capacitive sensor technology (v1.2) eliminates the corrosion failure mode of resistive sensors in saline Moroccan soils (EC typically 2--4 dS/m), consistent with the recommendation of Cobos \& Campbell (2007). Cloud deployment on Railway eliminates server administration burden for a single-developer prototype.
 
 \section{Economic}
-The total bill of materials for a single sensor node is estimated at USD~25--35 (Heltec WiFi LoRa 32 V3: USD~18, three capacitive sensors: USD~3 each, enclosure: USD~5). Cloud hosting costs are zero at prototype scale (Railway free tier). At scale, the primary economic benefit is water cost reduction: ORMVAT water tariffs for the Tadla perimeter are approximately MAD~0.35--0.55 per cubic metre. The 40,500-litre saving demonstrated in the current deployment corresponds to approximately MAD~14--22 saved over the evaluation period for a combined 7.5-hectare plot—a meaningful figure for smallholders operating at margin.
+The total bill of materials for a single sensor node is estimated at USD~25--35 (Heltec WiFi LoRa 32 V3: USD~18, three capacitive sensors: USD~3 each, enclosure: USD~5). Cloud hosting costs are zero at prototype scale (Railway free tier). At scale, the primary economic benefit is water cost reduction: ORMVAT water tariffs for the Tadla perimeter are approximately MAD~0.35--0.55 per cubic metre. The 40,500-litre saving demonstrated in the current deployment corresponds to approximately MAD~14--22 saved over the evaluation period for a combined 7.5-hectare plot---a meaningful figure for smallholders operating at margin.
 
 \section{Environmental}
 Precision irrigation directly reduces agricultural water withdrawal from an already-stressed basin. The Oum Er-Rbia river system feeds downstream ecosystems and urban supply for Béni Mellal; every cubic metre deferred from over-irrigation represents measurable ecosystem benefit. The system also reduces energy consumption associated with pumping surplus water.
@@ -392,10 +392,10 @@ Morocco's Plan Maroc Vert (Green Morocco Plan) and its successor Génération Gr
 The Open-Meteo API is open data under CC BY 4.0, with no commercial restriction at prototype scale. The Twilio messaging API is used within the free trial tier for prototype evaluation. The Anthropic Claude Haiku API is used under standard commercial terms. All dependencies are open-source under MIT, BSD, or Apache licences. No export control issues apply.
 
 \section{Ethical}
-The primary ethical dimension is data equity: the system generates recommendations from a synthetic dataset calibrated to Tadla agronomic parameters. The model's limitations—particularly the absence of multi-year field-calibrated training data—are disclosed to supervisors and documented in Section~8.2. The bilingual/Darija interface reflects a deliberate commitment to serving a historically underserved population in precision agriculture research.
+The primary ethical dimension is data equity: the system generates recommendations from a synthetic dataset calibrated to Tadla agronomic parameters. The model's limitations---particularly the absence of multi-year field-calibrated training data---are disclosed to supervisors and documented in Section~8.2. The bilingual/Darija interface reflects a deliberate commitment to serving a historically underserved population in precision agriculture research.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 5 — ENGINEERING STANDARDS
+%  CHAPTER 5 --- ENGINEERING STANDARDS
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Engineering Standards}
 
@@ -412,7 +412,7 @@ The API follows REST architectural constraints as defined by Fielding (2000): st
 The codebase adheres to PEP~8 Python style guidelines. Database migrations are handled idempotently via the \texttt{\_migrate\_db()} startup function, ensuring zero-downtime schema changes. The training pipeline uses stratified train/test split (80/20) and 5-fold cross-validation, consistent with standard ML evaluation practice.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 6 — LOGIC MODEL FRAMEWORK
+%  CHAPTER 6 --- LOGIC MODEL FRAMEWORK
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Logic Model Framework}
 
@@ -454,7 +454,7 @@ IrriSmart targets smallholder farmers in the Béni Mellal-Khénifra region culti
 \textbf{Long-term (2+ years):} Region-calibrated models trained on multi-season field data become available for scaling across ORMVAT's 105,500-hectare perimeter. Integration with ORMVAT advisory infrastructure provides institutional reach to the full smallholder population.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 7 — LITERATURE REVIEW
+%  CHAPTER 7 --- LITERATURE REVIEW
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Literature Review}
 
@@ -462,7 +462,7 @@ IrriSmart targets smallholder farmers in the Béni Mellal-Khénifra region culti
 
 Soil moisture measurement has historically relied on tensiometers, time-domain reflectometry (TDR), and resistive sensors. Cobos \& Campbell (2007) documented the critical limitation of resistive sensors in agricultural deployment: electrolytic corrosion of the electrode contacts in saline or moist soils renders readings unreliable within weeks of installation \cite{cobos2007}. Capacitive sensors, by contrast, measure the dielectric permittivity of the soil medium without direct electrical contact between the sensing elements and the soil water, providing stable performance over multi-season deployment horizons.
 
-For wireless sensor network design in the Tadla context, Augustin et al.\ (2016) characterised the LoRa physical layer and demonstrated rural ranges of 2--15~km on standard spreading factors, with link budgets of up to 157~dB—sufficient to cover the ORMVAT perimeter from a single gateway per sub-zone \cite{augustin2016}. Jawad et al.\ (2017) surveyed energy-efficient WSN architectures for precision agriculture and identified LoRa as the optimal physical layer for low-duty-cycle, low-data-rate sensor deployments, particularly under battery power constraints in sites without grid access \cite{jawad2017}. IrriSmart adopts capacitive sensing at 433~MHz with SF10/BW=125~kHz based directly on these findings.
+For wireless sensor network design in the Tadla context, Augustin et al.\ (2016) characterised the LoRa physical layer and demonstrated rural ranges of 2--15~km on standard spreading factors, with link budgets of up to 157~dB---sufficient to cover the ORMVAT perimeter from a single gateway per sub-zone \cite{augustin2016}. Jawad et al.\ (2017) surveyed energy-efficient WSN architectures for precision agriculture and identified LoRa as the optimal physical layer for low-duty-cycle, low-data-rate sensor deployments, particularly under battery power constraints in sites without grid access \cite{jawad2017}. IrriSmart adopts capacitive sensing at 433~MHz with SF10/BW=125~kHz based directly on these findings.
 
 \section{Reference Evapotranspiration and FAO-56 Standards}
 
@@ -476,7 +476,7 @@ The FAO Penman-Monteith equation, defined in Allen et al.\ (1998), is the intern
 
 where $\Delta$ is the slope of the saturation vapour pressure curve, $R_n$ net radiation, $G$ soil heat flux, $\gamma$ the psychrometric constant, $T$ mean air temperature, $u_2$ wind speed at 2~m, $e_s$ saturation vapour pressure, and $e_a$ actual vapour pressure.
 
-In deployments where radiation data is unavailable—the typical condition for a low-cost IoT gateway—Adeyemi et al.\ (2018) validated a simplified Penman-Monteith approximation against full-equation ET$_0$ values, demonstrating MAE below 8\% for semi-arid Mediterranean climates \cite{adeyemi2018}. IrriSmart implements this simplified form in its \texttt{simplified\_eto()} function, computing ET$_0$ from temperature, humidity, wind speed, and a seasonally-modelled solar radiation proxy. Crop evapotranspiration is then:
+In deployments where radiation data is unavailable---the typical condition for a low-cost IoT gateway---Adeyemi et al.\ (2018) validated a simplified Penman-Monteith approximation against full-equation ET$_0$ values, demonstrating MAE below 8\% for semi-arid Mediterranean climates \cite{adeyemi2018}. IrriSmart implements this simplified form in its \texttt{simplified\_eto()} function, computing ET$_0$ from temperature, humidity, wind speed, and a seasonally-modelled solar radiation proxy. Crop evapotranspiration is then:
 
 \begin{equation}
   \text{ET}_c = \text{ET}_0 \times K_c
@@ -497,7 +497,7 @@ The choice of 200 estimators in IrriSmart's RF models reflects Breiman's finding
 
 The absence of multi-season labelled field data for new IoT deployments is a well-documented obstacle in precision agriculture research. Adeyemi et al.\ (2018) established the practice of generating training corpora from validated agronomic knowledge bases when empirical data are unavailable, demonstrating that classifiers trained on FAO-56-derived synthetic data generalise to field conditions with acceptable degradation relative to classifiers trained on in-situ data \cite{adeyemi2018}.
 
-IrriSmart's 36,000-sample training corpus (12,000 per crop) is generated by a deterministic pipeline grounded in Béni Mellal-Khénifra climate statistics (monthly temperature, humidity, solar radiation, and rainfall probability), FAO-56 Penman-Monteith ET$_0$ computation, growth-stage-specific Kc coefficients, and INRA Tadla moisture thresholds. Label assignment follows a two-condition rule: irrigate=1 when (a) soil moisture is below the growth-stage threshold AND (b) forecast rainfall is below 8~mm; with a 5\% random noise injection to model label uncertainty. The resulting dataset is internally consistent with the agronomic knowledge base by construction—a strength, not a limitation: the classifier learns non-linear feature interactions across the full parameter space of the Tadla climate envelope, including edge cases that occur infrequently in any single growing season.
+IrriSmart's 36,000-sample training corpus (12,000 per crop) is generated by a deterministic pipeline grounded in Béni Mellal-Khénifra climate statistics (monthly temperature, humidity, solar radiation, and rainfall probability), FAO-56 Penman-Monteith ET$_0$ computation, growth-stage-specific Kc coefficients, and INRA Tadla moisture thresholds. Label assignment follows a two-condition rule: irrigate=1 when (a) soil moisture is below the growth-stage threshold AND (b) forecast rainfall is below 8~mm; with a 5\% random noise injection to model label uncertainty. The resulting dataset is internally consistent with the agronomic knowledge base by construction---a strength, not a limitation: the classifier learns non-linear feature interactions across the full parameter space of the Tadla climate envelope, including edge cases that occur infrequently in any single growing season.
 
 \section{Unsupervised Anomaly Detection in IoT Sensor Networks}
 
@@ -507,18 +507,18 @@ Liu et al.\ (2008) introduced the Isolation Forest algorithm, which detects anom
 
 \section{Meteorological Integration and Rainfall-Contingent Scheduling}
 
-Giusti \& Marsili-Libelli (2015) demonstrated that fuzzy irrigation control systems integrating probabilistic weather forecasts achieve 18--24\% water savings over deterministic threshold-based systems, primarily by suppressing irrigation events before significant rainfall \cite{giusti2015}. Their framework formalises the principle that irrigation deferral is warranted when the expected precipitation within a forecast horizon exceeds the soil moisture deficit—a principle implemented in IrriSmart's decision engine through the conditions: (a) skip irrigation when rainfall in the preceding 48~h exceeds 10~mm; (b) defer when tomorrow's forecast precipitation meets or exceeds 5~mm.
+Giusti \& Marsili-Libelli (2015) demonstrated that fuzzy irrigation control systems integrating probabilistic weather forecasts achieve 18--24\% water savings over deterministic threshold-based systems, primarily by suppressing irrigation events before significant rainfall \cite{giusti2015}. Their framework formalises the principle that irrigation deferral is warranted when the expected precipitation within a forecast horizon exceeds the soil moisture deficit---a principle implemented in IrriSmart's decision engine through the conditions: (a) skip irrigation when rainfall in the preceding 48~h exceeds 10~mm; (b) defer when tomorrow's forecast precipitation meets or exceeds 5~mm.
 
-In concurrent and independent work, Et-taibi et al.\ (2024) deployed a cloud-based IoT irrigation system at Al Akhawayn University Ifrane, Morocco, and established an 80\% rainfall probability threshold for irrigation deferral—providing external convergent validation for IrriSmart's meteorological integration approach, which was derived independently from FAO-56 precipitation correction guidelines \cite{ettaibi2024}. The convergence of two independently developed systems on closely aligned meteorological integration thresholds—one probability-based, one precipitation-volume-based—corroborates the agronomic validity of the approach.
+In concurrent and independent work, Et-taibi et al.\ (2024) deployed a cloud-based IoT irrigation system at Al Akhawayn University Ifrane, Morocco, and established an 80\% rainfall probability threshold for irrigation deferral---providing external convergent validation for IrriSmart's meteorological integration approach, which was derived independently from FAO-56 precipitation correction guidelines \cite{ettaibi2024}. The convergence of two independently developed systems on closely aligned meteorological integration thresholds---one probability-based, one precipitation-volume-based---corroborates the agronomic validity of the approach.
 
 \section{Bilingual Human-Computer Interaction in Agricultural Systems}
 
-Dearden \& Rizvi (2008) examined participatory design frameworks for ICT systems targeting smallholder communities and concluded that interface language is the primary barrier to adoption in non-Anglophone agricultural contexts: even technically superior systems fail to reach target populations when the interface assumes literacy in a language that is not the farmer's primary register \cite{dearden2008}. In the Moroccan context, this failure mode is acute: formal French—the language of most precision agriculture software—is a second or third language for the majority of Tadla smallholders, whose primary communication medium is Moroccan Darija.
+Dearden \& Rizvi (2008) examined participatory design frameworks for ICT systems targeting smallholder communities and concluded that interface language is the primary barrier to adoption in non-Anglophone agricultural contexts: even technically superior systems fail to reach target populations when the interface assumes literacy in a language that is not the farmer's primary register \cite{dearden2008}. In the Moroccan context, this failure mode is acute: formal French---the language of most precision agriculture software---is a second or third language for the majority of Tadla smallholders, whose primary communication medium is Moroccan Darija.
 
-IrriSmart addresses this through two mechanisms: a bilingual FR/AR dashboard with dynamic RTL layout switching, and a conversational assistant powered by Claude Haiku (claude-haiku-4-5-20251001) with a system prompt that enforces strict language mirroring—responding in Darija when queried in Darija, in Arabic when queried in Arabic, and in French when queried in French—without mixing registers. The assistant is grounded in real-time sensor context injected at each turn, ensuring that recommendations are plot-specific rather than generic.
+IrriSmart addresses this through two mechanisms: a bilingual FR/AR dashboard with dynamic RTL layout switching, and a conversational assistant powered by Claude Haiku (claude-haiku-4-5-20251001) with a system prompt that enforces strict language mirroring---responding in Darija when queried in Darija, in Arabic when queried in Arabic, and in French when queried in French---without mixing registers. The assistant is grounded in real-time sensor context injected at each turn, ensuring that recommendations are plot-specific rather than generic.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 8 — CAPSTONE DESIGN AND IMPLEMENTATION
+%  CHAPTER 8 --- CAPSTONE DESIGN AND IMPLEMENTATION
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Capstone Design and Implementation}
 
@@ -760,7 +760,7 @@ Wheat  & 0.40 & 0.70 & 1.15 & 1.15 & 0.50 & 2--3 (montaison/épiaison) \\
 
 IrriSmart implements a two-layer anomaly detection architecture that distinguishes between sensor hardware faults (Layer~1) and agronomically significant soil moisture deviations (Layer~2).
 
-\subsection{Layer 1 — IsolationForest}
+\subsection{Layer 1 --- IsolationForest}
 
 An IsolationForest model (scikit-learn 1.3.2) is trained on all 36,000 samples from the training corpus using a 4-feature vector: \{soil\_moisture\_pct, temperature\_c, humidity\_pct, eto\_mm\_day\}. The configuration is: contamination=0.05, n\_estimators=200, max\_samples=``auto'', random\_state=42.
 
@@ -776,7 +776,7 @@ At inference, each incoming reading is scored by \texttt{score\_samples()}, whic
 
 Inference latency is below 1~ms per sample on the Railway cloud instance, enabling real-time quality control on every reading without batching.
 
-\subsection{Layer 2 — Seasonal Z-Score}
+\subsection{Layer 2 --- Seasonal Z-Score}
 
 The seasonal anomaly engine compares each reading against two reference distributions simultaneously:
 
@@ -789,7 +789,7 @@ The seasonal anomaly engine compares each reading against two reference distribu
 
 \begin{table}[H]
 \centering
-\caption{INRA Tadla seasonal soil moisture baselines — April (month 4)}
+\caption{INRA Tadla seasonal soil moisture baselines --- April (month 4)}
 \label{tab:baselines}
 \begin{tabular}{lcccc}
 \toprule
@@ -960,7 +960,7 @@ The dashboard organises content into five functional tabs:
   \item \textbf{Capteurs (Sensors):} Three crop cards displaying real-time soil moisture, temperature, battery level, last update timestamp, and a 72-hour moisture forecast strip. Each card shows the active recommendation badge (IRRIGUER / ATTENDRE / NORMAL / SURVEILLER) with confidence percentage.
   \item \textbf{Recommandations (Recommendations):} Detailed AI decision panel per sensor: reasoning text in French, contributing factors with type-coloured badges (moisture, rain, wind, heat), soil health composite score with four sub-scores (stabilité, équilibre, stress thermique, cohérence), and simulation rapide (compare irrigate vs.\ wait outcomes over 24h).
   \item \textbf{Météo (Weather):} 6-day forecast cards from Open-Meteo with temperature range, precipitation probability, and wind speed.
-  \item \textbf{IA (AI):} Analytics and interpretability tab — Chart.js time-series for moisture history, decision distribution bar chart, ET$_0$ scatter plot, and confidence statistics histogram.
+  \item \textbf{IA (AI):} Analytics and interpretability tab --- Chart.js time-series for moisture history, decision distribution bar chart, ET$_0$ scatter plot, and confidence statistics histogram.
   \item \textbf{Alertes (Alerts):} Alert feed with severity colouring (critical red, warning amber, info blue), impact tags (decision, soil health, yield risk), and acknowledge button.
 \end{enumerate}
 
@@ -1039,7 +1039,7 @@ Readings are posted every 60 seconds (\texttt{POST\_INTERVAL\_MS = 60000}).
 In the current demonstration configuration, capacitive sensors are connected directly to the gateway microcontroller via ADC GPIO pins. The production deployment architecture envisions autonomous LoRa sensor nodes (each comprising a capacitive sensor, a LoRa radio, an ESP32 microcontroller, and an 18650 battery pack) transmitting at 433~MHz every 15~minutes, received by the gateway in LoRa mode, and forwarded to the cloud API. This architecture supports a range of 2--15~km in the flat Tadla terrain, covering multiple plot clusters per gateway node.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 9 — AI USE IN THIS PROJECT
+%  CHAPTER 9 --- AI USE IN THIS PROJECT
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{AI Use in This Project}
 
@@ -1058,10 +1058,10 @@ IrriSmart integrates six AI and machine learning components:
 
 \section{AI Coding Assistance During Development}
 
-Claude Code (Anthropic) was used during the development of IrriSmart for the following tasks: generation of Flask route boilerplate, debugging of SQLAlchemy migration edge cases, generation of Chart.js rendering code, and drafting of this report. All architectural decisions—system tier design, the choice of RandomForest over XGBoost or neural network classifiers, the dual-layer anomaly detection architecture, the use of physics-informed synthetic data generation, the specific crop thresholds calibrated to INRA Tadla data, and the bilingual interface design—reflect the independent technical judgment of the author. The use of AI coding assistance is consistent with the AUI academic integrity policy for capstone engineering projects, under which tool-assisted development is permitted when disclosed and when the intellectual contribution of the student is primary and demonstrable.
+Claude Code (Anthropic) was used during the development of IrriSmart for the following tasks: generation of Flask route boilerplate, debugging of SQLAlchemy migration edge cases, generation of Chart.js rendering code, and drafting of this report. All architectural decisions---system tier design, the choice of RandomForest over XGBoost or neural network classifiers, the dual-layer anomaly detection architecture, the use of physics-informed synthetic data generation, the specific crop thresholds calibrated to INRA Tadla data, and the bilingual interface design---reflect the independent technical judgment of the author. The use of AI coding assistance is consistent with the AUI academic integrity policy for capstone engineering projects, under which tool-assisted development is permitted when disclosed and when the intellectual contribution of the student is primary and demonstrable.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 10 — TESTING AND VALIDATION
+%  CHAPTER 10 --- TESTING AND VALIDATION
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Testing and Validation}
 
@@ -1076,7 +1076,7 @@ The IsolationForest model was validated by verifying that the flagged anomaly ra
 All 30 API endpoints were tested against the live Railway deployment. Key validation scenarios:
 
 \begin{itemize}
-  \item \textbf{Makerfabs packet ingestion:} Raw string ``ID010003 REPLY: SOIL INDEX:0 H:48.85 T:30.50 ADC:896 BAT:1016'' correctly parsed and stored; ADC=896 → moisture=20.8\% via Equation~\ref{eq:adc}.
+  \item \textbf{Makerfabs packet ingestion:} Raw string ``ID010003 REPLY: SOIL INDEX:0 H:48.85 T:30.50 ADC:896 BAT:1016'' correctly parsed and stored; ADC=896 \ensuremath{\rightarrow} moisture=20.8\% via Equation~\ref{eq:adc}.
   \item \textbf{RF inference (live):} POST /api/predict with olive, soil\_moisture=32\%, T=26°C, humidity=55\%, rain=0 returns decision=WAIT, confidence=89.5\%, with ET$_0$=5.575~mm/day, ET$_c$=3.903~mm/day, growth\_stage=1 (débourrement).
   \item \textbf{Forecast endpoint:} GET /api/forecast/ID010001 returns 72-hour projection: current=44.9\%, 24h=43.5\%, 48h=42.0\%, 72h=40.6\%, 11.8 days until critical threshold (28\%).
   \item \textbf{Water savings:} GET /api/water-savings confirms 40,500~L saved, 17.7\% reduction, 180 sessions deferred.
@@ -1095,13 +1095,13 @@ The Heltec WiFi LoRa 32 V3 gateway firmware was compiled against the Arduino ESP
 A controlled pot experiment with physical soil samples from the Béni Mellal-Khénifra region is planned as the field validation phase following capstone submission.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 11 — RESULTS AND DISCUSSION
+%  CHAPTER 11 --- RESULTS AND DISCUSSION
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Results and Discussion}
 
 \section{Machine Learning Performance}
 
-The three RandomForest classifiers achieve mean test accuracy of 94.71\% and mean ROC AUC of 0.9500 (Table~\ref{tab:perf}), exceeding all non-functional requirements. The wheat model achieves the highest test accuracy (95.00\%) despite the lowest CV F1 (0.9346), reflecting the sharper decision boundary imposed by the Kc=1.15 peak demand at montaison—a boundary that is easier to classify correctly but harder to generalise across seasons. The citrus model shows the highest recall (94.62\%), the most critical metric for irrigation advisory: a false negative (missed irrigation need) carries higher agronomic cost than a false positive (unnecessary irrigation recommendation).
+The three RandomForest classifiers achieve mean test accuracy of 94.71\% and mean ROC AUC of 0.9500 (Table~\ref{tab:perf}), exceeding all non-functional requirements. The wheat model achieves the highest test accuracy (95.00\%) despite the lowest CV F1 (0.9346), reflecting the sharper decision boundary imposed by the Kc=1.15 peak demand at montaison---a boundary that is easier to classify correctly but harder to generalise across seasons. The citrus model shows the highest recall (94.62\%), the most critical metric for irrigation advisory: a false negative (missed irrigation need) carries higher agronomic cost than a false positive (unnecessary irrigation recommendation).
 
 The dominance of soil\_moisture\_pct in feature importance (0.59--0.62 across crops) confirms that the RF is primarily learning moisture-threshold comparisons, augmented by ET$_c$ context. The secondary importance of moisture\_threshold (the growth-stage-specific threshold encoded as a feature) validates the design decision to include it explicitly: without this feature, the model would need to learn the non-linear crop $\times$ stage $\times$ threshold relationship purely from data, which would require a much larger training corpus.
 
@@ -1117,13 +1117,13 @@ The 52-commit development trajectory (April 2--28, 2026) reflects a test-and-ite
 
 \begin{enumerate}
   \item \textbf{Synthetic training data:} The RF models are trained on physics-informed synthetic data, not multi-season field measurements. While the synthetic corpus is internally consistent with FAO-56 and INRA Tadla parameters, model performance on field data will differ from the held-out synthetic test set metrics until retraining on accumulated real readings.
-  \item \textbf{Direct ADC mode:} The current demonstration deploys sensors via direct ADC connection rather than LoRa radio. The full two-hop architecture (sensor node → LoRa → gateway → HTTP → cloud) has not been validated end-to-end in the field.
+  \item \textbf{Direct ADC mode:} The current demonstration deploys sensors via direct ADC connection rather than LoRa radio. The full two-hop architecture (sensor node \ensuremath{\rightarrow} LoRa \ensuremath{\rightarrow} gateway \ensuremath{\rightarrow} HTTP \ensuremath{\rightarrow} cloud) has not been validated end-to-end in the field.
   \item \textbf{Single-gateway coverage:} The demonstration covers three plots totalling 7.5~ha. Scaling to the ORMVAT perimeter would require a multi-gateway LoRaWAN deployment, tested gateway density planning, and ORMVAT infrastructure integration.
   \item \textbf{Seasonal baseline granularity:} INRA Tadla baselines are available at monthly resolution; sub-monthly variation (e.g., the rapid moisture drop following the last wheat irrigation in late May) is not captured.
 \end{enumerate}
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 12 — CONCLUSION
+%  CHAPTER 12 --- CONCLUSION
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Conclusion}
 
@@ -1131,10 +1131,10 @@ IrriSmart demonstrates that precision irrigation advisory is achievable at low c
 
 The machine learning engine achieves 94.71--95.00\% test accuracy across three crops with ROC AUC consistently above 0.95, meeting all specified performance requirements. The live deployment has generated measurable water savings (40,500~L, 17.7\% reduction) from 177 deferred irrigation sessions, validating the core premise that data-driven scheduling outperforms calendar-based irrigation.
 
-The primary contribution of IrriSmart is not any single technical component but the integration: specifically, the alignment of FAO-56 agronomic standards, INRA Tadla field parameters, and a bilingual interface designed around the communication practices of Tadla smallholders. This alignment—between the knowledge source, the decision engine, and the user—is the necessary condition for real-world adoption.
+The primary contribution of IrriSmart is not any single technical component but the integration: specifically, the alignment of FAO-56 agronomic standards, INRA Tadla field parameters, and a bilingual interface designed around the communication practices of Tadla smallholders. This alignment---between the knowledge source, the decision engine, and the user---is the necessary condition for real-world adoption.
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  CHAPTER 13 — FUTURE WORK
+%  CHAPTER 13 --- FUTURE WORK
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Future Work}
 
@@ -1145,7 +1145,7 @@ The primary contribution of IrriSmart is not any single technical component but 
 
   \item \textbf{ORMVAT integration:} The REST API is designed for programmatic integration. A formal engagement with ORMVAT's digital advisory infrastructure would enable IrriSmart recommendations to reach ORMVAT extension agents serving the full 105,500-ha perimeter.
 
-  \item \textbf{Additional crops:} The \texttt{CROP\_THRESHOLDS} dictionary and the training data generator both support extensible crop definitions. Alfalfa (already partially specified) and sugar beet—two high-water-consumption crops in the Tadla rotation—are priority additions.
+  \item \textbf{Additional crops:} The \texttt{CROP\_THRESHOLDS} dictionary and the training data generator both support extensible crop definitions. Alfalfa (already partially specified) and sugar beet---two high-water-consumption crops in the Tadla rotation---are priority additions.
 
   \item \textbf{pH and electrical conductivity:} The \texttt{readings} table already contains \texttt{ph\_level} and \texttt{soil\_temperature} columns. Adding EC (electrical conductivity) sensing would enable soil salinity monitoring, relevant for the saline soils in portions of the Tadla perimeter.
 
@@ -1234,7 +1234,7 @@ Advanced monitoring and management systems for improving sustainability in preci
 \end{thebibliography}
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  APPENDIX A — CODE LISTINGS
+%  APPENDIX A --- CODE LISTINGS
 % ══════════════════════════════════════════════════════════════════════════════
 \appendix
 \chapter{Selected Code Listings}
@@ -1279,7 +1279,7 @@ def _parse_makerfabs(raw):
 
 \begin{lstlisting}[language=Python, caption={Simplified Penman-Monteith ET$_0$ (generate\_training\_data.py)}]
 def simplified_eto(temp_c, humidity_pct, wind_kmh, solar_radiation):
-    """Simplified Penman-Monteith ETo (mm/day) — FAO-56 approximation."""
+    """Simplified Penman-Monteith ETo (mm/day) --- FAO-56 approximation."""
     radiation_factor = solar_radiation / 20.0
     svp = 0.6108 * np.exp((17.27 * temp_c) / (temp_c + 237.3))
     avp = svp * (humidity_pct / 100.0)
@@ -1330,13 +1330,13 @@ float adcToMoisture(int raw) {
 \end{lstlisting}
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  APPENDIX B — HARDWARE SPECIFICATIONS
+%  APPENDIX B --- HARDWARE SPECIFICATIONS
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Hardware Specifications}
 
 \begin{table}[H]
 \centering
-\caption{Heltec WiFi LoRa 32 V3 — key specifications}
+\caption{Heltec WiFi LoRa 32 V3 --- key specifications}
 \label{tab:heltec}
 \begin{tabularx}{\textwidth}{lX}
 \toprule
@@ -1361,7 +1361,7 @@ Power supply  & 3.3V regulated (USB or LiPo) \\
 
 \begin{table}[H]
 \centering
-\caption{Capacitive Soil Moisture Sensor v1.2 — key specifications}
+\caption{Capacitive Soil Moisture Sensor v1.2 --- key specifications}
 \label{tab:sensor}
 \begin{tabularx}{\textwidth}{lX}
 \toprule
@@ -1379,17 +1379,17 @@ Suitable soils      & All mineral soils; compatible with saline soils (EC up to 
 \end{table}
 
 % ══════════════════════════════════════════════════════════════════════════════
-%  APPENDIX C — SUPPLEMENTARY FIGURES
+%  APPENDIX C --- SUPPLEMENTARY FIGURES
 % ══════════════════════════════════════════════════════════════════════════════
 \chapter{Supplementary Figures}
 
-\section{Live System State — April 28, 2026}
+\section{Live System State --- April 28, 2026}
 
 The following data reflects the live deployment state at time of report submission.
 
 \begin{table}[H]
 \centering
-\caption{Live sensor readings — April 28, 2026, 10:06 UTC}
+\caption{Live sensor readings --- April 28, 2026, 10:06 UTC}
 \label{tab:live}
 \begin{tabular}{llccc}
 \toprule
@@ -1404,7 +1404,7 @@ ID010003 & Wheat  & 33.6 & 23.6 & Below baseline (z=1.13) \\
 
 \begin{table}[H]
 \centering
-\caption{Live water savings — April 28, 2026}
+\caption{Live water savings --- April 28, 2026}
 \label{tab:savings}
 \begin{tabular}{lc}
 \toprule
@@ -1419,7 +1419,7 @@ Percentage reduction    & 17.7\% \\
 
 \begin{table}[H]
 \centering
-\caption{72-hour soil moisture forecast — Olive (ID010001), April 28, 2026}
+\caption{72-hour soil moisture forecast --- Olive (ID010001), April 28, 2026}
 \label{tab:forecast}
 \begin{tabular}{cccc}
 \toprule
