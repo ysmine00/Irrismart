@@ -29,6 +29,7 @@ def create_app(config=None):
         _migrate_db()
         _seed_if_empty()
         _seed_seasonal_baselines()
+        _backfill_history()
     return app
 
 def _migrate_db():
@@ -105,7 +106,7 @@ def _seed_seasonal_baselines():
 
 
 def _seed_if_empty():
-    from app.models import Sensor, Reading, Recommendation, Alert, AnomalyLog, AIDecisionLog
+    from app.models import Sensor, Reading, Recommendation, Alert
     from datetime import datetime, timedelta
     import random, math
     if Sensor.query.count() > 0:
@@ -117,17 +118,41 @@ def _seed_if_empty():
     ]
     db.session.add_all(sensors)
     db.session.commit()
-    base = datetime.utcnow() - timedelta(hours=23)
+    _insert_history_hours(sensors, hours=168)  # 7 days
+    db.session.add(Alert(
+        sensor_id="ID010001", type="TREND_CHANGE",
+        message="Les tendances capteurs changent, surveiller la cohérence des mesures.",
+        sent_sms=False, acknowledged=False))
+    db.session.commit()
+    print("[Seed] 7 days of hourly history seeded")
+
+def _backfill_history():
+    """On an existing DB with few readings, insert 7 days of backdated history."""
+    from app.models import Sensor, Reading
+    if Reading.query.count() >= 200:
+        return
+    sensors = Sensor.query.all()
+    if not sensors:
+        return
+    _insert_history_hours(sensors, hours=168)
+    db.session.commit()
+    print("[Backfill] 7-day history inserted for existing DB")
+
+def _insert_history_hours(sensors, hours=168):
+    from app.models import Reading, Recommendation
+    from datetime import datetime, timedelta
+    import random, math
+    base = datetime.utcnow() - timedelta(hours=hours - 1)
     for sensor in sensors:
         moisture = {"olive": 42.0, "citrus": 48.0, "wheat": 37.0}.get(sensor.crop_type, 40.0)
         battery  = sensor.battery_level + 0.5
-        for h in range(24):
+        for h in range(hours):
             ts = base + timedelta(hours=h)
             moisture += random.uniform(-1.2, 0.6)
             moisture  = max(28, min(62, moisture))
-            battery  -= random.uniform(0.02, 0.05)
+            battery  -= random.uniform(0.005, 0.015)
             rain = round(random.uniform(0, 2.0), 1) if random.random() > 0.85 else 0.0
-            temp = round(22 + 5 * math.sin(h / 24 * math.pi) + random.uniform(-1, 1), 1)
+            temp = round(22 + 5 * math.sin((h % 24) / 24 * math.pi) + random.uniform(-1, 1), 1)
             soil_temp = round(temp - 2.0 + random.uniform(-0.5, 0.5), 1)
             ph        = round(6.8 + random.uniform(-0.3, 0.3), 2)
             db.session.add(Reading(
@@ -146,8 +171,3 @@ def _seed_if_empty():
                 reason="Humidité actuelle suffisante pour aujourd'hui." if action == "WAIT" else "Humidité insuffisante.",
                 moisture_at_time=round(moisture, 1),
                 acknowledged=True))
-    db.session.add(Alert(
-        sensor_id="ID010001", type="TREND_CHANGE",
-        message="Les tendances capteurs changent, surveiller la cohérence des mesures.",
-        sent_sms=False, acknowledged=False))
-    db.session.commit()
