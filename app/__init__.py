@@ -117,17 +117,17 @@ def _seed_if_empty():
     ]
     db.session.add_all(sensors)
     db.session.commit()
-    base = datetime.utcnow() - timedelta(days=14)
+    base = datetime.utcnow() - timedelta(hours=23)
     for sensor in sensors:
-        moisture = 41.0
-        battery  = sensor.battery_level + 1.7
-        for d in range(15):
-            ts = base + timedelta(days=d, hours=1)
-            moisture += random.uniform(-1.8, 0.9)
-            moisture  = max(28, min(52, moisture))
-            battery  -= random.uniform(0.1, 0.15)
-            rain = round(random.uniform(0, 5.0), 1) if 4 <= d <= 10 else 0.0
-            temp = round(22 + 8 * math.sin(d / 14 * math.pi) + random.uniform(-1, 1), 1)
+        moisture = {"olive": 42.0, "citrus": 48.0, "wheat": 37.0}.get(sensor.crop_type, 40.0)
+        battery  = sensor.battery_level + 0.5
+        for h in range(24):
+            ts = base + timedelta(hours=h)
+            moisture += random.uniform(-1.2, 0.6)
+            moisture  = max(28, min(62, moisture))
+            battery  -= random.uniform(0.02, 0.05)
+            rain = round(random.uniform(0, 2.0), 1) if random.random() > 0.85 else 0.0
+            temp = round(22 + 5 * math.sin(h / 24 * math.pi) + random.uniform(-1, 1), 1)
             soil_temp = round(temp - 2.0 + random.uniform(-0.5, 0.5), 1)
             ph        = round(6.8 + random.uniform(-0.3, 0.3), 2)
             db.session.add(Reading(
