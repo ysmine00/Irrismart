@@ -1055,6 +1055,7 @@ def test_alert():
 def chart_moisture_history():
     from app.models import Sensor, Reading
     hours = request.args.get("hours", 24, type=int)
+    limit = request.args.get("limit", 48, type=int)
     cutoff = datetime.utcnow() - timedelta(hours=hours)
     sensors = Sensor.query.filter_by(is_active=True).all()
 
@@ -1064,11 +1065,16 @@ def chart_moisture_history():
             Reading.sensor_id == s.id,
             Reading.timestamp >= cutoff
         ).order_by(Reading.timestamp).all()
+        # Fall back to most-recent readings when nothing falls in the time window
+        if not rows:
+            rows = Reading.query.filter_by(sensor_id=s.id)\
+                .order_by(Reading.timestamp.desc()).limit(limit).all()
+            rows = list(reversed(rows))
         series[s.crop_type] = {
             "label": s.name,
             "crop": s.crop_type,
             "data": [{"t": r.timestamp.isoformat(), "y": round(r.soil_moisture, 1)} for r in rows],
-            "threshold": {"olive": 35, "citrus": 50, "wheat": 45}.get(s.crop_type, 35),
+            "threshold": {"olive": 28, "citrus": 45, "wheat": 40}.get(s.crop_type, 35),
         }
 
     return ok(list(series.values()))

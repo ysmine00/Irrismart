@@ -306,9 +306,9 @@ body{max-width:430px;margin:0 auto;overflow-x:hidden}
 .anomaly-detail-card.open{display:block}
 
 /* ── Chatbot trigger (farmer avatar) ── */
-#chat-toggle{position:fixed;bottom:28px;right:28px;width:72px;height:72px;border-radius:50%;cursor:pointer;z-index:9997;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.18));animation:farmerBob 3s ease-in-out infinite;transition:transform .2s ease}
+#chat-toggle{position:fixed;bottom:28px;right:28px;width:72px;height:72px;border-radius:50%;cursor:pointer;z-index:9997;overflow:visible;background:transparent;border:none;padding:0;animation:farmerBob 3s ease-in-out infinite;transition:transform .2s ease}
 #chat-toggle:hover{animation:none;transform:scale(1.12) rotate(-5deg)}
-#farmer-img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+#farmer-img{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:center top;border:3px solid white;box-shadow:0 4px 16px rgba(0,0,0,0.2);display:block}
 .chat-badge{position:absolute;top:2px;right:2px;background:#e74c3c;color:white;font-size:11px;font-weight:700;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:2px solid white}
 .chat-badge.hidden{display:none}
 @keyframes farmerBob{0%,100%{transform:translateY(0px) rotate(0deg)}25%{transform:translateY(-6px) rotate(2deg)}75%{transform:translateY(-3px) rotate(-1deg)}}
@@ -1414,24 +1414,30 @@ const dashCharts = {};
 function destroyDashChart(id) { if(dashCharts[id]){dashCharts[id].destroy();delete dashCharts[id];} }
 
 async function loadDashMoistureChart() {
-  destroyDashChart("moisture");
+  destroyDashChart('moisture');
   try {
-    const res = await fetch(`${API}/api/charts/moisture_history?hours=24`);
-    const series = (await res.json()).data;
-    const ctx = document.getElementById("dash-chart-moisture");
+    const SENS = [
+      {id:'ID010001',crop:'olive', label:'Olivier'},
+      {id:'ID010002',crop:'citrus',label:'Agrumes'},
+      {id:'ID010003',crop:'wheat', label:'Blé'},
+    ];
+    const results = await Promise.all(SENS.map(s => fetch(`${API}/api/sensors/${s.id}/history?limit=48`).then(r=>r.json())));
+    const ctx = document.getElementById('dash-chart-moisture');
     if (!ctx) return;
-    const colors = {olive:"#1A9B50",citrus:"#FF8C00",wheat:"#DAA520"};
-    const datasets = series.map(s => ({
-      label: s.label.split(" ")[0],
-      data: s.data.map(p => ({x: new Date(p.t), y: p.y})),
-      borderColor: colors[s.crop]||"#1A9B50",
-      backgroundColor: "transparent", borderWidth: 2, tension: 0.4, pointRadius: 1,
+    const colors = {olive:'#1A9B50',citrus:'#FF8C00',wheat:'#DAA520'};
+    const allPts = results.flatMap(r => r.data||[]);
+    const unit = allPts.length > 1 && (new Date(allPts[allPts.length-1].timestamp) - new Date(allPts[0].timestamp)) > 86400000 ? 'day' : 'hour';
+    const datasets = SENS.map((s,i) => ({
+      label: s.label,
+      data: (results[i].data||[]).map(r => ({x: new Date(r.timestamp), y: r.soil_moisture})),
+      borderColor: colors[s.crop]||'#1A9B50',
+      backgroundColor: 'transparent', borderWidth: 2, tension: 0.4, pointRadius: 1,
     }));
-    dashCharts["moisture"] = new Chart(ctx, {
-      type:"line", data:{datasets},
-      options:{responsive:true,animation:{duration:500},scales:{x:{type:"time",time:{unit:"hour"},ticks:{maxTicksLimit:4},grid:{display:false}},y:{min:0,max:80,ticks:{callback:v=>v+"%"}}},plugins:{legend:{display:false}}}
+    dashCharts['moisture'] = new Chart(ctx, {
+      type:'line', data:{datasets},
+      options:{responsive:true,animation:{duration:500},scales:{x:{type:'time',time:{unit},ticks:{maxTicksLimit:6},grid:{display:false}},y:{min:0,max:80,ticks:{callback:v=>v+'%'}}},plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}}
     });
-  } catch(e) {}
+  } catch(e) { console.warn('Dash moisture chart:', e); }
 }
 
 async function loadDashConfidenceChart() {
@@ -1772,38 +1778,41 @@ function destroyChart(id) {
 }
 
 async function loadMoistureChart() {
-  destroyChart("moisture");
+  destroyChart('moisture');
   try {
-    const res = await fetch(`${API}/api/charts/moisture_history?hours=24`);
-    const series = (await res.json()).data;
-    const ctx = document.getElementById("chart-moisture");
+    const THRESHOLDS = {olive:28,citrus:45,wheat:40};
+    const SENS = [
+      {id:'ID010001',crop:'olive', label:'Olivier'},
+      {id:'ID010002',crop:'citrus',label:'Agrumes'},
+      {id:'ID010003',crop:'wheat', label:'Blé'},
+    ];
+    const results = await Promise.all(SENS.map(s => fetch(`${API}/api/sensors/${s.id}/history?limit=48`).then(r=>r.json())));
+    const ctx = document.getElementById('chart-moisture');
     if (!ctx) return;
-    const colors = {olive:"#1A9B50",citrus:"#FF8C00",wheat:"#DAA520"};
-    const datasets = series.map(s => ({
-      label: s.label.split(" ")[0],
-      data: s.data.map(p => ({x: new Date(p.t), y: p.y})),
-      borderColor: colors[s.crop]||"#1A9B50",
-      backgroundColor: "transparent",
-      borderWidth: 2, tension: 0.4, pointRadius: 2,
-    }));
-    // Add threshold lines
-    series.forEach(s => {
-      datasets.push({
-        label: `Seuil ${s.label.split(" ")[0]}`,
-        data: s.data.length ? [{x: new Date(s.data[0].t), y: s.threshold}, {x: new Date(s.data[s.data.length-1]?.t||new Date()), y: s.threshold}] : [],
-        borderColor: colors[s.crop]||"#1A9B50",
-        borderWidth: 1, borderDash: [5,4], pointRadius: 0, backgroundColor:"transparent",
-      });
+    const colors = {olive:'#1A9B50',citrus:'#FF8C00',wheat:'#DAA520'};
+    const allPts = results.flatMap(r => r.data||[]);
+    const unit = allPts.length > 1 && (new Date(allPts[allPts.length-1].timestamp) - new Date(allPts[0].timestamp)) > 86400000 ? 'day' : 'hour';
+    const minT = allPts.length ? new Date(Math.min(...allPts.map(r=>new Date(r.timestamp)))) : new Date(Date.now()-86400000);
+    const maxT = allPts.length ? new Date(Math.max(...allPts.map(r=>new Date(r.timestamp)))) : new Date();
+    const datasets = SENS.flatMap((s,i) => [
+      {
+        label: s.label,
+        data: (results[i].data||[]).map(r => ({x: new Date(r.timestamp), y: r.soil_moisture})),
+        borderColor: colors[s.crop]||'#1A9B50',
+        backgroundColor: 'transparent', borderWidth:2, tension:.4, pointRadius:2,
+      },
+      {
+        label: `Seuil ${s.label}`,
+        data: [{x:minT,y:THRESHOLDS[s.crop]},{x:maxT,y:THRESHOLDS[s.crop]}],
+        borderColor: colors[s.crop]||'#1A9B50',
+        borderWidth:1, borderDash:[5,4], pointRadius:0, backgroundColor:'transparent',
+      },
+    ]);
+    iaCharts['moisture'] = new Chart(ctx, {
+      type:'line', data:{datasets},
+      options:{responsive:true,animation:{duration:600},scales:{x:{type:'time',time:{unit},ticks:{maxTicksLimit:6},grid:{display:false}},y:{min:0,max:80,ticks:{callback:v=>v+'%'}}},plugins:{legend:{display:false}}}
     });
-    iaCharts["moisture"] = new Chart(ctx, {
-      type: "line",
-      data: { datasets },
-      options: { responsive:true, animation:{duration:600}, scales: {
-        x: { type:"time", time:{unit:"hour"}, ticks:{maxTicksLimit:6}, grid:{display:false} },
-        y: { min:0, max:80, ticks:{callback:v=>v+"%"} }
-      }, plugins:{legend:{display:false}} }
-    });
-  } catch(e) { console.warn("Moisture chart:", e); }
+  } catch(e) { console.warn('Moisture chart:', e); }
 }
 
 async function loadDecisionChart() {
