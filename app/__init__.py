@@ -135,8 +135,8 @@ def _backfill_history():
         return
     # Skip only when readings already span at least 6 days (handles fresh DBs
     # where count >= 200 but all timestamps cluster on the same day)
-    cutoff = datetime.utcnow() - timedelta(days=6)
-    if Reading.query.filter(Reading.timestamp <= cutoff).count() >= 10:
+    recent_cutoff = datetime.utcnow() - timedelta(hours=48)
+    if Reading.query.filter(Reading.timestamp >= recent_cutoff).count() >= 5:
         return
     _insert_history_hours(sensors, hours=168)
     db.session.commit()
@@ -146,15 +146,24 @@ def _insert_history_hours(sensors, hours=168):
     from app.models import Reading, Recommendation
     from datetime import datetime, timedelta
     import random, math
+    # Crop-specific: center, amplitude, clamp-low, clamp-high, irrigate-threshold
+    CROP_CFG = {
+        "olive":  (48.0, 8.0, 35.0, 65.0, 35),
+        "citrus": (55.0, 7.0, 40.0, 70.0, 40),
+        "wheat":  (42.0, 6.0, 30.0, 58.0, 30),
+    }
     base = datetime.utcnow() - timedelta(hours=hours - 1)
     for sensor in sensors:
-        moisture = {"olive": 42.0, "citrus": 48.0, "wheat": 37.0}.get(sensor.crop_type, 40.0)
+        center, amp, clamp_lo, clamp_hi, irr_thr = CROP_CFG.get(
+            sensor.crop_type, (45.0, 7.0, 32.0, 62.0, 35))
+        moisture = center
         battery  = sensor.battery_level + 0.5
         for h in range(hours):
             ts = base + timedelta(hours=h)
-            moisture += random.uniform(-1.2, 0.6)
-            moisture  = max(28, min(62, moisture))
-            battery  -= random.uniform(0.005, 0.015)
+            # Oscillate around center with a 7-day cycle + noise; no long-term drift
+            moisture = center + amp * math.sin(h * 2 * math.pi / 168) + random.uniform(-1.5, 1.5)
+            moisture = max(clamp_lo, min(clamp_hi, moisture))
+            battery -= random.uniform(0.005, 0.015)
             rain = round(random.uniform(0, 2.0), 1) if random.random() > 0.85 else 0.0
             temp = round(22 + 5 * math.sin((h % 24) / 24 * math.pi) + random.uniform(-1, 1), 1)
             soil_temp = round(temp - 2.0 + random.uniform(-0.5, 0.5), 1)
@@ -168,10 +177,11 @@ def _insert_history_hours(sensors, hours=168):
                 rain_mm=rain,
                 soil_temperature=soil_temp,
                 ph_level=ph))
-            action = "WAIT" if moisture > 35 else "IRRIGATE"
+            action = "WAIT" if moisture >= irr_thr else "IRRIGATE"
             db.session.add(Recommendation(
                 sensor_id=sensor.id, created_at=ts, action=action,
                 duration_minutes=0 if action == "WAIT" else 45,
                 reason="Humidité actuelle suffisante pour aujourd'hui." if action == "WAIT" else "Humidité insuffisante.",
                 moisture_at_time=round(moisture, 1),
+                health_impact=3 if action == "IRRIGATE" else 0,
                 acknowledged=True))

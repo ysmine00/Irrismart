@@ -364,9 +364,9 @@ KC_BY_STAGE = {
 }
 
 MOISTURE_THRESHOLDS = {
-    "olive":  {0: 20, 1: 28, 2: 35, 3: 32, 4: 25},
-    "citrus": {0: 40, 1: 48, 2: 52, 3: 50, 4: 45},
-    "wheat":  {0: 35, 1: 40, 2: 45, 3: 50, 4: 30},
+    "olive":  {0: 30, 1: 35, 2: 40, 3: 37, 4: 32},
+    "citrus": {0: 40, 1: 42, 2: 48, 3: 46, 4: 42},
+    "wheat":  {0: 30, 1: 35, 2: 42, 3: 45, 4: 25},
 }
 
 
@@ -703,7 +703,7 @@ def ai_stats():
 
 
 # ── 72h Moisture Forecast ────────────────────────────────────────────────────
-FORECAST_THRESHOLDS = {"olive": 28, "citrus": 45, "wheat": 40}
+FORECAST_THRESHOLDS = {"olive": 35, "citrus": 42, "wheat": 32}
 
 @api.route("/forecast/<sid>")
 def moisture_forecast(sid):
@@ -887,9 +887,9 @@ STAGE_NAMES_IMPACT = {
 }
 
 MOISTURE_THR_IMPACT = {
-    "olive":  {0: 20, 1: 28, 2: 35, 3: 32, 4: 25},
-    "citrus": {0: 40, 1: 48, 2: 52, 3: 50, 4: 45},
-    "wheat":  {0: 35, 1: 40, 2: 45, 3: 50, 4: 30},
+    "olive":  {0: 30, 1: 35, 2: 40, 3: 37, 4: 32},
+    "citrus": {0: 40, 1: 42, 2: 48, 3: 46, 4: 42},
+    "wheat":  {0: 30, 1: 35, 2: 42, 3: 45, 4: 25},
 }
 
 @api.route("/predict/impact", methods=["POST"])
@@ -1053,7 +1053,8 @@ def test_alert():
 # ── Water savings ────────────────────────────────────────────────────────────
 @api.route("/water-savings")
 def water_savings():
-    recs   = Recommendation.query.all()
+    cutoff = datetime.utcnow() - timedelta(days=7)
+    recs   = Recommendation.query.filter(Recommendation.created_at >= cutoff).all()
     wait_n = sum(1 for r in recs if r.action in ("WAIT", "NO_ACTION", "MONITOR"))
     irr_n  = sum(1 for r in recs if r.action == "IRRIGATE")
     total  = max(1, wait_n + irr_n)
@@ -1090,7 +1091,7 @@ def chart_moisture_history():
             "label": s.name,
             "crop": s.crop_type,
             "data": [{"t": r.timestamp.isoformat(), "y": round(r.soil_moisture, 1)} for r in rows],
-            "threshold": {"olive": 28, "citrus": 45, "wheat": 40}.get(s.crop_type, 35),
+            "threshold": {"olive": 35, "citrus": 42, "wheat": 32}.get(s.crop_type, 35),
         }
 
     return ok(list(series.values()))

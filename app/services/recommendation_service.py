@@ -14,11 +14,11 @@ from app import db
 from app.models import Sensor, Reading, Recommendation
 
 CROP_THRESHOLDS = {
-    "olive":   {"critical":15, "low":25, "opt_low":35, "opt_high":50, "opt_mid":42, "high":60},
-    "citrus":  {"critical":20, "low":30, "opt_low":45, "opt_high":60, "opt_mid":52, "high":70},
-    "wheat":   {"critical":10, "low":20, "opt_low":30, "opt_high":45, "opt_mid":37, "high":55},
-    "alfalfa": {"critical":25, "low":35, "opt_low":50, "opt_high":65, "opt_mid":57, "high":75},
-    "beet":    {"critical":20, "low":30, "opt_low":45, "opt_high":60, "opt_mid":52, "high":70},
+    "olive":   {"critical":20, "low":35, "opt_low":42, "opt_high":62, "opt_mid":52, "high":72},
+    "citrus":  {"critical":25, "low":40, "opt_low":50, "opt_high":65, "opt_mid":57, "high":75},
+    "wheat":   {"critical":15, "low":30, "opt_low":38, "opt_high":52, "opt_mid":45, "high":62},
+    "alfalfa": {"critical":30, "low":42, "opt_low":52, "opt_high":68, "opt_mid":60, "high":78},
+    "beet":    {"critical":25, "low":38, "opt_low":48, "opt_high":63, "opt_mid":55, "high":73},
 }
 
 @dataclass

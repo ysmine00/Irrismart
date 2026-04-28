@@ -15,11 +15,14 @@ CROPS = {
     "wheat":  {"id": 2, "emoji": "🌾"},
 }
 
-# Crop moisture thresholds by growth stage (%)
+# Crop moisture thresholds by growth stage (%) — FAO-56 Tadla calibrated
+# Olive: drought-tolerant, fine at 40-60%; irrigate only when <35%
+# Citrus: water-demanding but not at 48%; irrigate when <42%
+# Wheat: irrigate when <32%
 MOISTURE_THRESHOLDS = {
-    "olive":  {0: 20, 1: 28, 2: 35, 3: 32, 4: 25},
-    "citrus": {0: 40, 1: 48, 2: 52, 3: 50, 4: 45},
-    "wheat":  {0: 35, 1: 40, 2: 45, 3: 50, 4: 30},
+    "olive":  {0: 30, 1: 35, 2: 40, 3: 37, 4: 32},
+    "citrus": {0: 40, 1: 42, 2: 48, 3: 46, 4: 42},
+    "wheat":  {0: 30, 1: 35, 2: 42, 3: 45, 4: 25},
 }
 
 # Crop coefficients (Kc) by growth stage
@@ -125,14 +128,14 @@ def generate_sample(crop, month):
     # Days since last irrigation (affects soil moisture)
     days_since_irrigation = np.random.randint(0, 15)
 
-    # Soil moisture modeling (decreases over time, affected by rain and irrigation)
-    # Start from a baseline that varies by crop
+    # Soil moisture — centered at realistic field values so the model sees
+    # plenty of "wait" examples in the 40-60% range for each crop
     if crop == "olive":
-        base_moisture = np.random.normal(30, 10)
+        base_moisture = np.random.normal(48, 14)  # fine at 40-60%
     elif crop == "citrus":
-        base_moisture = np.random.normal(48, 8)
+        base_moisture = np.random.normal(52, 12)
     else:  # wheat
-        base_moisture = np.random.normal(42, 9)
+        base_moisture = np.random.normal(42, 11)
 
     # Moisture depletion from days without irrigation
     moisture_loss = days_since_irrigation * (etc_mm_day / 10.0)  # simplified depletion

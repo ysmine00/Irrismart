@@ -1534,7 +1534,7 @@ function buildIAShell() {
           <div class="chart-card-title">${ar ? 'رطوبة التربة / 24 ساعة' : 'Humidité sol / 24h'}</div>
           <button class="chart-refresh" onclick="loadMoistureChart()">↻</button>
         </div>
-        <canvas id="chart-moisture" height="180"></canvas>
+        <canvas id="ia-chart-moisture" height="180"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-card-header">
@@ -1775,14 +1775,14 @@ function destroyChart(id) {
 async function loadMoistureChart() {
   destroyChart('moisture');
   try {
-    const THRESHOLDS = {olive:28,citrus:45,wheat:40};
+    const THRESHOLDS = {olive:35,citrus:42,wheat:32};
     const SENS = [
       {id:'ID010001',crop:'olive', label:'Olivier'},
       {id:'ID010002',crop:'citrus',label:'Agrumes'},
       {id:'ID010003',crop:'wheat', label:'Blé'},
     ];
     const results = await Promise.all(SENS.map(s => fetch(`${API}/api/sensors/${s.id}/history?limit=48`).then(r=>r.json())));
-    const ctx = document.getElementById('chart-moisture');
+    const ctx = document.getElementById('ia-chart-moisture');
     if (!ctx) return;
     const colors = {olive:'#1A9B50',citrus:'#FF8C00',wheat:'#DAA520'};
     const base = results[0].data || results[1].data || results[2].data || [];
@@ -2053,9 +2053,9 @@ async function loadMoistureTrend7Day() {
       {label:ar?"زيتون":"Olivier",  data:allDays.map(d=>avgFor(om,d)), borderColor:"#2D6A4F", backgroundColor:"transparent", borderWidth:2, tension:.4, pointRadius:3, spanGaps:true},
       {label:ar?"حمضيات":"Agrumes", data:allDays.map(d=>avgFor(cm,d)), borderColor:"#E9A719", backgroundColor:"transparent", borderWidth:2, tension:.4, pointRadius:3, spanGaps:true},
       {label:ar?"قمح":"Blé dur",   data:allDays.map(d=>avgFor(wm,d)), borderColor:"#D4A017", backgroundColor:"transparent", borderWidth:2, tension:.4, pointRadius:3, spanGaps:true},
-      tLine(28,"#2D6A4F","Seuil olivier"),
-      tLine(45,"#E9A719","Seuil agrumes"),
-      tLine(40,"#D4A017","Seuil blé"),
+      tLine(35,"#2D6A4F","Seuil olivier"),
+      tLine(42,"#E9A719","Seuil agrumes"),
+      tLine(32,"#D4A017","Seuil blé"),
     ];
     iaCharts["moisture7d"] = new Chart(ctx, {
       type:"line", data:{labels:allDays, datasets},
