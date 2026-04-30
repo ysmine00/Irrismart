@@ -45,33 +45,23 @@ def register_sensor():
 
 @api.route("/sensors/<sid>/history")
 def sensor_history(sid):
-    from sqlalchemy import text
-    sql = text("""
-        SELECT DISTINCT ON (DATE(timestamp))
-            id, sensor_id, timestamp, soil_moisture,
-            air_temperature, air_humidity, battery_voltage,
-            rain_mm, soil_temperature, ph_level
-        FROM readings
-        WHERE sensor_id = :sid
-        ORDER BY DATE(timestamp) DESC, timestamp DESC
-        LIMIT 14
-    """)
-    rows = db.session.execute(sql, {"sid": sid}).fetchall()
-    result = []
-    for row in reversed(rows):
-        m = row._mapping
-        result.append({
-            "id": m["id"], "sensor_id": m["sensor_id"],
-            "timestamp": m["timestamp"].isoformat() if m["timestamp"] else None,
-            "soil_moisture": m["soil_moisture"],
-            "air_temperature": m["air_temperature"],
-            "air_humidity": m["air_humidity"],
-            "battery_voltage": m["battery_voltage"],
-            "rain_mm": m["rain_mm"],
-            "soil_temperature": m["soil_temperature"],
-            "ph_level": m["ph_level"],
-        })
-    return ok(result)
+    limit = request.args.get("limit", 48, type=int)
+    # Fetch enough rows to find distinct days when limit is small
+    fetch_n = max(limit, 500)
+    rows = Reading.query.filter_by(sensor_id=sid)\
+        .order_by(Reading.timestamp.desc()).limit(fetch_n).all()
+
+    # For Historique Récent (small limit): one reading per distinct day
+    if limit <= 14:
+        by_date = {}
+        for r in rows:
+            d = r.timestamp.date()
+            if d not in by_date:
+                by_date[d] = r
+        daily = sorted(by_date.values(), key=lambda x: x.timestamp)[-limit:]
+        return ok([r.to_dict() for r in daily])
+
+    return ok([r.to_dict() for r in reversed(rows[:limit])])
 
 
 @api.route("/sensors/latest")
