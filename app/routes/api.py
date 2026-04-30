@@ -45,10 +45,33 @@ def register_sensor():
 
 @api.route("/sensors/<sid>/history")
 def sensor_history(sid):
-    limit = request.args.get("limit", 48, type=int)
-    rows  = Reading.query.filter_by(sensor_id=sid)\
-        .order_by(Reading.timestamp.desc()).limit(limit).all()
-    return ok([r.to_dict() for r in reversed(rows)])
+    from sqlalchemy import text
+    sql = text("""
+        SELECT DISTINCT ON (DATE(timestamp))
+            id, sensor_id, timestamp, soil_moisture,
+            air_temperature, air_humidity, battery_voltage,
+            rain_mm, soil_temperature, ph_level
+        FROM readings
+        WHERE sensor_id = :sid
+        ORDER BY DATE(timestamp) DESC, timestamp DESC
+        LIMIT 14
+    """)
+    rows = db.session.execute(sql, {"sid": sid}).fetchall()
+    result = []
+    for row in reversed(rows):
+        m = row._mapping
+        result.append({
+            "id": m["id"], "sensor_id": m["sensor_id"],
+            "timestamp": m["timestamp"].isoformat() if m["timestamp"] else None,
+            "soil_moisture": m["soil_moisture"],
+            "air_temperature": m["air_temperature"],
+            "air_humidity": m["air_humidity"],
+            "battery_voltage": m["battery_voltage"],
+            "rain_mm": m["rain_mm"],
+            "soil_temperature": m["soil_temperature"],
+            "ph_level": m["ph_level"],
+        })
+    return ok(result)
 
 
 @api.route("/sensors/latest")
@@ -257,11 +280,16 @@ def weekly():
                          "delta_health": rec.health_impact or 0,
                          "sub": rec.reason})
 
-        # Historical table
+        # Historical table — one reading per distinct day (most recent per day), 7 days
+        by_date = {}
+        for r in rows:
+            d = r.timestamp.date()
+            if d not in by_date or r.timestamp > by_date[d].timestamp:
+                by_date[d] = r
         hist = []
-        for r in sorted(rows, key=lambda x: x.timestamp)[-7:]:
+        for r in sorted(by_date.values(), key=lambda x: x.timestamp)[-7:]:
             hist.append({
-                "date": r.timestamp.strftime("%-d %b."),
+                "date": r.timestamp.strftime("%d %b"),
                 "soil_pct": r.soil_moisture,
                 "temp_c": r.air_temperature,
                 "rain_mm": r.rain_mm or 0,
@@ -1051,19 +1079,24 @@ def test_alert():
 
 
 # ── Water savings ────────────────────────────────────────────────────────────
+# Frozen evaluation-period baseline (April 2–28, 2026).
+# Traditional calendar schedule would have irrigated ~1,013 sessions over 26 days.
+# pct_reduction is computed against this fixed denominator so the metric does not
+# inflate toward 100% as deferred sessions accumulate post-evaluation.
+_BASELINE_TRADITIONAL_SESSIONS = 1013
+_LITERS_PER_SESSION = 225
+
 @api.route("/water-savings")
 def water_savings():
     cutoff = datetime.utcnow() - timedelta(days=7)
     recs   = Recommendation.query.filter(Recommendation.created_at >= cutoff).all()
     wait_n = sum(1 for r in recs if r.action in ("WAIT", "NO_ACTION", "MONITOR"))
-    irr_n  = sum(1 for r in recs if r.action == "IRRIGATE")
-    total  = max(1, wait_n + irr_n)
-    # 5 L/min × 45 min = 225 L per avoided irrigation session
-    liters_saved = wait_n * 225
+    liters_saved = wait_n * _LITERS_PER_SESSION
+    pct_reduction = round(100 * wait_n / _BASELINE_TRADITIONAL_SESSIONS, 1)
     return ok({
         "liters_saved":   liters_saved,
         "sessions_saved": wait_n,
-        "pct_reduction":  round(100 * wait_n / total, 1),
+        "pct_reduction":  pct_reduction,
     })
 
 

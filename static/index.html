@@ -1126,7 +1126,7 @@ async function loadRapports() {
   // Use live history if weekly report has no data (readings older than 7 days)
   if (!r.history_table || r.history_table.length === 0) {
     r.history_table = histRaw.slice(-7).map(row => ({
-      date: new Date(row.timestamp).toLocaleDateString("fr-FR",{day:"2-digit",month:"short"}),
+      date: new Date(row.timestamp).toLocaleDateString("en-GB",{day:"2-digit",month:"short"}),
       soil_pct: row.soil_moisture,
       temp_c: row.air_temperature,
       rain_mm: row.rain_mm || 0,
