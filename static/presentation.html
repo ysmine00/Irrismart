@@ -1393,14 +1393,152 @@
 </nav>
 
 <script>
-  // ── Edit Mode ────────────────────────────────────────────────────────────
+  // ── Editor ───────────────────────────────────────────────────────────────
   let editMode = false;
-  const EDITABLE = 'h1,h2,h3,p,span,div,li,td,th,a,button:not(#edit-btn):not(#save-btn)';
+
+  // Inject toolbar + styles
+  const editorStyles = document.createElement('style');
+  editorStyles.textContent = `
+    #editor-toolbar {
+      display: none;
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a2e1c;
+      border: 1px solid #4ec97a;
+      border-radius: 10px;
+      padding: 6px 10px;
+      gap: 6px;
+      align-items: center;
+      z-index: 9999;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 95vw;
+    }
+    #editor-toolbar.visible { display: flex; }
+    #editor-toolbar select, #editor-toolbar input[type=number] {
+      background: #0a2312; color: #fff; border: 1px solid #4ec97a44;
+      border-radius: 6px; padding: 4px 8px; font-size: 13px; cursor: pointer;
+    }
+    #editor-toolbar input[type=color] {
+      width: 32px; height: 28px; border: none; border-radius: 6px;
+      cursor: pointer; background: none; padding: 0;
+    }
+    .tb-btn {
+      background: #0a2312; color: #fff; border: 1px solid #4ec97a44;
+      border-radius: 6px; padding: 4px 10px; font-size: 13px;
+      cursor: pointer; font-family: inherit;
+    }
+    .tb-btn:hover { background: #1e6b3c; }
+    .tb-sep { width: 1px; height: 22px; background: #4ec97a33; margin: 0 2px; }
+    [contenteditable=true] {
+      outline: 1.5px dashed rgba(78,201,122,0.45) !important;
+      cursor: text !important;
+      border-radius: 3px;
+    }
+    [contenteditable=true]:hover { outline-color: rgba(78,201,122,0.9) !important; }
+    img.swappable { cursor: pointer; outline: 2px dashed transparent; border-radius: 4px; }
+    img.swappable:hover { outline-color: #4ec97a; }
+    #img-upload { display: none; }
+    #edit-hint {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: #1a2e1c; border: 1px solid #4ec97a55; border-radius: 8px;
+      padding: 8px 16px; color: #b0c8b8; font-size: 12px; z-index: 9998;
+      pointer-events: none; opacity: 0; transition: opacity 0.3s;
+    }
+    #edit-hint.show { opacity: 1; }
+  `;
+  document.head.appendChild(editorStyles);
+
+  // Toolbar HTML
+  const toolbar = document.createElement('div');
+  toolbar.id = 'editor-toolbar';
+  toolbar.innerHTML = `
+    <select id="tb-font" title="Font">
+      <option value="Syne">Syne</option>
+      <option value="DM Sans">DM Sans</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Arial">Arial</option>
+      <option value="'Courier New'">Courier New</option>
+    </select>
+    <input type="number" id="tb-size" value="16" min="6" max="120" style="width:58px" title="Font size">
+    <div class="tb-sep"></div>
+    <button class="tb-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+    <button class="tb-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+    <button class="tb-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+    <div class="tb-sep"></div>
+    <input type="color" id="tb-color" value="#ffffff" title="Text color">
+    <div class="tb-sep"></div>
+    <button class="tb-btn" onclick="fmt('justifyLeft')" title="Left">⬤ L</button>
+    <button class="tb-btn" onclick="fmt('justifyCenter')" title="Center">⬤ C</button>
+    <button class="tb-btn" onclick="fmt('justifyRight')" title="Right">⬤ R</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" style="color:#e74c3c" onclick="fmt('removeFormat')" title="Clear format">✕ Clear</button>
+  `;
+  document.body.appendChild(toolbar);
+
+  // Hidden file input for image swapping
+  const imgUpload = document.createElement('input');
+  imgUpload.type = 'file'; imgUpload.accept = 'image/*'; imgUpload.id = 'img-upload';
+  document.body.appendChild(imgUpload);
+  let targetImg = null;
+  imgUpload.addEventListener('change', () => {
+    if (!imgUpload.files[0] || !targetImg) return;
+    const reader = new FileReader();
+    reader.onload = e => { targetImg.src = e.target.result; targetImg = null; };
+    reader.readAsDataURL(imgUpload.files[0]);
+    imgUpload.value = '';
+  });
+
+  // Edit hint
+  const hint = document.createElement('div');
+  hint.id = 'edit-hint';
+  hint.textContent = '✏️ Click any text to edit  •  Click any image to swap it';
+  document.body.appendChild(hint);
+
+  function fmt(cmd) {
+    if (cmd === 'fontSize' || cmd === 'fontName') return;
+    document.execCommand(cmd, false, null);
+  }
+
+  // Apply font/size from toolbar dropdowns
+  document.getElementById('tb-font').addEventListener('change', function() {
+    document.execCommand('fontName', false, this.value);
+  });
+  document.getElementById('tb-size').addEventListener('change', function() {
+    // execCommand fontSize only does 1-7; use a span hack instead
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    const span = document.createElement('span');
+    span.style.fontSize = this.value + 'px';
+    try { range.surroundContents(span); } catch(e) {}
+  });
+  document.getElementById('tb-color').addEventListener('input', function() {
+    document.execCommand('foreColor', false, this.value);
+  });
+
+  // Show/hide toolbar on selection
+  document.addEventListener('selectionchange', () => {
+    if (!editMode) return;
+    const sel = window.getSelection();
+    if (sel && sel.toString().length > 0) {
+      toolbar.classList.add('visible');
+    } else {
+      toolbar.classList.remove('visible');
+    }
+  });
+
+  const EDITABLE = 'unused';
 
   function toggleEdit() {
     editMode = !editMode;
     const btn = document.getElementById('edit-btn');
     const saveBtn = document.getElementById('save-btn');
+
+    // All text elements
     const selectors = [
       '.slide-title-light','.s1-title','.s1-subtitle','.s1-meta','.s1-url',
       '.stat-num','.stat-label','.panel-bullet','.panel-title-red','.panel-title-green',
@@ -1412,23 +1550,37 @@
       '.result-num','.result-label',
       '.results-table td','.results-table th','.footer-note',
       '.future-item','.demo-live-url','.demo-live-label',
-      '.tagline','.footer-bar','.slide-num'
+      '.tagline','.footer-bar','.slide-num','.logo-word'
     ];
     document.querySelectorAll(selectors.join(',')).forEach(el => {
       el.contentEditable = editMode ? 'true' : 'false';
+    });
+
+    // Images — make swappable
+    document.querySelectorAll('.slide img, .photo-bg').forEach(el => {
       if (editMode) {
-        el.style.outline = '1.5px dashed rgba(78,201,122,0.5)';
-        el.style.cursor = 'text';
-        el.style.borderRadius = '3px';
+        el.classList.add('swappable');
+        el.title = 'Click to swap image';
+        el.addEventListener('click', imgClickHandler);
       } else {
-        el.style.outline = '';
-        el.style.cursor = '';
-        el.style.borderRadius = '';
+        el.classList.remove('swappable');
+        el.title = '';
+        el.removeEventListener('click', imgClickHandler);
       }
     });
-    btn.textContent = editMode ? '✅ Done' : '✏️ Edit Mode';
+
+    btn.textContent = editMode ? '✅ Done Editing' : '✏️ Edit Mode';
     btn.style.background = editMode ? '#c0392b' : '#1e6b3c';
     saveBtn.style.display = editMode ? 'inline-block' : 'none';
+    hint.classList.toggle('show', editMode);
+    setTimeout(() => { if(editMode) hint.classList.remove('show'); }, 3000);
+    if (!editMode) toolbar.classList.remove('visible');
+  }
+
+  function imgClickHandler(e) {
+    e.stopPropagation();
+    targetImg = this;
+    imgUpload.click();
   }
 
   function saveHTML() {
